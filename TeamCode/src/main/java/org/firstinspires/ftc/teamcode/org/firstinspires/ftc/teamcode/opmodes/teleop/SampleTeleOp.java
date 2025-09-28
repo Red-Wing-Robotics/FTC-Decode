@@ -11,26 +11,27 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+
 import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
 @Configurable
 @TeleOp
 public class SampleTeleOp extends OpMode {
+
+    public static boolean robotCentric = false;
     private Follower follower;
     public static Pose startingPose; //See ExampleAuto to understand how to use this
     private boolean automatedDrive;
     private Supplier<PathChain> pathChain;
-
-    private Supplier<PathChain> returnChain;
     private TelemetryManager telemetryM;
     private boolean slowMode = false;
     private double slowModeMultiplier = 0.5;
 
     @Override
     public void init() {
-        Pose start = new Pose(72,72);
-        start.setHeading(Math.toRadians(0));
+        Pose start = new Pose(72,72); // Assumed heading is 0 since we didn't specify
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(start); //startingPose == null ? new Pose() : startingPose);
@@ -41,12 +42,6 @@ public class SampleTeleOp extends OpMode {
                 .addPath(new Path(new BezierLine(follower::getPose, new Pose(60, 60))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(0), 0.8))
                 .build();
-
-        returnChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                .addPath(new Path(new BezierLine(follower::getPose, new Pose(72, 72))))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(0), 0.8))
-                .build();
-
     }
 
     @Override
@@ -62,6 +57,7 @@ public class SampleTeleOp extends OpMode {
         //Call this once per loop
         follower.update();
         telemetryM.update();
+        telemetry.update();
 
         if (!automatedDrive) {
             //Make the last parameter false for field-centric
@@ -72,7 +68,7 @@ public class SampleTeleOp extends OpMode {
                     -gamepad1.left_stick_y,
                     -gamepad1.left_stick_x,
                     -gamepad1.right_stick_x,
-                    true // Robot Centric
+                    robotCentric
             );
 
                 //This is how it looks with slowMode on
@@ -80,7 +76,7 @@ public class SampleTeleOp extends OpMode {
                     -gamepad1.left_stick_y * slowModeMultiplier,
                     -gamepad1.left_stick_x * slowModeMultiplier,
                     -gamepad1.right_stick_x * slowModeMultiplier,
-                    true // Robot Centric
+                    robotCentric
             );
         }
 
@@ -89,17 +85,6 @@ public class SampleTeleOp extends OpMode {
             follower.followPath(pathChain.get());
             automatedDrive = true;
         }
-
-        if (gamepad1.bWasPressed() && !follower.isBusy()) {
-            follower.followPath(returnChain.get());
-            automatedDrive = true;
-        }
-
-        //Stop automated following if the follower is done
-//        if (automatedDrive && (gamepad1.bWasPressed() || !follower.isBusy())) {
-//            follower.startTeleopDrive();
-//            automatedDrive = false;
-//        }
 
         //Slow Mode
         if (gamepad1.rightBumperWasPressed()) {
@@ -119,5 +104,9 @@ public class SampleTeleOp extends OpMode {
         telemetryM.debug("position", follower.getPose());
         telemetryM.debug("velocity", follower.getVelocity());
         telemetryM.debug("automatedDrive", automatedDrive);
+        telemetry.addData("x", follower.getPose().getX());
+        telemetry.addData("y", follower.getPose().getY());
+        telemetry.addData("heading", follower.getPose().getHeading());
+
     }
 }
