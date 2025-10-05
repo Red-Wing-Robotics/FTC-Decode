@@ -64,6 +64,6 @@ For each pipline, click the download button in the header. Then, save it into a 
 
 To use MegaTag 2, you will need to update the orientation of the robot on each loop. To do this, you can get the heading from the `follower` (which gets it from the Gobilda Pinpoint).
 
-```java
+```
 limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
 ```
