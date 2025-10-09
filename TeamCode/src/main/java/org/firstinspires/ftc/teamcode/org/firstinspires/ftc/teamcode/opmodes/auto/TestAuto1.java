@@ -1,57 +1,69 @@
-package org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.teleop;
+package org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.auto;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@SuppressWarnings("unused")
 @Configurable
-@TeleOp(name = "Limelight Goals", group = "Examples")
-public class LimelightGoals extends OpMode {
-
+@Autonomous(name = "Test Auto 1", group = "Examples")
+public class TestAuto1 extends OpMode {
     Limelight3A limelight;
     private Follower follower;
-    private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
+    private int pathState;
 
+    // POSES -------------------------------------------------------------
 
+    private final Pose startPose = new Pose(56, 8, Math.toRadians(90));
+
+    private final Pose shootPose = new Pose(59.5, 83.69, Math.toRadians(135));
+
+    private PathChain gotoShootPose;
+
+    public void buildPaths() {
+        gotoShootPose = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, shootPose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
+                .build();
+    }
+
+    public void setPathState(int pState) {
+        pathState = pState;
+    }
+
+    public void autonomousPathUpdate(){
+        switch (pathState) {
+            case 0:
+                follower.followPath(gotoShootPose);
+                setPathState(-1);
+                break;
+        }
+    }
 
     @Override
     public void init() {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
         limelight.start(); // This tells Limelight to start looking!
-        limelight.pipelineSwitch(1); // Switch to pipeline
+        limelight.pipelineSwitch(1); // Switch to pipeline number 1
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
-        follower.update();
-    }
-
-    @Override
-    public void start() {
-        follower.startTeleopDrive();
+        buildPaths();
     }
 
     @Override
     public void loop() {
         follower.update();
-        telemetry.update();
-
-        follower.setTeleOpDrive(
-                -gamepad1.left_stick_y,
-                -gamepad1.left_stick_x,
-                -gamepad1.right_stick_x,
-                false
-        );
+        autonomousPathUpdate();
 
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
@@ -77,11 +89,19 @@ public class LimelightGoals extends OpMode {
             telemetry.addData("Limelight", "No Targets");
         }
 
-        telemetry.addData("PP x", follower.getPose().getX());
-        telemetry.addData("PP y", follower.getPose().getY());
-        telemetry.addData("PP heading", follower.getPose().getHeading());
+
+        // Feedback to Driver Hub for debugging
+        telemetry.addData("path state", pathState);
+        telemetry.addData("x", follower.getPose().getX());
+        telemetry.addData("y", follower.getPose().getY());
+        telemetry.addData("heading", follower.getPose().getHeading());
+        telemetry.update();
+
     }
 
+    public void start() {
+        setPathState(0);
+    }
     private double getDistanceToTarget(double ty) {
         double targetHeight = 29.4375;
         double limelightHeight = 13.34375;
@@ -91,5 +111,4 @@ public class LimelightGoals extends OpMode {
         return (targetHeight - limelightHeight) / Math.tan(angleToTarget);
     }
 }
-
 
