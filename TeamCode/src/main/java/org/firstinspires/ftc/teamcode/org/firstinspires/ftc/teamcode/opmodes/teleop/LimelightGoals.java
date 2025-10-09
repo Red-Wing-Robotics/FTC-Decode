@@ -54,23 +54,25 @@ public class LimelightGoals extends OpMode {
                 false
         );
 
+        limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
 
         if (result != null && result.isValid()) {
             LLResultTypes.FiducialResult fResult = result.getFiducialResults().get(0);
             int id = result.getFiducialResults().get(0).getFiducialId();
-            if( id == 20 ) {
-                telemetry.addData("April Tag ID", "" + id);
+            telemetry.addData("April Tag ID", "" + id);
 
-                limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
-                Pose3D botpose_mt2 = result.getBotpose_MT2();
-                if (botpose_mt2 != null) {
-                    double x = fResult.getTargetXPixels();
-                    //botpose_mt2.getPosition().z;
-                    double y = fResult.getTargetYPixels();
-                    //botpose_mt2.getPosition().y;
-                    telemetry.addData("MT2 Location:", "(" + x + ", " + y + ")");
-                }
+            Pose3D botpose_mt2 = result.getBotpose_MT2();
+            if (botpose_mt2 != null) {
+                double tx = result.getTx();
+                double ty = result.getTy();
+                double ta = result.getTa();
+                telemetry.addData("MT2 Target:", "(" + tx + ", " + ty + ", " + ta + ")");
+                double distance = getDistanceToTarget(ty);
+                telemetry.addData("Distance to Goal", distance);
+                double x = botpose_mt2.getPosition().x;
+                double y = botpose_mt2.getPosition().y;
+                telemetry.addData("MT2 Location:", "(" + x + ", " + y + ")");
             }
         } else {
             telemetry.addData("Limelight", "No Targets");
@@ -80,4 +82,15 @@ public class LimelightGoals extends OpMode {
         telemetry.addData("PP y", follower.getPose().getY());
         telemetry.addData("PP heading", follower.getPose().getHeading());
     }
+
+    private double getDistanceToTarget(double ty) {
+        double targetHeight = 29.4375;
+        double limelightHeight = 13.34375;
+        double limelightAngle = 0;
+
+        double angleToTarget = Math.toRadians(limelightAngle + ty);
+        return (targetHeight - limelightHeight) / Math.tan(angleToTarget);
+    }
 }
+
+
