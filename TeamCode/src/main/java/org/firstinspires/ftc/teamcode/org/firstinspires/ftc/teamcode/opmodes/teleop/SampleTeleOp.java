@@ -24,23 +24,32 @@ public class SampleTeleOp extends OpMode {
     private Follower follower;
     public static Pose startingPose; //See ExampleAuto to understand how to use this
     private boolean automatedDrive;
-    private Supplier<PathChain> pathChain;
+    private Supplier<PathChain> gotoShootPose, gotoLeverPose;
     private TelemetryManager telemetryM;
     private boolean slowMode = false;
     private double slowModeMultiplier = 0.5;
 
+
+
     @Override
     public void init() {
         Pose start = new Pose(72,72); // Assumed heading is 0 since we didn't specify
+        Pose shootPose = new Pose(59.5, 83.69, Math.toRadians(135));
+        Pose leverPose = new Pose(14.95, 76.9, 0);
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(start); //startingPose == null ? new Pose() : startingPose);
         follower.update();
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
-        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                .addPath(new Path(new BezierLine(follower::getPose, new Pose(60, 60))))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(0), 0.8))
+        gotoShootPose = () -> follower.pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(follower::getPose, shootPose )))
+                .setLinearHeadingInterpolation( follower.getHeading(), shootPose.getHeading())
+                .build();
+
+        gotoLeverPose = () -> follower.pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(follower::getPose, leverPose )))
+                .setLinearHeadingInterpolation( follower.getHeading(), leverPose.getHeading())
                 .build();
     }
 
@@ -82,8 +91,16 @@ public class SampleTeleOp extends OpMode {
 
         //Automated PathFollowing
         if (gamepad1.aWasPressed() && !follower.isBusy()) {
-            follower.followPath(pathChain.get());
             automatedDrive = true;
+            follower.followPath(gotoShootPose.get());
+            automatedDrive = false;
+        }
+
+        if (gamepad1.bWasPressed() && !follower.isBusy()) {
+            automatedDrive = true;
+            follower.followPath(gotoLeverPose.get());
+            automatedDrive = false;
+
         }
 
         //Slow Mode
