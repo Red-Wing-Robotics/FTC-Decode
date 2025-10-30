@@ -33,9 +33,10 @@ public class SampleTeleOp extends OpMode {
 
     @Override
     public void init() {
-        Pose start = new Pose(72,72); // Assumed heading is 0 since we didn't specify
+        Pose start = new Pose(17.0625/2d + 0.25,16.09375/2d, Math.toRadians(90) ); // Assumed heading is 0 since we didn't specify
         Pose shootPose = new Pose(59.5, 83.69, Math.toRadians(135));
-        Pose leverPose = new Pose(14.95, 76.9, 0);
+        Pose leverSetUpPose = new Pose(22.95, 71.9, 0);
+        Pose leverPose = new Pose(15.95, 71.9, 0);
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(start); //startingPose == null ? new Pose() : startingPose);
@@ -48,8 +49,10 @@ public class SampleTeleOp extends OpMode {
                 .build();
 
         gotoLeverPose = () -> follower.pathBuilder() //Lazy Curve Generation
-                .addPath(new Path(new BezierLine(follower::getPose, leverPose )))
-                .setLinearHeadingInterpolation( follower.getHeading(), leverPose.getHeading())
+                .addPath(new Path(new BezierLine(follower::getPose, leverSetUpPose )))
+                .setLinearHeadingInterpolation( follower.getHeading(), leverSetUpPose.getHeading())
+                .addPath(new Path(new BezierLine(leverSetUpPose, leverPose )))
+                .setLinearHeadingInterpolation( leverSetUpPose.getHeading(), leverPose.getHeading())
                 .build();
     }
 
@@ -67,6 +70,11 @@ public class SampleTeleOp extends OpMode {
         follower.update();
         telemetryM.update();
         telemetry.update();
+
+        if(automatedDrive && !follower.isBusy()){
+            automatedDrive = false;
+            follower.startTeleopDrive();
+        }
 
         if (!automatedDrive) {
             //Make the last parameter false for field-centric
@@ -91,15 +99,13 @@ public class SampleTeleOp extends OpMode {
 
         //Automated PathFollowing
         if (gamepad1.aWasPressed() && !follower.isBusy()) {
-            automatedDrive = true;
             follower.followPath(gotoShootPose.get());
-            automatedDrive = false;
+            automatedDrive = true;
         }
 
         if (gamepad1.bWasPressed() && !follower.isBusy()) {
-            automatedDrive = true;
             follower.followPath(gotoLeverPose.get());
-            automatedDrive = false;
+            automatedDrive = true;
 
         }
 
@@ -124,6 +130,8 @@ public class SampleTeleOp extends OpMode {
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
+        telemetry.addData("automatedDrive", automatedDrive);
+        telemetry.addData("slowMode", slowMode);
 
     }
 }

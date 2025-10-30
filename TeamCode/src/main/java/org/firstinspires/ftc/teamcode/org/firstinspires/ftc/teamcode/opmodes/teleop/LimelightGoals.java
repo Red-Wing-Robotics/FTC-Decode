@@ -67,8 +67,10 @@ public class LimelightGoals extends OpMode {
                 double ty = result.getTy();
                 double ta = result.getTa();
                 telemetry.addData("MT2 Target:", "(" + tx + ", " + ty + ", " + ta + ")");
-                double distance = getDistanceToTarget(ty);
-                telemetry.addData("Distance to Goal", distance);
+                double distance = getTrigDistanceToTarget(ty);
+                telemetry.addData("Trig Distance to Goal", distance);
+                telemetry.addData("Target Area", result.getTa());
+                telemetry.addData("Ta Distance to Goal", 69.6*(Math.pow(result.getTa(), -0.502)));
                 double x = botpose_mt2.getPosition().x;
                 double y = botpose_mt2.getPosition().y;
                 telemetry.addData("MT2 Location:", "(" + x + ", " + y + ")");
@@ -82,7 +84,7 @@ public class LimelightGoals extends OpMode {
         telemetry.addData("PP heading", follower.getPose().getHeading());
     }
 
-    private double getDistanceToTarget(double ty) {
+    private double getTrigDistanceToTarget(double ty) {
         double targetHeight = 29.4375;
         double limelightHeight = 13.34375;
         double limelightAngle = 0;

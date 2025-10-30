@@ -32,21 +32,21 @@ public class TestAuto2 extends OpMode {
 
     // POSES -------------------------------------------------------------
 
-    private final Pose startPose = new Pose(56, 8, Math.toRadians(90));
+    private final Pose startPose = new Pose(56.25, 8.25, Math.toRadians(90));
 
     private final Pose shootPose = new Pose(59.5, 83.69, Math.toRadians(135));
 
-    private final Pose gppPose = new Pose(38.86, 45.68, Math.toRadians(180));
+    private final Pose gppPose = new Pose(38.86, 36.68, Math.toRadians(180));
 
-    private final Pose pgpPose = new Pose(38.86, 68.16, Math.toRadians(180));
+    private final Pose pgpPose = new Pose(38.86, 60.16, Math.toRadians(180));
 
-    private final Pose ppgPose = new Pose(38.86, 89.93, Math.toRadians(180));
+    private final Pose ppgPose = new Pose(38.86, 82.93, Math.toRadians(180));
 
-    private final Pose gppCollectPose = new Pose(21.9, 45.68, Math.toRadians(180));
+    private final Pose gppCollectPose = new Pose(21.9, 36.68, Math.toRadians(180));
 
-    private final Pose pgpCollectPose = new Pose(21.9, 68.16, Math.toRadians(180));
+    private final Pose pgpCollectPose = new Pose(21.9, 60.16, Math.toRadians(180));
 
-    private final Pose ppgCollectPose = new Pose(21.9, 89.93, Math.toRadians(180));
+    private final Pose ppgCollectPose = new Pose(21.9, 82.93, Math.toRadians(180));
 
     private Pose preCollectPose;
 
@@ -114,6 +114,7 @@ public class TestAuto2 extends OpMode {
     }
     public void autonomousPathUpdate() {
         switch (pathState) {
+            //repeatable 99%
             case 0:
                 follower.followPath(gotoShootPose1);
                 setPathState(1);
