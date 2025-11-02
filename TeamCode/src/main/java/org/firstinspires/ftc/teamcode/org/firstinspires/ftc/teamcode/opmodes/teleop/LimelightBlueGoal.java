@@ -13,15 +13,18 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.util.Alliance;
+import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 
 @SuppressWarnings("unused")
 @Configurable
-@TeleOp(name = "Limelight Goals", group = "Examples")
-public class LimelightGoals extends OpMode {
+@TeleOp(name = "Limelight Blue Goal", group = "Examples")
+public class LimelightBlueGoal extends OpMode {
 
     Limelight3A limelight;
     private Follower follower;
-    private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
+    private final Pose startPose = new Pose(17.0625/2.0, 16.09375/2.0, Math.toRadians(90));
+    private Alliance alliance = Alliance.BLUE;
 
 
 
@@ -71,6 +74,7 @@ public class LimelightGoals extends OpMode {
                 telemetry.addData("Trig Distance to Goal", distance);
                 telemetry.addData("Target Area", result.getTa());
                 telemetry.addData("Ta Distance to Goal", 69.6*(Math.pow(result.getTa(), -0.502)));
+                telemetry.addData( "Odometry Distance to Goal", DistanceCalculation.getOdometryDistanceToGoal( follower.getPose(), alliance ));
                 double x = botpose_mt2.getPosition().x;
                 double y = botpose_mt2.getPosition().y;
                 telemetry.addData("MT2 Location:", "(" + x + ", " + y + ")");

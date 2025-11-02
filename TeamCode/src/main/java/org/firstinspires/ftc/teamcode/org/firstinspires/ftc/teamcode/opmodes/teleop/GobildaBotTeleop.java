@@ -22,6 +22,9 @@ public class GobildaBotTeleop extends OpMode {
     public CRServo leftFeeder = null;
     private double shooterPower = 0;
 
+    private boolean dpad_up = false;
+    private boolean dpad_down = false;
+
 
 
 
@@ -75,13 +78,32 @@ public class GobildaBotTeleop extends OpMode {
             setShooterPower( 0 );
         }
 
-        if(gamepad1.dpad_up && shooterPower < 1){
-            shooterPower = shooterPower + 0.1;
-            setShooterPower( shooterPower );
-        } else if ( gamepad1.dpad_down && shooterPower > 0.1 ) {
-            shooterPower = shooterPower - 0.1;
-            setShooterPower( shooterPower );
+        if(gamepad1.a){
+            intake.setPower( 1.0 );
+        } else if (gamepad1.b) {
+            intake.setPower( 0 );
         }
+
+        if( gamepad1.dpad_up ){
+            if (shooterPower < 1 && !dpad_up) {
+                shooterPower = shooterPower + 0.1;
+                setShooterPower(shooterPower);
+            }
+            dpad_up = true;
+        } else if ( gamepad1.dpad_down ) {
+            if( shooterPower > 0.1 && !dpad_down ) {
+                shooterPower = shooterPower - 0.1;
+                setShooterPower(shooterPower);
+
+            }
+            dpad_down = true;
+            dpad_up = false;
+        }else{
+            dpad_down = false;
+            dpad_up = false;
+        }
+
+        telemetry.addData( "Shooter Power", shooterPower);
 
     }
 
