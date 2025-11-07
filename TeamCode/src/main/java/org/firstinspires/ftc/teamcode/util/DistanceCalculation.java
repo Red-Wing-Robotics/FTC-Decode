@@ -48,5 +48,7 @@ public class DistanceCalculation {
             case RED:
                 return Math.sqrt( Math.pow( pose.getX() - redGoalx, 2 ) + Math.pow( pose.getY() - redGoaly, 2 ) );
         }
+
+        return -1;
     }
 }
