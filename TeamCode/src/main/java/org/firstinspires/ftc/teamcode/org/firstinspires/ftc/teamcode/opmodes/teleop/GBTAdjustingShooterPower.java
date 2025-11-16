@@ -20,8 +20,8 @@ import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 
 @SuppressWarnings("unused")
 @Configurable
-@TeleOp(name = "Gobilda Bot Teleop", group = "Examples")
-public class GobildaBotTeleop extends OpMode {
+@TeleOp(name = "GBT Adjusting Shooter Power", group = "Examples")
+public class GBTAdjustingShooterPower extends OpMode {
 
     public static boolean robotCentric = true;
     private Follower follower;
@@ -36,7 +36,7 @@ public class GobildaBotTeleop extends OpMode {
     private Alliance alliance = Alliance.BLUE;
     private double shooterPower = 500;
 
-    //public static double SHOOTER_DEFAULT_VELOCITY = 500;
+    public static double SHOOTER_DEFAULT_VELOCITY = 500;
 
     public static double MAX_SHOOTER_VELOCITY = (280 * 6);
     public static double MAX_SHOOTER_POWER = 1d;
@@ -141,15 +141,15 @@ public class GobildaBotTeleop extends OpMode {
 
         if( gamepad1.dpad_up ){
             if (shooterPower < MAX_SHOOTER_VELOCITY && !dpad_up) {
-                shooterPower = shooterPower + 100;
-                //shooterPower = shooterPower + 0.1;
+                //shooterPower = shooterPower + 100;
+                shooterPower = shooterPower + 10;
                 setShooterPower(shooterPower);
             }
             dpad_up = true;
         } else if ( gamepad1.dpad_down ) {
             if( shooterPower > 0 && !dpad_down ) {
-                shooterPower = shooterPower - 100;
-                //shooterPower = shooterPower - 0.1;
+                //shooterPower = shooterPower - 100;
+                shooterPower = shooterPower - 10;
                 setShooterPower(shooterPower);
 
             }
@@ -168,6 +168,7 @@ public class GobildaBotTeleop extends OpMode {
 
         telemetry.addData( "Shooter Power", shooterPower);
         telemetry.addData( "Motor Velocity", rightShooter.getVelocity());
+        telemetry.addData( "Distance To Goal", distanceToGoal);
 
     }
 
@@ -178,3 +179,4 @@ public class GobildaBotTeleop extends OpMode {
         leftShooter.setVelocity(p);
     }
 }
+
