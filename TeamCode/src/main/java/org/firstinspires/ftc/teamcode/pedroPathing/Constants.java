@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(6.504)
+            .mass(7.504)
             .forwardZeroPowerAcceleration(-50.78250088949429)
             .lateralZeroPowerAcceleration(-76.39726904672757)
             .translationalPIDFCoefficients(new PIDFCoefficients(
@@ -72,8 +72,8 @@ public class Constants {
             .yVelocity(36.026922271007635);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(0.375)
-            .strafePodX(-6.045)
+            .forwardPodY( -2.0 - 11.0/32.0 )//0.375 for other chasee
+            .strafePodX( -4.0 - 23.0/32.0 )//-6.045 for other chasee
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 

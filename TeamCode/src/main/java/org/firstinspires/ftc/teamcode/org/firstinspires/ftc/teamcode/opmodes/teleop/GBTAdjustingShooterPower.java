@@ -77,6 +77,7 @@ public class GBTAdjustingShooterPower extends OpMode {
     }
 
     public void start() {
+        follower.setMaxPower( 0.4 );
         follower.startTeleopDrive();
     }
 
@@ -111,18 +112,18 @@ public class GBTAdjustingShooterPower extends OpMode {
 
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
-                -gamepad1.left_stick_x,
-                -gamepad1.right_stick_x,
+                gamepad1.left_stick_x,
+                gamepad1.right_stick_x,
                 true
         );
 
-        if (gamepad1.right_bumper) {
+        if (gamepad1.right_bumper && Math.abs(rightShooter.getVelocity() - shooterVelocity) < 10 ) {
             rightFeeder.setPower(1);
         } else {
             rightFeeder.setPower(0);
         }
 
-        if (gamepad1.left_bumper) {
+        if (gamepad1.left_bumper && Math.abs(leftShooter.getVelocity() - shooterVelocity) < 10 ) {
             leftFeeder.setPower(-1);
         } else {
             leftFeeder.setPower(0);
@@ -176,7 +177,8 @@ public class GBTAdjustingShooterPower extends OpMode {
         }
 
         telemetry.addData( "Shooter Velocity", shooterVelocity);
-        telemetry.addData( "Motor Velocity", rightShooter.getVelocity());
+        telemetry.addData( "Right Motor Velocity", rightShooter.getVelocity());
+        telemetry.addData("Left Motor Velocity", leftShooter.getVelocity());
         telemetry.addData( "Distance To Goal", distanceToGoal);
         telemetry.addData("PP x", follower.getPose().getX());
         telemetry.addData("PP y", follower.getPose().getY());
@@ -190,5 +192,13 @@ public class GBTAdjustingShooterPower extends OpMode {
         rightShooter.setVelocity(-1 * p);
         leftShooter.setVelocity(p);
     }
+/*
+    public void setDrivePower(double frontLeft, double backLeft, double frontRight, double backRight) {
+            leftFrontDrive.setPower(frontLeft);
+            leftBackDrive.setPower(backLeft);
+            rightFrontDrive.setPower(frontRight);
+            rightBackDrive.setPower(backRight);
+        }
+    }*/
 }
 
