@@ -10,13 +10,13 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
+import org.firstinspires.ftc.teamcode.util.VelocityCalculation;
 
 @SuppressWarnings("unused")
 @Configurable
@@ -34,7 +34,8 @@ public class GBTAdjustingShooterPower extends OpMode {
     public Servo diverter = null;
     Limelight3A limelight;
     private Alliance alliance = Alliance.BLUE;
-    private double shooterPower = 500;
+    private double shooterVelocity = 500;
+    private boolean isShooterOn = false;
 
     public static double SHOOTER_DEFAULT_VELOCITY = 500;
 
@@ -45,7 +46,7 @@ public class GBTAdjustingShooterPower extends OpMode {
     private boolean dpad_down = false;
 
     private double trigDistanceToGoal = 0;
-    private double taDistanceToGoal = 0;
+    private double taDistanceToGoal = 0;//9
 
     private double distanceToGoal = 0;
 
@@ -96,15 +97,15 @@ public class GBTAdjustingShooterPower extends OpMode {
             double ty = result.getTy();
             double ta = result.getTa();
 
-            trigDistanceToGoal = DistanceCalculation.getTrigDistanceToTarget( ty );
-            taDistanceToGoal = DistanceCalculation.getAreaDistanceToTarget( ta );
+            trigDistanceToGoal = DistanceCalculation.getTrigDistanceToTarget(ty);
+            taDistanceToGoal = DistanceCalculation.getAreaDistanceToTarget(ta);
 
-            if( 0.5 * (trigDistanceToGoal + taDistanceToGoal ) > 74.4 ){
+            if (0.5 * (trigDistanceToGoal + taDistanceToGoal) > 74.4) {
                 distanceToGoal = taDistanceToGoal;
             } else {
                 distanceToGoal = trigDistanceToGoal;
             }
-        }else {
+        } else {
             distanceToGoal = 0;
         }
 
@@ -115,22 +116,22 @@ public class GBTAdjustingShooterPower extends OpMode {
                 true
         );
 
-        if( gamepad1.right_bumper ){
+        if (gamepad1.right_bumper) {
             rightFeeder.setPower(1);
         } else {
             rightFeeder.setPower(0);
         }
 
-        if( gamepad1.left_bumper ){
+        if (gamepad1.left_bumper) {
             leftFeeder.setPower(-1);
         } else {
             leftFeeder.setPower(0);
         }
 
-        if(gamepad1.x){
-            setShooterPower( shooterPower );
+        if (gamepad1.x) {
+            isShooterOn = true;
         } else if (gamepad1.y) {
-            setShooterPower( 0 );
+            isShooterOn = false;
         }
 
         if(gamepad1.a){
@@ -139,18 +140,18 @@ public class GBTAdjustingShooterPower extends OpMode {
             intake.setPower( 0 );
         }
 
-        if( gamepad1.dpad_up ){
-            if (shooterPower < MAX_SHOOTER_VELOCITY && !dpad_up) {
-                //shooterPower = shooterPower + 100;
-                shooterPower = shooterPower + 10;
-                setShooterPower(shooterPower);
+        /*if( gamepad1.dpad_up ){
+            if (shooterVelocity < MAX_SHOOTER_VELOCITY && !dpad_up) {
+                //ShooterVelocity = ShooterVelocity + 100;
+                shooterVelocity = shooterVelocity + 10;
+                setShooterVelocity(shooterVelocity);
             }
             dpad_up = true;
         } else if ( gamepad1.dpad_down ) {
-            if( shooterPower > 0 && !dpad_down ) {
-                //shooterPower = shooterPower - 100;
-                shooterPower = shooterPower - 10;
-                setShooterPower(shooterPower);
+            if( shooterVelocity > 0 && !dpad_down ) {
+                //ShooterVelocity = ShooterVelocity - 100;
+                shooterVelocity = shooterVelocity - 10;
+                setShooterVelocity(shooterVelocity);
 
             }
             dpad_down = true;
@@ -158,7 +159,15 @@ public class GBTAdjustingShooterPower extends OpMode {
         }else{
             dpad_down = false;
             dpad_up = false;
+        }*/
+
+        if( isShooterOn ){
+            shooterVelocity = VelocityCalculation.getTargetVelocity( distanceToGoal );
+        }else{
+            shooterVelocity = 0;
         }
+
+        setShooterVelocity( shooterVelocity );
 
         if(gamepad1.dpad_right){
             diverter.setPosition( 0.34 );
@@ -166,13 +175,16 @@ public class GBTAdjustingShooterPower extends OpMode {
             diverter.setPosition(0.02);
         }
 
-        telemetry.addData( "Shooter Power", shooterPower);
+        telemetry.addData( "Shooter Velocity", shooterVelocity);
         telemetry.addData( "Motor Velocity", rightShooter.getVelocity());
         telemetry.addData( "Distance To Goal", distanceToGoal);
+        telemetry.addData("PP x", follower.getPose().getX());
+        telemetry.addData("PP y", follower.getPose().getY());
+        telemetry.addData("PP heading", follower.getPose().getHeading());
 
     }
 
-    private void setShooterPower( double p ){
+    private void setShooterVelocity(double p ){
         //rightShooter.setPower( -1 * p );
         //leftShooter.setPower(  p );
         rightShooter.setVelocity(-1 * p);

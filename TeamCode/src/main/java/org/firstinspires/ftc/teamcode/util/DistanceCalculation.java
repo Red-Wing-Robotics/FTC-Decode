@@ -18,7 +18,7 @@ public class DistanceCalculation {
     public static double getTrigDistanceToTarget(double ty) {
         double targetHeight = 29.4375;
         double limelightHeight = 13.34375;
-        double limelightAngle = 0;
+        double limelightAngle = 26.3;
 
         double angleToTarget = Math.toRadians(limelightAngle + ty);
         return (targetHeight - limelightHeight) / Math.tan(angleToTarget);
