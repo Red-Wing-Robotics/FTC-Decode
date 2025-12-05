@@ -33,7 +33,7 @@ public class GBTAdjustingShooterPower extends OpMode {
     public CRServo leftFeeder = null;
     public Servo diverter = null;
     Limelight3A limelight;
-    private Alliance alliance = Alliance.BLUE;
+    private final Alliance alliance = Alliance.BLUE;
     private double shooterVelocity = 500;
     private boolean isShooterOn = false;
 
@@ -42,13 +42,8 @@ public class GBTAdjustingShooterPower extends OpMode {
     public static double MAX_SHOOTER_VELOCITY = (280 * 6);
     public static double MAX_SHOOTER_POWER = 1d;
 
-    private boolean dpad_up = false;
-    private boolean dpad_down = false;
-
-    private double trigDistanceToGoal = 0;
-    private double taDistanceToGoal = 0;//9
-
-    private double distanceToGoal = 0;
+    private final boolean dpad_up = false;
+    private final boolean dpad_down = false;
 
     @Override
     public void init() {
@@ -77,7 +72,6 @@ public class GBTAdjustingShooterPower extends OpMode {
     }
 
     public void start() {
-        follower.setMaxPower( 0.4 );
         follower.startTeleopDrive();
     }
 
@@ -89,6 +83,7 @@ public class GBTAdjustingShooterPower extends OpMode {
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
 
+        double distanceToGoal;
         if (result != null && result.isValid()) {
             LLResultTypes.FiducialResult fResult = result.getFiducialResults().get(0);
             int id = result.getFiducialResults().get(0).getFiducialId();
@@ -98,8 +93,9 @@ public class GBTAdjustingShooterPower extends OpMode {
             double ty = result.getTy();
             double ta = result.getTa();
 
-            trigDistanceToGoal = DistanceCalculation.getTrigDistanceToTarget(ty);
-            taDistanceToGoal = DistanceCalculation.getAreaDistanceToTarget(ta);
+            double trigDistanceToGoal = DistanceCalculation.getTrigDistanceToTarget(ty);
+            //9
+            double taDistanceToGoal = DistanceCalculation.getAreaDistanceToTarget(ta);
 
             if (0.5 * (trigDistanceToGoal + taDistanceToGoal) > 74.4) {
                 distanceToGoal = taDistanceToGoal;
@@ -112,8 +108,8 @@ public class GBTAdjustingShooterPower extends OpMode {
 
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
-                gamepad1.left_stick_x,
-                gamepad1.right_stick_x,
+                -gamepad1.right_stick_x,
+                -gamepad1.left_stick_x,
                 true
         );
 
@@ -163,7 +159,7 @@ public class GBTAdjustingShooterPower extends OpMode {
         }*/
 
         if( isShooterOn ){
-            shooterVelocity = VelocityCalculation.getTargetVelocity( distanceToGoal );
+            shooterVelocity = VelocityCalculation.getTargetVelocity(distanceToGoal);
         }else{
             shooterVelocity = 0;
         }
