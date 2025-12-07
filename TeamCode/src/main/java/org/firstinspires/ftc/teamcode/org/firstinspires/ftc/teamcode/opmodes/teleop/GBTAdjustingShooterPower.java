@@ -117,13 +117,13 @@ public class GBTAdjustingShooterPower extends OpMode {
                 true
         );
 
-        if (gamepad1.right_bumper && Math.abs(rightShooter.getVelocity() - shooterVelocity) < 10 ) {
+        if (gamepad1.right_bumper && Math.abs(rightShooter.getVelocity() - shooterVelocity) < 30 ) {
             rightFeeder.setPower(1);
         } else {
             rightFeeder.setPower(0);
         }
 
-        if (gamepad1.left_bumper && Math.abs(leftShooter.getVelocity() - shooterVelocity) < 10 ) {
+        if (gamepad1.left_bumper && Math.abs(leftShooter.getVelocity() - shooterVelocity) < 30 ) {
             leftFeeder.setPower(-1);
         } else {
             leftFeeder.setPower(0);
