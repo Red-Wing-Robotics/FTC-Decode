@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.VelocityCalculation;
 
-import java.time.Duration;
-import java.time.Instant;
+//import java.time.Duration;
+//import java.time.Instant;
 
 @SuppressWarnings("unused")
 @Configurable
@@ -55,8 +55,8 @@ public class GBTAdjustingShooterPower extends OpMode {
 
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 30;
 
-    private Instant flyWheelStart;
-    private Duration elapsedTime;
+    //private Instant flyWheelStart;
+    //private Duration elapsedTime;
 
     @Override
     public void init() {
@@ -139,10 +139,10 @@ public class GBTAdjustingShooterPower extends OpMode {
 
         if (gamepad1.x) {
             isShooterOn = true;
-            if( flyWheelStart == null ){
-                elapsedTime = null;
-                flyWheelStart = Instant.now();
-            }
+//            if( flyWheelStart == null ){
+//                elapsedTime = null;
+//                flyWheelStart = Instant.now();
+//            }
         } else if (gamepad1.y) {
             isShooterOn = false;
         }
@@ -181,11 +181,11 @@ public class GBTAdjustingShooterPower extends OpMode {
             shooterVelocity = 0;
         }
 
-        if( Math.abs(shooterVelocity - rightShooter.getVelocity() ) < SHOOTER_VELOCITY_FUDGE_FACTOR && elapsedTime == null){
-            Instant now = Instant.now();
-            elapsedTime = Duration.between( flyWheelStart, now );
-            flyWheelStart = null;
-        }
+//        if( Math.abs(shooterVelocity - rightShooter.getVelocity() ) < SHOOTER_VELOCITY_FUDGE_FACTOR && elapsedTime == null){
+//            Instant now = Instant.now();
+//            elapsedTime = Duration.between( flyWheelStart, now );
+//            flyWheelStart = null;
+//        }
 
         setShooterVelocity( shooterVelocity );
 
@@ -202,7 +202,7 @@ public class GBTAdjustingShooterPower extends OpMode {
         telemetry.addData("PP x", follower.getPose().getX());
         telemetry.addData("PP y", follower.getPose().getY());
         telemetry.addData("PP heading", follower.getPose().getHeading());
-        telemetry.addData( "Fly Wheel Start Time", elapsedTime.toMillis() );
+        //telemetry.addData( "Fly Wheel Start Time", elapsedTime.toMillis() );
 
 
     }
