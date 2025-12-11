@@ -18,9 +18,6 @@ import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.VelocityCalculation;
 
-//import java.time.Duration;
-//import java.time.Instant;
-
 @SuppressWarnings("unused")
 @Configurable
 @TeleOp(name = "GBT Adjusting Shooter Power", group = "Examples")
@@ -55,8 +52,8 @@ public class GBTAdjustingShooterPower extends OpMode {
 
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 30;
 
-    //private Instant flyWheelStart;
-    //private Duration elapsedTime;
+    private long flyWheelStart = 0;
+    private long elapsedTime = 0;
 
     @Override
     public void init() {
@@ -122,7 +119,7 @@ public class GBTAdjustingShooterPower extends OpMode {
                 -gamepad1.left_stick_y,
                 gamepad1.left_stick_x,
                 gamepad1.right_stick_x,
-                true
+                robotCentric
         );
 
         if (gamepad1.right_bumper && Math.abs(rightShooter.getVelocity() - shooterVelocity) < SHOOTER_VELOCITY_FUDGE_FACTOR ) {
@@ -139,10 +136,10 @@ public class GBTAdjustingShooterPower extends OpMode {
 
         if (gamepad1.x) {
             isShooterOn = true;
-//            if( flyWheelStart == null ){
-//                elapsedTime = null;
-//                flyWheelStart = Instant.now();
-//            }
+            if( flyWheelStart == 0 ){
+                elapsedTime = 0;
+                flyWheelStart = System.currentTimeMillis();
+            }
         } else if (gamepad1.y) {
             isShooterOn = false;
         }
@@ -181,11 +178,11 @@ public class GBTAdjustingShooterPower extends OpMode {
             shooterVelocity = 0;
         }
 
-//        if( Math.abs(shooterVelocity - rightShooter.getVelocity() ) < SHOOTER_VELOCITY_FUDGE_FACTOR && elapsedTime == null){
-//            Instant now = Instant.now();
-//            elapsedTime = Duration.between( flyWheelStart, now );
-//            flyWheelStart = null;
-//        }
+        if( Math.abs(shooterVelocity - rightShooter.getVelocity() ) < SHOOTER_VELOCITY_FUDGE_FACTOR && elapsedTime == 0 && flyWheelStart != 0){
+            long now = System.currentTimeMillis();
+            elapsedTime = now - flyWheelStart;
+            flyWheelStart = 0;
+        }
 
         setShooterVelocity( shooterVelocity );
 
@@ -199,11 +196,13 @@ public class GBTAdjustingShooterPower extends OpMode {
         telemetry.addData( "Right Motor Velocity", rightShooter.getVelocity());
         telemetry.addData("Left Motor Velocity", leftShooter.getVelocity());
         telemetry.addData( "Distance To Goal", distanceToGoal);
+        telemetry.addData("Driving Mode", robotCentric ? "Robot-Centric" : "Field-Centric");
         telemetry.addData("PP x", follower.getPose().getX());
         telemetry.addData("PP y", follower.getPose().getY());
         telemetry.addData("PP heading", follower.getPose().getHeading());
-        //telemetry.addData( "Fly Wheel Start Time", elapsedTime.toMillis() );
-
+        if (elapsedTime > 0) {
+            telemetry.addData( "Flywheel spin-up time (ms)", elapsedTime );
+        }
 
     }
 
