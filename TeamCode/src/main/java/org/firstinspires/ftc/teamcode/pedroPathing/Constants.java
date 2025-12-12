@@ -43,18 +43,18 @@ public class Constants {
                     0.02
             ))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(
-                    0.1,
+                    0.67,
                     0,
-                    0.00035,
+                    0.04,
                     0.6,
-                    0.015
+                    0.1
             ))
             .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(
-                    0.02,
+                    0.3,
                     0,
-                    0.000005,
+                    0.005,
                     0.6,
-                    0.01
+                    0.04
             ))
             .drivePIDFSwitch(15)
             .centripetalScaling(0.0005);
@@ -91,7 +91,7 @@ public class Constants {
             0.1,
             0.009,
             50,
-            1.25,
+            1.85,
             10,
             1
     );

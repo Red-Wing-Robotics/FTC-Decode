@@ -53,7 +53,7 @@ public class GBTAdjustingShooterPower extends OpMode {
 
     private double distanceToGoal = 0;
 
-    public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 30;
+    public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     //private Instant flyWheelStart;
     //private Duration elapsedTime;
@@ -85,10 +85,9 @@ public class GBTAdjustingShooterPower extends OpMode {
     }
 
     public void start() {
-        follower.setMaxPower( 0.4 );
         follower.startTeleopDrive();
     }
-
+//72.1x, 75.155y,134h
     @Override
     public void loop() {
         follower.update();
@@ -125,7 +124,7 @@ public class GBTAdjustingShooterPower extends OpMode {
                 true
         );
 
-        if (gamepad1.right_bumper && Math.abs(rightShooter.getVelocity() - shooterVelocity) < SHOOTER_VELOCITY_FUDGE_FACTOR ) {
+        if (gamepad1.right_bumper  ) {//&& Math.abs(rightShooter.getVelocity() - shooterVelocity) < SHOOTER_VELOCITY_FUDGE_FACTOR
             rightFeeder.setPower(1);
         } else {
             rightFeeder.setPower(0);
