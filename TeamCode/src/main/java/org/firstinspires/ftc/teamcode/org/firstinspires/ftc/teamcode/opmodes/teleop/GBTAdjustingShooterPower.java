@@ -2,7 +2,10 @@ package org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.te
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -17,6 +20,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.VelocityCalculation;
+
+import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
 @Configurable
@@ -55,9 +60,28 @@ public class GBTAdjustingShooterPower extends OpMode {
     private long flyWheelStart = 0;
     private long elapsedTime = 0;
 
+    private Supplier<PathChain> gotoShootPoseNear, gotoShootPoseFar;
+
+    private boolean automatedDrive = false;
+
     @Override
     public void init() {
         Pose start = new Pose(17.0625/2d + 0.25,16.09375/2d, Math.toRadians(90) ); // Assumed heading is 0 since we didn't specify
+        Pose shootPoseNear = new Pose(72.1, 75.15, Math.toRadians(135));
+        Pose shootPoseFar = new Pose(67.02, 19.57, 2.037);//2.037
+        //Pose leverSetUpPose = new Pose(22.95, 71.9, 0);
+        //Pose leverPose = new Pose(15.95, 71.9, 0)
+
+        gotoShootPoseNear = () -> follower.pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(follower::getPose, shootPoseNear )))
+                .setLinearHeadingInterpolation( follower.getHeading(), shootPoseNear.getHeading())
+                .build();
+
+        gotoShootPoseFar = () -> follower.pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(follower::getPose, shootPoseFar )))
+                .setLinearHeadingInterpolation( follower.getHeading(), shootPoseFar.getHeading())
+                .build();
+
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(start); //startingPose == null ? new Pose() : startingPose);
@@ -102,6 +126,8 @@ public class GBTAdjustingShooterPower extends OpMode {
             double ty = result.getTy();
             double ta = result.getTa();
 
+            telemetry.addData( "Tx", tx);
+
             trigDistanceToGoal = DistanceCalculation.getTrigDistanceToTarget(ty);
             taDistanceToGoal = DistanceCalculation.getAreaDistanceToTarget(ta);
 
@@ -114,38 +140,56 @@ public class GBTAdjustingShooterPower extends OpMode {
             distanceToGoal = 0;
         }
 
-        follower.setTeleOpDrive(
-                -gamepad1.left_stick_y,
-                gamepad1.left_stick_x,
-                gamepad1.right_stick_x,
-                robotCentric
-        );
+        if(automatedDrive && !follower.isBusy()){
+            automatedDrive = false;
+            follower.startTeleopDrive();
+        }
 
-        if (gamepad1.right_bumper  ) {//&& Math.abs(rightShooter.getVelocity() - shooterVelocity) < SHOOTER_VELOCITY_FUDGE_FACTOR
+        if( !automatedDrive ) {
+            follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y,
+                    gamepad1.left_stick_x,
+                    gamepad1.right_stick_x,
+                    robotCentric
+            );
+        }
+
+        if (gamepad1.aWasPressed() && !follower.isBusy()) {
+            follower.followPath(gotoShootPoseNear.get());
+            automatedDrive = true;
+        }
+
+        if (gamepad1.bWasPressed() && !follower.isBusy()) {
+            follower.followPath(gotoShootPoseFar.get());
+            automatedDrive = true;
+
+        }
+
+        if (gamepad2.right_bumper  ) {//&& Math.abs(rightShooter.getVelocity() - shooterVelocity) < SHOOTER_VELOCITY_FUDGE_FACTOR
             rightFeeder.setPower(1);
         } else {
             rightFeeder.setPower(0);
         }
 
-        if (gamepad1.left_bumper && Math.abs(leftShooter.getVelocity() - shooterVelocity) < SHOOTER_VELOCITY_FUDGE_FACTOR ) {
+        if (gamepad2.left_bumper && Math.abs(leftShooter.getVelocity() - shooterVelocity) < SHOOTER_VELOCITY_FUDGE_FACTOR ) {
             leftFeeder.setPower(-1);
         } else {
             leftFeeder.setPower(0);
         }
 
-        if (gamepad1.x) {
+        if (gamepad2.x) {
             isShooterOn = true;
             if( flyWheelStart == 0 ){
                 elapsedTime = 0;
                 flyWheelStart = System.currentTimeMillis();
             }
-        } else if (gamepad1.y) {
+        } else if (gamepad2.y) {
             isShooterOn = false;
         }
 
-        if(gamepad1.a){
+        if(gamepad2.a){
             intake.setPower( -1.0 );
-        } else if (gamepad1.b) {
+        } else if (gamepad2.b) {
             intake.setPower( 0 );
         }
 
@@ -185,9 +229,9 @@ public class GBTAdjustingShooterPower extends OpMode {
 
         setShooterVelocity( shooterVelocity );
 
-        if(gamepad1.dpad_right){
+        if(gamepad2.dpad_right){
             diverter.setPosition( 0.34 );
-        } else if (gamepad1.dpad_left ) {
+        } else if (gamepad2.dpad_left ) {
             diverter.setPosition(0.02);
         }
 
@@ -198,7 +242,7 @@ public class GBTAdjustingShooterPower extends OpMode {
         telemetry.addData("Driving Mode", robotCentric ? "Robot-Centric" : "Field-Centric");
         telemetry.addData("PP x", follower.getPose().getX());
         telemetry.addData("PP y", follower.getPose().getY());
-        telemetry.addData("PP heading", follower.getPose().getHeading());
+        telemetry.addData("PP heading", Math.toDegrees(follower.getPose().getHeading()));
         if (elapsedTime > 0) {
             telemetry.addData( "Flywheel spin-up time (ms)", elapsedTime );
         }
