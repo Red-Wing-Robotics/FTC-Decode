@@ -5,11 +5,11 @@ import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -29,10 +29,12 @@ public class SampleTeleOp extends OpMode {
     private boolean slowMode = false;
     private double slowModeMultiplier = 0.5;
 
-
+    private Servo light = null;
 
     @Override
     public void init() {
+        light= hardwareMap.get(Servo.class, "light");
+
         Pose start = new Pose(17.0625/2d + 0.25,16.09375/2d, Math.toRadians(90) ); // Assumed heading is 0 since we didn't specify
         Pose shootPose = new Pose(59.5, 83.69, Math.toRadians(135));
         Pose leverSetUpPose = new Pose(22.95, 71.9, 0);
@@ -42,7 +44,9 @@ public class SampleTeleOp extends OpMode {
         follower.setStartingPose(start); //startingPose == null ? new Pose() : startingPose);
         follower.update();
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+        light = hardwareMap.get(Servo.class, "light");
 
+        //Lazy Curve Generation
         gotoShootPose = () -> follower.pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierLine(follower::getPose, shootPose )))
                 .setLinearHeadingInterpolation( follower.getHeading(), shootPose.getHeading())
@@ -95,6 +99,14 @@ public class SampleTeleOp extends OpMode {
                     -gamepad1.right_stick_x * slowModeMultiplier,
                     robotCentric
             );
+        }
+
+        if(gamepad1.x) {
+            light.setPosition(0.3);
+        } else if(gamepad1.y){
+            light.setPosition(0.500);
+        } else{
+            light.setPosition(0);
         }
 
         //Automated PathFollowing
