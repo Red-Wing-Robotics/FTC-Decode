@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.auto;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -7,20 +8,26 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.RWRBaseOpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.ObeliskState;
+//import thread.sleep;
 
 import java.util.function.Supplier;
 
-public class FarSideAutoBlue extends OpMode {
+@Configurable
+@Autonomous(name = "Far Side Auto Blue", group = "Examples")
+public class FarSideAutoBlue extends RWRBaseOpMode {
 
     Limelight3A limelight;
 
@@ -38,26 +45,28 @@ public class FarSideAutoBlue extends OpMode {
     public CRServo leftFeeder = null;
     public Servo diverter = null;
 
-    public double shootVelocity = 1500;
+    public static double shootVelocity = 1580;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
+
+    public static long TIMEOUT_DEFAULT = 5000;
 
     // POSES -------------------------------------------------------------
 
-    private double startX = 0;
-    private double startY = 16.09375/2d;
-    private double startHeading = 90;
-    private double firstShootX = 67.02;
-    private double firstShootY = 19.57;
-    private double firstShootHeading = 116.7;
-    private double loadingZoneCollectY = 0 ;
-    private double loadingZoneCollectX = 0;
-    private double loadingZoneCollectHeading = 0;
-    private double gppX = 38.86;
-    private double gppY = 36.68;
-    private double gppHeading = 180;
-    private double leaveY = 24;
-    private double leaveX = 0;
-    private double leaveHeading = 180;
+    public static double startX = 57.2;
+    public static double startY = 16.09375/2d;
+    public static double startHeading = 90;
+    public static double firstShootX = 57.2;
+    public static double firstShootY = 10;
+    public static double firstShootHeading = 108;
+    public static double loadingZoneCollectY = 11.3;
+    public static double loadingZoneCollectX = 13.1;
+    public static double loadingZoneCollectHeading = 180;
+    public static double gppX = 38.86;
+    public static double gppY = 36.68;
+    public static double gppHeading = 180;
+    public static double leaveY = 24;
+    public static double leaveX = 0;
+    public static double leaveHeading = 180;
 
     private final Pose startPose = new Pose(startX, startY, Math.toRadians(startHeading));
 
@@ -125,23 +134,23 @@ public class FarSideAutoBlue extends OpMode {
     public void shootPreloadMotif( ObeliskState oState ){
         switch (oState){
             case PURPLE_GREEN_PURPLE:
-                shootRight();
-                intake.setPower(1.0);
+                shootRight( 100000 );
+                intake.setPower(-1.0);
                 shootLeft();
                 shootRight();
             case PURPLE_PURPLE_GREEN:
-                shootRight();
-                intake.setPower(1.0);
+                shootRight( 100000 );
+                intake.setPower(-1.0);
                 shootRight();
                 shootLeft();
             case GREEN_PURPLE_PURPLE:
-                shootLeft();
+                shootLeft(100000);
                 shootRight();
-                intake.setPower(1.0);
+                intake.setPower(-1.0);
                 shootRight();
             default:
-                shootRight();
-                intake.setPower(1.0);
+                shootRight(100000);
+                intake.setPower(-1.0);
                 shootRight();
                 shootLeft();
         }
@@ -166,31 +175,37 @@ public class FarSideAutoBlue extends OpMode {
         switch (pathState) {
             //repeatable 99%
             case 0:
-                setShooterVelocity( shootVelocity );
-                follower.followPath(gotoFirstShootPose);
+                setShooterVelocity(shootVelocity);
+                follower.followPath(gotoFirstShootPose, true);
                 setPathState(1);
                 break;
             case 1:
-                shootPreloadMotif( oState );
-                setShooterVelocity( 0 );
-                setPathState( 2 );
+                if (!follower.isBusy()) {
+                    //shootPreloadMotif(oState);
+                    setShooterVelocity(0);
+                    setPathState(2);
+                }
+                break;
             case 2:
                 if (!follower.isBusy()){
-                    follower.followPath(gotoLoadingZoneCollectPose);
+                    follower.followPath(gotoLoadingZoneCollectPose, true);
                     setPathState(3);
                 }
                 break;
             case 3:
                 if(!follower.isBusy()) {
                     setShooterVelocity( shootVelocity );
-                    follower.followPath(gotoSecondShootPose);
+                    follower.followPath(gotoSecondShootPose,true);
                     setPathState(4);
                 }
                 break;
             case 4:
-                shootPreloadMotif( oState );
-                setShooterVelocity( 0 );
-                setPathState( 5 );
+                if (!follower.isBusy()) {
+                    shootPreloadMotif(oState);
+                    setShooterVelocity(0);
+                    setPathState(5);
+                }
+                break;
             case 5:
                 if(!follower.isBusy()) {
                     follower.followPath(gotoLeavePose);
@@ -223,10 +238,13 @@ public class FarSideAutoBlue extends OpMode {
 
     }
 
+    public void start() {
+        pathState = 0;
+        diverter.setPosition( 0.02 );
+    }
+
     @Override
     public void loop() {
-        follower.update();
-        autonomousPathUpdate();
 
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
@@ -240,32 +258,35 @@ public class FarSideAutoBlue extends OpMode {
         if (pipeline == 1 && result != null && result.isValid()) {
             LLResultTypes.FiducialResult fResult = result.getFiducialResults().get(0);
             int id = result.getFiducialResults().get(0).getFiducialId();
-            telemetry.addData("April Tag ID", "" + id);
+            log("April Tag ID", "" + id);
 
             Pose3D botpose_mt2 = result.getBotpose_MT2();
             if (botpose_mt2 != null) {
                 double tx = result.getTx();
                 double ty = result.getTy();
                 double ta = result.getTa();
-                telemetry.addData("MT2 Target:", "(" + tx + ", " + ty + ", " + ta + ")");
+                log("MT2 Target:", "(" + tx + ", " + ty + ", " + ta + ")");
                 double distance = DistanceCalculation.getTrigDistanceToTarget(ty);
-                telemetry.addData("Distance to Goal", distance);
+                log("Distance to Goal", distance);
                 double x = botpose_mt2.getPosition().x;
                 double y = botpose_mt2.getPosition().y;
-                telemetry.addData("MT2 Location:", "(" + x + ", " + y + ")");
+                log("MT2 Location:", "(" + x + ", " + y + ")");
             }
         } else {
-            telemetry.addData("Limelight", "No Targets");
+            log("Limelight", "No Targets");
         }
 
+        follower.update();
+        autonomousPathUpdate();
 
         // Feedback to Driver Hub for debugging
-        telemetry.addData("path state", pathState);
-        telemetry.addData("x", follower.getPose().getX());
-        telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.update();
-
+        log("path state", pathState);
+        log("x", follower.getPose().getX());
+        log("y", follower.getPose().getY());
+        log("heading", follower.getPose().getHeading());
+        log("right shooter velocity", rightShooter.getVelocity());
+        log("left shooter velocity", leftShooter.getVelocity());
+        updateTelemetry();
     }
 
     private void setShooterVelocity(double p ){
@@ -275,19 +296,46 @@ public class FarSideAutoBlue extends OpMode {
         leftShooter.setVelocity(p);
     }
 
-    private void shootRight(){
-        if( Math.abs(rightShooter.getVelocity() - shootVelocity) < SHOOTER_VELOCITY_FUDGE_FACTOR){
-            rightFeeder.setPower(1);
-            //insert wait
-            rightFeeder.setPower(0);
+    private void shoot( long timeout, boolean isRight ){
+        log("State", "Start Shoot");
+        updateTelemetry();
+        CRServo feeder = (isRight) ? rightFeeder : leftFeeder;
+
+        long startTime = System.currentTimeMillis();
+        while ( !(Math.abs(rightShooter.getVelocity() - shootVelocity) < SHOOTER_VELOCITY_FUDGE_FACTOR)){
+            if( System.currentTimeMillis() - startTime >= timeout ) {
+                return;
+            }
         }
+
+        log("State", "Speed Reached");
+        updateTelemetry();
+        feeder.setPower(1);
+        while ( (Math.abs(rightShooter.getVelocity() - shootVelocity) < SHOOTER_VELOCITY_FUDGE_FACTOR)){
+            if( System.currentTimeMillis() - startTime >= timeout ) {
+                return;
+            }
+        }
+
+        log("State", "Shooting Completed");
+        updateTelemetry();
+
+        feeder.setPower(0);
+    }
+
+    private void shootRight( long timeout ){
+        shoot( timeout, true);
+    }
+
+    private void shootRight(){
+        shootRight( TIMEOUT_DEFAULT );
+    }
+
+    private void shootLeft( long timeout ){
+        shoot( timeout, false);
     }
 
     private void shootLeft(){
-        if( Math.abs(leftShooter.getVelocity() - shootVelocity) < SHOOTER_VELOCITY_FUDGE_FACTOR){
-            leftFeeder.setPower(1);
-            //insert wait
-            leftFeeder.setPower(0);
-        }
+        shootRight( TIMEOUT_DEFAULT );
     }
 }

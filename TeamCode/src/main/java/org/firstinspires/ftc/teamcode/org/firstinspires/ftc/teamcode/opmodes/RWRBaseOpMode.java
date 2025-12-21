@@ -18,7 +18,7 @@ abstract public class RWRBaseOpMode extends OpMode {
     }
 
     public void log(String caption, Object value) {
-        telemetry.addData(caption, value );
+        telemetry.addData(caption, value);
         getPanelsTelemetry().addData(caption, value);
     }
 
@@ -29,5 +29,10 @@ abstract public class RWRBaseOpMode extends OpMode {
         if (target == LoggingTarget.DRIVER_HUB || target == LoggingTarget.ALL){
             telemetry.addData(caption, value );
         }
+    }
+
+    public void updateTelemetry() {
+        telemetry.update();
+        telemetryM.update();
     }
 }
