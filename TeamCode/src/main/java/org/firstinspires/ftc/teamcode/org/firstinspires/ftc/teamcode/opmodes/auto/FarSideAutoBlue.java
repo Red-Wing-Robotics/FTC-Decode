@@ -9,8 +9,6 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -19,12 +17,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.RWRBaseOpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.state.Launcher;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.ObeliskState;
-//import thread.sleep;
 
-import java.util.function.Supplier;
-
+@SuppressWarnings("unused")
 @Configurable
 @Autonomous(name = "Far Side Auto Blue", group = "Examples")
 public class FarSideAutoBlue extends RWRBaseOpMode {
@@ -34,6 +31,9 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     private int pipeline;
 
     private Follower follower;
+
+    private Launcher launcher;
+
     private int pathState;
 
     private ObeliskState oState = ObeliskState.UNKNOWN;
@@ -101,6 +101,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     private PathChain gotoFirstShootPose, gotoFirstLoadingZoneCollectPose, gotoSecondLoadingZoneCollectPose, gotoSecondShootPose, gotoLeavePose, gotoGPPCollect, gotoPGPCollect, gotoPPGCollect;
 
     //private Supplier<PathChain> extra;
+
     public void buildPaths() {
         gotoFirstShootPose = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, firstShootPose))
@@ -141,89 +142,97 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 .build();
     }
 
-    public void shootPreloadMotif( ObeliskState oState ){
-        switch (oState){
+    public void shootPreloadMotif(ObeliskState oState) {
+        switch (oState) {
             case PURPLE_GREEN_PURPLE:
-                shootRight( 100000 );
-                intake.setPower(-1.0);
-                shootLeft();
-                shootRight();
-            case PURPLE_PURPLE_GREEN:
-                shootRight( 100000 );
-                intake.setPower(-1.0);
-                shootRight();
-                shootLeft();
+                launcher.shootRight();
+                launcher.shootLeft();
+                launcher.shootRight(true);
+                break;
             case GREEN_PURPLE_PURPLE:
-                shootLeft(100000);
-                shootRight();
-                intake.setPower(-1.0);
-                shootRight();
+                launcher.shootLeft();
+                launcher.shootRight();
+                launcher.shootRight(true);
+                break;
+            case PURPLE_PURPLE_GREEN:
             default:
-                shootRight(100000);
-                intake.setPower(-1.0);
-                shootRight();
-                shootLeft();
+                launcher.shootRight();
+                launcher.shootRight(true);
+                launcher.shootLeft();
+                break;
         }
     }
 
-    public PathChain getCollectionPath( ObeliskState oState ){
-        switch (oState){
+    public PathChain getCollectionPath(ObeliskState oState) {
+        switch (oState) {
             case PURPLE_GREEN_PURPLE:
                 return gotoPGPCollect;
             case PURPLE_PURPLE_GREEN:
                 return gotoPPGCollect;
             case GREEN_PURPLE_PURPLE:
-                return gotoGPPCollect;
             default:
                 return gotoGPPCollect;
         }
     }
+
     public void setPathState(int pState) {
         pathState = pState;
     }
+
     public void autonomousPathUpdate() {
         switch (pathState) {
             //repeatable 99%
             case 0:
-                setShooterVelocity(shootVelocity);
+                launcher.startShooter(shootVelocity);
                 follower.followPath(gotoFirstShootPose, true);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    //shootPreloadMotif(oState);
-                    setShooterVelocity(0);
+                    shootPreloadMotif(oState);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if (!follower.isBusy()){
-                    follower.followPath(gotoFirstLoadingZoneCollectPose, true);
+                // Launcher should have its own caser for this
+                if (!launcher.isBusy()) {
+                    launcher.stopShooter();
                     setPathState(3);
                 }
                 break;
             case 3:
                 if (!follower.isBusy()){
-                    diverter.setPosition(0.34);
-                    follower.followPath( gotoSecondLoadingZoneCollectPose, true);
+                    follower.followPath(gotoFirstLoadingZoneCollectPose, true);
                     setPathState(4);
                 }
+                break;
             case 4:
+                if (!follower.isBusy()){
+                    diverter.setPosition(0.34);
+                    follower.followPath( gotoSecondLoadingZoneCollectPose, true);
+                    setPathState(5);
+                }
+            case 5:
                 if(!follower.isBusy()) {
                     intake.setPower(0);
-                    setShooterVelocity( shootVelocity );
+                    launcher.startShooter(shootVelocity);
                     follower.followPath(gotoSecondShootPose,true);
-                    setPathState(-1);
-                }
-                break;
-            case 5:
-                if (!follower.isBusy()) {
-                    shootPreloadMotif(oState);
-                    setShooterVelocity(0);
                     setPathState(6);
                 }
                 break;
             case 6:
+                if (!follower.isBusy()) {
+                    shootPreloadMotif(oState);
+                    setPathState(7);
+                }
+                break;
+            case 7:
+                if (!launcher.isBusy()) {
+                    launcher.stopShooter();
+                    setPathState(8);
+                }
+                break;
+            case 8:
                 if(!follower.isBusy()) {
                     follower.followPath(gotoLeavePose);
                     setPathState(-1);
@@ -242,7 +251,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
 
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
-        diverter = hardwareMap.get( Servo.class, "diverter");
+        diverter = hardwareMap.get(Servo.class, "diverter");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
@@ -253,11 +262,12 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
         follower.setStartingPose(startPose);
         buildPaths();
 
+        launcher = new Launcher(hardwareMap, telemetry);
     }
 
     public void start() {
         pathState = 0;
-        diverter.setPosition( 0.02 );
+        diverter.setPosition(0.02);
         intake.setPower(-1.0);
     }
 
@@ -267,93 +277,45 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
 
-        if(pipeline == 0 && result != null && result.isValid() && oState == ObeliskState.UNKNOWN){
+        if (pipeline == 0 && result != null && result.isValid() && oState == ObeliskState.UNKNOWN) {
             int id = result.getFiducialResults().get(0).getFiducialId();
-            oState = ObeliskState.fromInt( id );
+            oState = ObeliskState.fromInt(id);
             pipeline = 1;
         }
 
         if (pipeline == 1 && result != null && result.isValid()) {
             LLResultTypes.FiducialResult fResult = result.getFiducialResults().get(0);
             int id = result.getFiducialResults().get(0).getFiducialId();
-            log("April Tag ID", "" + id);
+            logger.logData("April Tag ID", "" + id);
 
             Pose3D botpose_mt2 = result.getBotpose_MT2();
             if (botpose_mt2 != null) {
                 double tx = result.getTx();
                 double ty = result.getTy();
                 double ta = result.getTa();
-                log("MT2 Target:", "(" + tx + ", " + ty + ", " + ta + ")");
+                logger.logData("MT2 Target:", "(" + tx + ", " + ty + ", " + ta + ")");
                 double distance = DistanceCalculation.getTrigDistanceToTarget(ty);
-                log("Distance to Goal", distance);
+                logger.logData("Distance to Goal", distance);
                 double x = botpose_mt2.getPosition().x;
                 double y = botpose_mt2.getPosition().y;
-                log("MT2 Location:", "(" + x + ", " + y + ")");
+                logger.logData("MT2 Location:", "(" + x + ", " + y + ")");
             }
         } else {
-            log("Limelight", "No Targets");
+            logger.logData("Limelight", "No Targets");
         }
 
         follower.update();
         autonomousPathUpdate();
+        launcher.update();
 
         // Feedback to Driver Hub for debugging
-        log("path state", pathState);
-        log("x", follower.getPose().getX());
-        log("y", follower.getPose().getY());
-        log("heading", follower.getPose().getHeading());
-        log("right shooter velocity", rightShooter.getVelocity());
-        log("left shooter velocity", leftShooter.getVelocity());
-        updateTelemetry();
-    }
-
-    private void setShooterVelocity(double p ){
-        //rightShooter.setPower( -1 * p );
-        //leftShooter.setPower(  p );
-        rightShooter.setVelocity(-1 * p);
-        leftShooter.setVelocity(p);
-    }
-
-    private void shoot( long timeout, boolean isRight ){
-        log("State", "Start Shoot");
-        updateTelemetry();
-        CRServo feeder = (isRight) ? rightFeeder : leftFeeder;
-
-        long startTime = System.currentTimeMillis();
-        while ( !(Math.abs(rightShooter.getVelocity() - shootVelocity) < SHOOTER_VELOCITY_FUDGE_FACTOR)){
-            if( System.currentTimeMillis() - startTime >= timeout ) {
-                return;
-            }
-        }
-
-        log("State", "Speed Reached");
-        updateTelemetry();
-        feeder.setPower(1);
-        while ( (Math.abs(rightShooter.getVelocity() - shootVelocity) < SHOOTER_VELOCITY_FUDGE_FACTOR)){
-            if( System.currentTimeMillis() - startTime >= timeout ) {
-                return;
-            }
-        }
-
-        log("State", "Shooting Completed");
-        updateTelemetry();
-
-        feeder.setPower(0);
-    }
-
-    private void shootRight( long timeout ){
-        shoot( timeout, true);
-    }
-
-    private void shootRight(){
-        shootRight( TIMEOUT_DEFAULT );
-    }
-
-    private void shootLeft( long timeout ){
-        shoot( timeout, false);
-    }
-
-    private void shootLeft(){
-        shootRight( TIMEOUT_DEFAULT );
+        logger.logData("path state", pathState);
+        logger.logData("launcher state", launcher.state);
+        logger.logData("x", follower.getPose().getX());
+        logger.logData("y", follower.getPose().getY());
+        logger.logData("heading", follower.getPose().getHeading());
+        logger.logData("right shooter velocity", rightShooter.getVelocity());
+        logger.logData("left shooter velocity", leftShooter.getVelocity());
+        logger.update();
     }
 }
