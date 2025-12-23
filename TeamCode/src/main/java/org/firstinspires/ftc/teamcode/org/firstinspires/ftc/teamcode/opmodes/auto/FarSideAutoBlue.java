@@ -64,12 +64,12 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public static double firstLoadingZoneCollectY = 14.3;
     public static double firstLoadingZoneCollectX = 13.1;
     public static double firstLoadingZoneCollectHeading = 180;
-    public static double greenCollectX;
-    public static double greenCollectY;
-    public static double greenCollectHeading;
-    public static double purpleCollectX;
-    public static double purpleCollectY;
-    public static double purpleCollectHeading;
+    public static double greenCollectX = 37.6;
+    public static double greenCollectY = 35.5;
+    public static double greenCollectHeading = 180;
+    public static double purpleCollectX = 24.5;
+    public static double purpleCollectY = 35.5;
+    public static double purpleCollectHeading = 180;
     public static double leaveY = 24;
     public static double leaveX = 0;
     public static double leaveHeading = 180;
@@ -99,7 +99,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
 
     private Pose postCollectPose;*/
 
-    private PathChain gotoFirstShootPose, gotoFirstLoadingZoneCollectPose, gotoSecondLoadingZoneCollectPose, gotoSecondShootPose, gotoLeavePose, gotoGPPCollect, gotoPGPCollect, gotoPPGCollect;
+    private PathChain gotoFirstShootPose, gotoFirstLoadingZoneCollectPose, gotoSecondLoadingZoneCollectPose, gotoSecondShootPose, gotoPurpleCollectPose, gotoGreenCollectPose, gotoThirdShootPose, gotoLeavePose, gotoGPPCollect, gotoPGPCollect, gotoPPGCollect;
 
     //private Supplier<PathChain> extra;
 
@@ -121,12 +121,22 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
 
         gotoSecondShootPose =  follower.pathBuilder()
                 .addPath(new BezierLine(secondLoadingZoneCollectPose, firstShootPose))
-                .setLinearHeadingInterpolation(follower.getHeading(), firstShootPose.getHeading())
+                .setLinearHeadingInterpolation(secondLoadingZoneCollectPose.getHeading(), firstShootPose.getHeading())
+                .build();
+
+        gotoGreenCollectPose = follower.pathBuilder()
+                .addPath(new BezierLine(firstShootPose, greenCollectPose))
+                .setLinearHeadingInterpolation(firstShootPose.getHeading(), greenCollectPose.getHeading())
                 .build();
 
         gotoPurpleCollectPose = follower.pathBuilder()
-                .addPath(new BezierLine(secondLoadingZoneCollectPose, firstShootPose))
-                .setLinearHeadingInterpolation(follower.getHeading(), firstShootPose.getHeading())
+                .addPath(new BezierLine(greenCollectPose, purpleCollectPose))
+                .setLinearHeadingInterpolation(greenCollectPose.getHeading(), purpleCollectPose.getHeading())
+                .build();
+
+        gotoThirdShootPose =  follower.pathBuilder()
+                .addPath(new BezierLine(purpleCollectPose, firstShootPose))
+                .setLinearHeadingInterpolation(purpleCollectPose.getHeading(), firstShootPose.getHeading())
                 .build();
 
         gotoLeavePose = follower.pathBuilder()
@@ -239,6 +249,40 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 }
                 break;
             case 8:
+                if (!follower.isBusy()) {
+                    intake.setPower(1.0);
+                    follower.followPath(gotoGreenCollectPose, true);
+                    setPathState(9);
+                }
+                break;
+            case 9:
+                if (!follower.isBusy()) {
+                    diverter.setPosition(0.02);
+                    follower.followPath(gotoPurpleCollectPose, true);
+                    setPathState(10);
+                }
+                break;
+            case 10:
+                if(!follower.isBusy()) {
+                    intake.setPower(0);
+                    launcher.startShooter(shootVelocity);
+                    follower.followPath(gotoThirdShootPose,true);
+                    setPathState(11);
+                }
+                break;
+            case 11:
+                if (!follower.isBusy()) {
+                    shootPreloadMotif(oState);
+                    setPathState(12);
+                }
+                break;
+            case 12:
+                if (!launcher.isBusy()) {
+                    launcher.stopShooter();
+                    setPathState(13);
+                }
+                break;
+            case 13:
                 if(!follower.isBusy()) {
                     follower.followPath(gotoLeavePose);
                     setPathState(-1);
