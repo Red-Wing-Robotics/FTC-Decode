@@ -64,25 +64,26 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public static double firstLoadingZoneCollectY = 14.3;
     public static double firstLoadingZoneCollectX = 13.1;
     public static double firstLoadingZoneCollectHeading = 180;
-    public static double gppX = 38.86;
-    public static double gppY = 36.68;
-    public static double gppHeading = 180;
+    public static double greenCollectX;
+    public static double greenCollectY;
+    public static double greenCollectHeading;
+    public static double purpleCollectX;
+    public static double purpleCollectY;
+    public static double purpleCollectHeading;
     public static double leaveY = 24;
     public static double leaveX = 0;
     public static double leaveHeading = 180;
 
     private final Pose startPose = new Pose(startX, startY, Math.toRadians(startHeading));
-
     private final Pose firstShootPose = new Pose(firstShootX, firstShootY, Math.toRadians(firstShootHeading));
-
     private final Pose firstLoadingZoneCollectPose = new Pose(firstLoadingZoneCollectX, firstLoadingZoneCollectY, Math.toRadians(firstLoadingZoneCollectHeading));
-
     private final Pose secondLoadingZoneCollectPose = new Pose(secondLoadingZoneCollectX, secondLoadingZoneCollectY, Math.toRadians(secondLoadingZoneCollectHeading));
-
+    private final Pose greenCollectPose = new Pose( greenCollectX, greenCollectY, Math.toRadians(greenCollectHeading));
+    private final Pose purpleCollectPose = new Pose( purpleCollectX, purpleCollectY, Math.toRadians(purpleCollectHeading));
     private final Pose leavePose = new Pose(leaveX, leaveY, Math.toRadians(leaveHeading));
 
 
-    private final Pose gppPose = new Pose(gppX, gppY, Math.toRadians(gppHeading));
+    /*private final Pose gppPose = new Pose(gppX, gppY, Math.toRadians(gppHeading));
 
     private final Pose pgpPose = new Pose(38.86, 60.16, Math.toRadians(180));
 
@@ -96,7 +97,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
 
     private Pose preCollectPose;
 
-    private Pose postCollectPose;
+    private Pose postCollectPose;*/
 
     private PathChain gotoFirstShootPose, gotoFirstLoadingZoneCollectPose, gotoSecondLoadingZoneCollectPose, gotoSecondShootPose, gotoLeavePose, gotoGPPCollect, gotoPGPCollect, gotoPPGCollect;
 
@@ -123,11 +124,16 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 .setLinearHeadingInterpolation(follower.getHeading(), firstShootPose.getHeading())
                 .build();
 
+        gotoPurpleCollectPose = follower.pathBuilder()
+                .addPath(new BezierLine(secondLoadingZoneCollectPose, firstShootPose))
+                .setLinearHeadingInterpolation(follower.getHeading(), firstShootPose.getHeading())
+                .build();
+
         gotoLeavePose = follower.pathBuilder()
                 .addPath(new BezierLine(firstShootPose, leavePose))
                 .setLinearHeadingInterpolation(firstShootPose.getHeading(), leavePose.getHeading())
                 .build();
-
+/*
         gotoGPPCollect = follower.pathBuilder()
                 .addPath(new BezierLine(gppPose, gppCollectPose))
                 .setLinearHeadingInterpolation(gppPose.getHeading(), gppCollectPose.getHeading())
@@ -139,7 +145,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
         gotoPPGCollect = follower.pathBuilder()
                 .addPath(new BezierLine(ppgPose, ppgCollectPose))
                 .setLinearHeadingInterpolation(ppgPose.getHeading(), ppgCollectPose.getHeading())
-                .build();
+                .build();*/
     }
 
     public void shootPreloadMotif(ObeliskState oState) {
