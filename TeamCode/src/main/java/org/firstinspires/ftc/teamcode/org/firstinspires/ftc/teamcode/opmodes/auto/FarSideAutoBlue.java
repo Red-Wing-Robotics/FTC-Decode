@@ -45,7 +45,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public CRServo leftFeeder = null;
     public Servo diverter = null;
 
-    public static double shootVelocity = 1580;
+    public static double shootVelocity = 1560;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     public static long TIMEOUT_DEFAULT = 5000;
@@ -57,18 +57,18 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public static double startHeading = 90;
     public static double firstShootX = 57.2;
     public static double firstShootY = 10;
-    public static double firstShootHeading = 108;
-    public static double secondLoadingZoneCollectY = 11.3;
-    public static double secondLoadingZoneCollectX = 12;
+    public static double firstShootHeading = 110;
+    public static double secondLoadingZoneCollectY = 13;
+    public static double secondLoadingZoneCollectX = 14;
     public static double secondLoadingZoneCollectHeading = 180;
     public static double firstLoadingZoneCollectY = 14.3;
-    public static double firstLoadingZoneCollectX = 13.1;
+    public static double firstLoadingZoneCollectX = 14;
     public static double firstLoadingZoneCollectHeading = 180;
-    public static double greenCollectX = 37.6;
-    public static double greenCollectY = 35.5;
+    public static double greenCollectX = 40;
+    public static double greenCollectY = 37;
     public static double greenCollectHeading = 180;
-    public static double purpleCollectX = 24.5;
-    public static double purpleCollectY = 35.5;
+    public static double purpleCollectX = 20;
+    public static double purpleCollectY = 37;
     public static double purpleCollectHeading = 180;
     public static double leaveY = 24;
     public static double leaveX = 0;
@@ -179,6 +179,24 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
         }
     }
 
+    public void shootLoadingZoneBalls(ObeliskState oState) {
+        switch (oState) {
+            case PURPLE_GREEN_PURPLE:
+                launcher.shootRight();
+                launcher.shootLeft();
+                break;
+            case GREEN_PURPLE_PURPLE:
+                launcher.shootLeft();
+                launcher.shootRight();
+                break;
+            case PURPLE_PURPLE_GREEN:
+            default:
+                launcher.shootRight();
+                launcher.shootLeft();
+                break;
+        }
+    }
+
     public PathChain getCollectionPath(ObeliskState oState) {
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
@@ -197,7 +215,6 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
 
     public void autonomousPathUpdate() {
         switch (pathState) {
-            //repeatable 99%
             case 0:
                 launcher.startShooter(shootVelocity);
                 follower.followPath(gotoFirstShootPose, true);
@@ -218,6 +235,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 3:
                 if (!follower.isBusy()){
+                    launcher.activateIntake();
                     follower.followPath(gotoFirstLoadingZoneCollectPose, true);
                     setPathState(4);
                 }
@@ -230,7 +248,6 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 }
             case 5:
                 if(!follower.isBusy()) {
-                    intake.setPower(0);
                     launcher.startShooter(shootVelocity);
                     follower.followPath(gotoSecondShootPose,true);
                     setPathState(6);
@@ -238,7 +255,8 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 6:
                 if (!follower.isBusy()) {
-                    shootPreloadMotif(oState);
+                    launcher.deactivateIntake();
+                    shootLoadingZoneBalls(oState);
                     setPathState(7);
                 }
                 break;
@@ -250,7 +268,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 8:
                 if (!follower.isBusy()) {
-                    intake.setPower(1.0);
+                    launcher.activateIntake();
                     follower.followPath(gotoGreenCollectPose, true);
                     setPathState(9);
                 }
@@ -258,13 +276,14 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
             case 9:
                 if (!follower.isBusy()) {
                     diverter.setPosition(0.02);
+                    //insert sleep
                     follower.followPath(gotoPurpleCollectPose, true);
                     setPathState(10);
                 }
                 break;
             case 10:
                 if(!follower.isBusy()) {
-                    intake.setPower(0);
+                    launcher.deactivateIntake();
                     launcher.startShooter(shootVelocity);
                     follower.followPath(gotoThirdShootPose,true);
                     setPathState(11);
@@ -318,7 +337,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public void start() {
         pathState = 0;
         diverter.setPosition(0.02);
-        intake.setPower(-1.0);
+        intake.setPower(0);
     }
 
     @Override

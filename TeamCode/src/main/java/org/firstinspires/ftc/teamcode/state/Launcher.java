@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.state;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -11,11 +12,13 @@ import org.firstinspires.ftc.teamcode.util.log.Logger;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+@Configurable
 public class Launcher {
 
-    public static double FEED_TIME_MS = 200; // in milliseconds
-    public static double LAUNCHER_VELOCITY_PERCENT_FUDGE_FACTOR = 0.10; // Decimal percentage
-    public static double TIME_BETWEEN_SHOTS_MS = 2000; // in milliseconds
+    public static double FEED_TIME_MS = 2500; // in milliseconds
+    public static double LAUNCHER_VELOCITY_PERCENT_FUDGE_FACTOR = 0.20; // Decimal percentage
+    public static double LAUNCHER_RAMPING_TIME = 3000;
+    public static double TIME_BETWEEN_SHOTS_MS = 1000; // in milliseconds
     public static double INTAKE_TIME_MS = 1000; // in milliseconds
 
     private double targetVelocity;
@@ -36,7 +39,8 @@ public class Launcher {
         READY,
         INTAKING,
         SHOOTING,
-        WAITING
+        WAITING,
+        DONE
     }
 
     private enum ShooterSide {
@@ -78,7 +82,7 @@ public class Launcher {
                 // Waiting for startShooter() to be called
                 break;
             case RAMPING:
-                if(isShooterWithinFudgeFactor()) {
+                if(System.currentTimeMillis() - stateStartTime >= LAUNCHER_RAMPING_TIME) {//isShooterWithinFudgeFactor()
                     this.state = LauncherState.READY;
                     logger.logLine("Flywheel at speed, ready to shoot.");
                 }
@@ -121,7 +125,7 @@ public class Launcher {
                     shotQueue.poll(); // remove shot from queue
                     logger.logLine("Finished shot.");
                     if (shotQueue.isEmpty()) {
-                        this.state = LauncherState.READY;
+                        this.state = LauncherState.DONE;
                         logger.logLine("Shot queue empty, returning to ready.");
                     } else {
                         this.state = LauncherState.WAITING;
@@ -134,6 +138,23 @@ public class Launcher {
                 if (currentTime - stateStartTime >= TIME_BETWEEN_SHOTS_MS) {
                     this.state = LauncherState.READY;
                     logger.logLine("Finished waiting, ready for next shot.");
+                }
+                break;
+            case DONE:
+                if (!shotQueue.isEmpty()) {
+                    ShotRequest currentShot = shotQueue.peek();
+                    if (currentShot != null && currentShot.shouldActivateIntake) {
+                        this.state = LauncherState.INTAKING;
+                        stateStartTime = currentTime;
+                        activateIntake();
+                        logger.logLine("Starting intake for next shot.");
+                    } else if (currentShot != null) {
+                        // Skip intake and go straight to shooting
+                        this.state = LauncherState.SHOOTING;
+                        stateStartTime = currentTime;
+                        activateFeeder(currentShot.side);
+                        logger.logLine("Shooting " + currentShot.side);
+                    }
                 }
                 break;
         }
@@ -149,7 +170,7 @@ public class Launcher {
     }
 
     public boolean isBusy() {
-        return this.state == LauncherState.SHOOTING || this.state == LauncherState.WAITING || this.state == LauncherState.INTAKING;
+        return this.state == LauncherState.SHOOTING || this.state == LauncherState.WAITING || this.state == LauncherState.INTAKING || this.state == LauncherState.RAMPING || this.state == LauncherState.READY;
     }
 
     public void startShooter(double velocity) {
@@ -203,7 +224,7 @@ public class Launcher {
     private void activateFeeder(ShooterSide side) {
         switch (side) {
             case LEFT:
-                leftFeeder.setPower(1);
+                leftFeeder.setPower(-1);
                 break;
             case RIGHT:
                 rightFeeder.setPower(1);
@@ -216,11 +237,11 @@ public class Launcher {
         rightFeeder.setPower(0);
     }
 
-    private void activateIntake() {
+    public void activateIntake() {
         intake.setPower(-1.0);
     }
 
-    private void deactivateIntake() {
+    public void deactivateIntake() {
         intake.setPower(0);
     }
 
