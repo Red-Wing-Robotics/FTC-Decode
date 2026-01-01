@@ -23,8 +23,8 @@ import org.firstinspires.ftc.teamcode.util.ObeliskState;
 
 @SuppressWarnings("unused")
 @Configurable
-@Autonomous(name = "Far Side Auto Blue", group = "Examples")
-public class FarSideAutoBlue extends RWRBaseOpMode {
+@Autonomous(name = "Near Side Auto Blue", group = "Examples")
+public class NearSideAutoBlue extends RWRBaseOpMode {
 
     Limelight3A limelight;
 
@@ -52,94 +52,108 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
 
     // POSES -------------------------------------------------------------
 
-    public static double startX = 57.2;
-    public static double startY = 16.09375/2d;
+    public static double startX = 33.7;
+    public static double startY = 144 - (16.09375/2d);
     public static double startHeading = 90;
-    public static double firstShootX = 57.2;
-    public static double firstShootY = 10;
-    public static double firstShootHeading = 110;
-    public static double secondLoadingZoneCollectY = 13;
-    public static double secondLoadingZoneCollectX = 14;
-    public static double secondLoadingZoneCollectHeading = 180;
-    public static double firstLoadingZoneCollectY = 14.3;
-    public static double firstLoadingZoneCollectX = 14;
-    public static double firstLoadingZoneCollectHeading = 180;
-    public static double greenCollectX = 40;
-    public static double greenCollectY = 37;
-    public static double greenCollectHeading = 180;
-    public static double purpleCollectX = 20;
-    public static double purpleCollectY = 37;
-    public static double purpleCollectHeading = 180;
-    public static double leaveY = 24;
-    public static double leaveX = 0;
+    public static double shootX = 47.73;
+    public static double shootY = 95.78;
+    public static double shootHeading = 135;
+    public static double obeliskReadHeading = 75;
+    public static double gppX = 41.44;
+    public static double gppY = 83.85;
+    public static double gppHeading = 180;
+    public static double gppPurpleY = 83.85;
+    public static double gppPurpleX = 36.28;
+    public static double gppPurpleHeading = 180;
+    public static double gppGreenX = 25.16;
+    public static double gppGreenY = 83.85;
+    public static double gppGreenHeading = 180;
+    public static double pgpX = 41.44;
+    public static double pgpY = 59.34;
+    public static double pgpHeading = 180;
+    public static double pgpPurpleX = 36.28;
+    public static double pgpPurpleY = 59.34;
+    public static double pgpPurpleHeading = 180;
+    public static double pgpGreenX = 25.16;
+    public static double pgpGreenY = 59.34;
+    public static double pgpGreenHeading = 180;
+    public static double leaveY = 69.66;
+    public static double leaveX = 24;
     public static double leaveHeading = 180;
 
     private final Pose startPose = new Pose(startX, startY, Math.toRadians(startHeading));
-    private final Pose firstShootPose = new Pose(firstShootX, firstShootY, Math.toRadians(firstShootHeading));
-    private final Pose firstLoadingZoneCollectPose = new Pose(firstLoadingZoneCollectX, firstLoadingZoneCollectY, Math.toRadians(firstLoadingZoneCollectHeading));
-    private final Pose secondLoadingZoneCollectPose = new Pose(secondLoadingZoneCollectX, secondLoadingZoneCollectY, Math.toRadians(secondLoadingZoneCollectHeading));
-    private final Pose greenCollectPose = new Pose( greenCollectX, greenCollectY, Math.toRadians(greenCollectHeading));
-    private final Pose purpleCollectPose = new Pose( purpleCollectX, purpleCollectY, Math.toRadians(purpleCollectHeading));
+    private final Pose obeliskReadPose = new Pose(shootX, shootY, Math.toRadians(obeliskReadHeading));
+    private final Pose shootPose = new Pose(shootX, shootY, Math.toRadians(shootHeading));
+    private final Pose gppPose = new Pose(gppX, gppY, Math.toRadians(gppHeading));
+    private final Pose gppPurplePose = new Pose(gppPurpleX, gppPurpleY, Math.toRadians(gppPurpleHeading));
+    private final Pose gppGreenPose = new Pose(gppGreenX, gppGreenY, Math.toRadians(gppGreenHeading));
+    private final Pose pgpPose = new Pose(pgpX, pgpY, Math.toRadians(pgpHeading));
+    private final Pose pgpPurplePose = new Pose(pgpPurpleX, pgpPurpleY, Math.toRadians(pgpPurpleHeading));
+    private final Pose pgpGreenPose = new Pose(pgpGreenX, pgpGreenY, Math.toRadians(pgpGreenHeading));
     private final Pose leavePose = new Pose(leaveX, leaveY, Math.toRadians(leaveHeading));
 
 
-    private PathChain gotoFirstShootPose, gotoFirstLoadingZoneCollectPose, gotoSecondLoadingZoneCollectPose, gotoSecondShootPose, gotoPurpleCollectPose, gotoGreenCollectPose, gotoThirdShootPose, gotoLeavePose, gotoGPPCollect, gotoPGPCollect, gotoPPGCollect;
+    private PathChain gotoObeliskReadPose, gotoFirstShootPose, gotoGppPose, gotoGppPurplePose, gotoGppGreenPose, gotoSecondShootPose, gotoPgpPose, gotoPgpPurplePose, gotoPgpGreenPose, gotoThirdShootPose, gotoLeavePose;
 
     //private Supplier<PathChain> extra;
 
     public void buildPaths() {
+        gotoObeliskReadPose = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, obeliskReadPose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), obeliskReadPose.getHeading())
+                .build();
+
         gotoFirstShootPose = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, firstShootPose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), firstShootPose.getHeading())
+                .addPath(new BezierLine(obeliskReadPose, shootPose))
+                .setLinearHeadingInterpolation(obeliskReadPose.getHeading(), shootPose.getHeading())
                 .build();
 
-        gotoFirstLoadingZoneCollectPose = follower.pathBuilder()
-                .addPath(new BezierLine(firstShootPose, firstLoadingZoneCollectPose))
-                .setLinearHeadingInterpolation(firstShootPose.getHeading(), firstLoadingZoneCollectPose.getHeading())
+        gotoGppPose = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose, gppPose))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), gppPose.getHeading())
                 .build();
 
-        gotoSecondLoadingZoneCollectPose = follower.pathBuilder()
-                .addPath(new BezierLine(firstLoadingZoneCollectPose, secondLoadingZoneCollectPose))
-                .setLinearHeadingInterpolation(firstLoadingZoneCollectPose.getHeading(), secondLoadingZoneCollectPose.getHeading())
+        gotoGppPurplePose = follower.pathBuilder()
+                .addPath(new BezierLine(gppPose, gppPurplePose))
+                .setLinearHeadingInterpolation(gppPose.getHeading(), gppPurplePose.getHeading())
+                .build();
+
+        gotoGppGreenPose = follower.pathBuilder()
+                .addPath(new BezierLine(gppPurplePose, gppGreenPose))
+                .setLinearHeadingInterpolation(gppPurplePose.getHeading(), gppGreenPose.getHeading())
                 .build();
 
         gotoSecondShootPose =  follower.pathBuilder()
-                .addPath(new BezierLine(secondLoadingZoneCollectPose, firstShootPose))
-                .setLinearHeadingInterpolation(secondLoadingZoneCollectPose.getHeading(), firstShootPose.getHeading())
+                .addPath(new BezierLine(gppGreenPose, shootPose))
+                .setLinearHeadingInterpolation(gppGreenPose.getHeading(), shootPose.getHeading())
                 .build();
 
-        gotoGreenCollectPose = follower.pathBuilder()
-                .addPath(new BezierLine(firstShootPose, greenCollectPose))
-                .setLinearHeadingInterpolation(firstShootPose.getHeading(), greenCollectPose.getHeading())
+        gotoPgpPose = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose, pgpPose))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), pgpPose.getHeading())
                 .build();
 
-        gotoPurpleCollectPose = follower.pathBuilder()
-                .addPath(new BezierLine(greenCollectPose, purpleCollectPose))
-                .setLinearHeadingInterpolation(greenCollectPose.getHeading(), purpleCollectPose.getHeading())
+        gotoPgpPurplePose = follower.pathBuilder()
+                .addPath(new BezierLine(pgpPose, pgpPurplePose))
+                .setLinearHeadingInterpolation(pgpPose.getHeading(), pgpPurplePose.getHeading())
+                .build();
+
+        gotoPgpGreenPose = follower.pathBuilder()
+                .addPath(new BezierLine(pgpPurplePose, pgpGreenPose))
+                .setLinearHeadingInterpolation(pgpPurplePose.getHeading(), pgpGreenPose.getHeading())
                 .build();
 
         gotoThirdShootPose =  follower.pathBuilder()
-                .addPath(new BezierLine(purpleCollectPose, firstShootPose))
-                .setLinearHeadingInterpolation(purpleCollectPose.getHeading(), firstShootPose.getHeading())
+                .addPath(new BezierLine(pgpGreenPose, shootPose))
+                .setLinearHeadingInterpolation(pgpGreenPose.getHeading(), shootPose.getHeading())
                 .build();
 
         gotoLeavePose = follower.pathBuilder()
-                .addPath(new BezierLine(firstShootPose, leavePose))
-                .setLinearHeadingInterpolation(firstShootPose.getHeading(), leavePose.getHeading())
+                .addPath(new BezierLine(shootPose, leavePose))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), leavePose.getHeading())
                 .build();
-/*
-        gotoGPPCollect = follower.pathBuilder()
-                .addPath(new BezierLine(gppPose, gppCollectPose))
-                .setLinearHeadingInterpolation(gppPose.getHeading(), gppCollectPose.getHeading())
-                .build();
-        gotoPGPCollect = follower.pathBuilder()
-                .addPath(new BezierLine(pgpPose, pgpCollectPose))
-                .setLinearHeadingInterpolation(pgpPose.getHeading(), pgpCollectPose.getHeading())
-                .build();
-        gotoPPGCollect = follower.pathBuilder()
-                .addPath(new BezierLine(ppgPose, ppgCollectPose))
-                .setLinearHeadingInterpolation(ppgPose.getHeading(), ppgCollectPose.getHeading())
-                .build();*/
+
+
     }
 
     public void shootPreloadMotif(ObeliskState oState) {
@@ -163,24 +177,54 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
         }
     }
 
-    public void shootLoadingZoneBalls(ObeliskState oState) {
+    public void shootGPP(ObeliskState oState) {
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
-                launcher.shootRight();
+                launcher.shootLeft(true);
                 launcher.shootLeft();
+                launcher.shootRight();
                 break;
             case GREEN_PURPLE_PURPLE:
+                launcher.shootLeft(true);
                 launcher.shootLeft();
                 launcher.shootRight();
                 break;
             case PURPLE_PURPLE_GREEN:
+                launcher.shootLeft();
+                launcher.shootRight(true);
+                launcher.shootLeft();
             default:
                 launcher.shootRight();
+                launcher.shootLeft(true);
                 launcher.shootLeft();
                 break;
         }
     }
 
+    public void shootPGP(ObeliskState oState) {
+        switch (oState) {
+            case PURPLE_GREEN_PURPLE:
+                launcher.shootRight();
+                launcher.shootLeft(true);
+                launcher.shootLeft();
+                break;
+            case GREEN_PURPLE_PURPLE:
+                launcher.shootLeft(true);
+                launcher.shootLeft();
+                launcher.shootRight();
+                break;
+            case PURPLE_PURPLE_GREEN:
+                launcher.shootRight();
+                launcher.shootLeft(true);
+                launcher.shootLeft();
+            default:
+                launcher.shootRight();
+                launcher.shootLeft(true);
+                launcher.shootLeft();
+                break;
+        }
+    }
+/*
     public PathChain getCollectionPath(ObeliskState oState) {
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
@@ -191,7 +235,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
             default:
                 return gotoGPPCollect;
         }
-    }
+    }*/
 
     public void setPathState(int pState) {
         pathState = pState;
@@ -201,91 +245,107 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
         switch (pathState) {
             case 0:
                 launcher.startShooter(shootVelocity);
-                follower.followPath(gotoFirstShootPose, true);
+                follower.followPath(gotoObeliskReadPose, true);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    shootPreloadMotif(oState);
+                    follower.followPath(gotoObeliskReadPose, true);
                     setPathState(2);
                 }
                 break;
             case 2:
-                // Launcher should have its own caser for this
-                if (!launcher.isBusy()) {
-                    launcher.stopShooter();
+                if (!follower.isBusy()) {
+                    shootPreloadMotif(oState);
                     setPathState(3);
                 }
                 break;
             case 3:
-                if (!follower.isBusy()){
-                    launcher.activateIntake();
-                    follower.followPath(gotoFirstLoadingZoneCollectPose, true);
+                if (!launcher.isBusy()) {
+                    launcher.stopShooter();
                     setPathState(4);
                 }
                 break;
             case 4:
                 if (!follower.isBusy()){
-                    diverter.setPosition(0.34);
-                    follower.followPath( gotoSecondLoadingZoneCollectPose, true);
+                    launcher.activateIntake();
+                    follower.followPath(gotoGppPose, true);
                     setPathState(5);
                 }
+                break;
             case 5:
-                if(!follower.isBusy()) {
-                    launcher.startShooter(shootVelocity);
-                    follower.followPath(gotoSecondShootPose,true);
+                if (!follower.isBusy()){
+                    follower.followPath( gotoGppPurplePose, true);
                     setPathState(6);
                 }
-                break;
             case 6:
-                if (!follower.isBusy()) {
-                    launcher.deactivateIntake();
-                    shootLoadingZoneBalls(oState);
+                if (!follower.isBusy()){
+                    diverter.setPosition(0.34);
+                    //insert sleep
+                    follower.followPath( gotoGppGreenPose, true);
                     setPathState(7);
                 }
-                break;
             case 7:
-                if (!launcher.isBusy()) {
-                    launcher.stopShooter();
+                if(!follower.isBusy()) {
+                    launcher.deactivateIntake();
+                    launcher.startShooter(shootVelocity);
+                    follower.followPath(gotoSecondShootPose,true);
                     setPathState(8);
                 }
                 break;
             case 8:
                 if (!follower.isBusy()) {
-                    launcher.activateIntake();
-                    follower.followPath(gotoGreenCollectPose, true);
+                    shootGPP(oState);
                     setPathState(9);
                 }
                 break;
             case 9:
-                if (!follower.isBusy()) {
-                    diverter.setPosition(0.02);
-                    //insert sleep
-                    follower.followPath(gotoPurpleCollectPose, true);
+                if (!launcher.isBusy()) {
+                    launcher.stopShooter();
                     setPathState(10);
                 }
                 break;
             case 10:
-                if(!follower.isBusy()) {
-                    launcher.deactivateIntake();
-                    launcher.startShooter(shootVelocity);
-                    follower.followPath(gotoThirdShootPose,true);
+                if (!follower.isBusy()){
+                    launcher.activateIntake();
+                    diverter.setPosition(0.02);
+                    follower.followPath(gotoPgpPose, true);
                     setPathState(11);
                 }
                 break;
             case 11:
-                if (!follower.isBusy()) {
-                    shootPreloadMotif(oState);
+                if (!follower.isBusy()){
+                    follower.followPath( gotoPgpPurplePose, true);
                     setPathState(12);
                 }
-                break;
             case 12:
-                if (!launcher.isBusy()) {
-                    launcher.stopShooter();
+                if (!follower.isBusy()){
+                    diverter.setPosition(0.34);
+                    //insert sleep
+                    follower.followPath( gotoPgpGreenPose, true);
                     setPathState(13);
                 }
-                break;
             case 13:
+                if(!follower.isBusy()) {
+                    launcher.deactivateIntake();
+                    launcher.startShooter(shootVelocity);
+                    follower.followPath(gotoSecondShootPose,true);
+                    setPathState(14);
+                }
+                break;
+            case 14:
+                if (!follower.isBusy()) {
+                    shootPGP(oState);
+                    setPathState(15);
+                }
+                break;
+            case 15:
+                if (!launcher.isBusy()) {
+                    launcher.stopShooter();
+                    setPathState(16);
+                }
+                break;
+            case 16:
                 if(!follower.isBusy()) {
                     follower.followPath(gotoLeavePose);
                     setPathState(-1);
