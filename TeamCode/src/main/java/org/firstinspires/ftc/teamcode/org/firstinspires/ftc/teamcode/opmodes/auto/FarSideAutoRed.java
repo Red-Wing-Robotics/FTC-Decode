@@ -23,8 +23,8 @@ import org.firstinspires.ftc.teamcode.util.ObeliskState;
 
 @SuppressWarnings("unused")
 @Configurable
-@Autonomous(name = "Far Side Auto Blue", group = "Examples")
-public class FarSideAutoBlue extends RWRBaseOpMode {
+@Autonomous(name = "Far Side Auto Red", group = "Examples")
+public class FarSideAutoRed extends RWRBaseOpMode {
 
     Limelight3A limelight;
 
@@ -52,27 +52,27 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
 
     // POSES -------------------------------------------------------------
 
-    public static double startX = 57.2;
+    public static double startX = 144 - FarSideAutoBlue.startX;
     public static double startY = 16.09375/2d;
-    public static double startHeading = 90;
-    public static double firstShootX = 57.2;
+    public static double startHeading = 180 - FarSideAutoBlue.startHeading;
+    public static double firstShootX = 144 - FarSideAutoBlue.firstShootX;
     public static double firstShootY = 10;
-    public static double firstShootHeading = 110;
+    public static double firstShootHeading = 180 - FarSideAutoBlue.firstShootHeading;
     public static double secondLoadingZoneCollectY = 13;
-    public static double secondLoadingZoneCollectX = 14;
-    public static double secondLoadingZoneCollectHeading = 180;
+    public static double secondLoadingZoneCollectX = 144 - FarSideAutoBlue.secondLoadingZoneCollectX;
+    public static double secondLoadingZoneCollectHeading = 180 - FarSideAutoBlue.secondLoadingZoneCollectHeading;
     public static double firstLoadingZoneCollectY = 14.3;
-    public static double firstLoadingZoneCollectX = 14;
-    public static double firstLoadingZoneCollectHeading = 180;
-    public static double greenCollectX = 40;
+    public static double firstLoadingZoneCollectX = 144 - FarSideAutoBlue.firstLoadingZoneCollectX;
+    public static double firstLoadingZoneCollectHeading = 180 - FarSideAutoBlue.firstLoadingZoneCollectHeading;
+    public static double greenCollectX = 144 - FarSideAutoBlue.greenCollectX;
     public static double greenCollectY = 37;
-    public static double greenCollectHeading = 180;
-    public static double purpleCollectX = 20;
+    public static double greenCollectHeading = 180 - FarSideAutoBlue.greenCollectHeading;
+    public static double purpleCollectX = 144 - FarSideAutoBlue.purpleCollectX;
     public static double purpleCollectY = 37;
-    public static double purpleCollectHeading = 180;
+    public static double purpleCollectHeading = 180 - FarSideAutoBlue.purpleCollectHeading;
     public static double leaveY = 24;
-    public static double leaveX = 24;
-    public static double leaveHeading = 180;
+    public static double leaveX = 144 - FarSideAutoBlue.leaveX;
+    public static double leaveHeading = 180 - FarSideAutoBlue.leaveHeading;
 
     private final Pose startPose = new Pose(startX, startY, Math.toRadians(startHeading));
     private final Pose firstShootPose = new Pose(firstShootX, firstShootY, Math.toRadians(firstShootHeading));
