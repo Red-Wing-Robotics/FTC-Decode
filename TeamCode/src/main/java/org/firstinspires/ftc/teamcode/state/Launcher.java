@@ -142,19 +142,7 @@ public class Launcher {
                 break;
             case DONE:
                 if (!shotQueue.isEmpty()) {
-                    ShotRequest currentShot = shotQueue.peek();
-                    if (currentShot != null && currentShot.shouldActivateIntake) {
-                        this.state = LauncherState.INTAKING;
-                        stateStartTime = currentTime;
-                        activateIntake();
-                        logger.logLine("Starting intake for next shot.");
-                    } else if (currentShot != null) {
-                        // Skip intake and go straight to shooting
-                        this.state = LauncherState.SHOOTING;
-                        stateStartTime = currentTime;
-                        activateFeeder(currentShot.side);
-                        logger.logLine("Shooting " + currentShot.side);
-                    }
+                    this.state = LauncherState.READY;
                 }
                 break;
         }
