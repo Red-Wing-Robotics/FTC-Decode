@@ -45,7 +45,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public CRServo leftFeeder = null;
     public Servo diverter = null;
 
-    public static double shootVelocity = 1560;
+    public static double shootVelocity = 1380;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     public static long TIMEOUT_DEFAULT = 5000;
@@ -55,18 +55,18 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public static double startX = 33.7;
     public static double startY = 144 - (16.09375/2d);
     public static double startHeading = 90;
-    public static double shootX = 47.73;
-    public static double shootY = 95.78;
+    public static double shootX = 51.73;
+    public static double shootY = 96.78;
     public static double shootHeading = 135;
     public static double obeliskReadHeading = 75;
     public static double gppX = 41.44;
-    public static double gppY = 83.85;
+    public static double gppY = 87.85;
     public static double gppHeading = 180;
-    public static double gppPurpleY = 83.85;
+    public static double gppPurpleY = 87.85;
     public static double gppPurpleX = 36.28;
     public static double gppPurpleHeading = 180;
     public static double gppGreenX = 25.16;
-    public static double gppGreenY = 83.85;
+    public static double gppGreenY = 87.85;
     public static double gppGreenHeading = 180;
     public static double pgpX = 41.44;
     public static double pgpY = 59.34;
@@ -104,8 +104,8 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 .build();
 
         gotoFirstShootPose = follower.pathBuilder()
-                .addPath(new BezierLine(obeliskReadPose, shootPose))
-                .setLinearHeadingInterpolation(obeliskReadPose.getHeading(), shootPose.getHeading())
+                .addPath(new BezierLine(startPose, shootPose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
                 .build();
 
         gotoGppPose = follower.pathBuilder()
@@ -245,17 +245,18 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         switch (pathState) {
             case 0:
                 launcher.startShooter(shootVelocity);
-                follower.followPath(gotoObeliskReadPose, true);
-                setPathState(1);
+                follower.followPath(gotoFirstShootPose, true);
+                setPathState(2);
                 break;
-            case 1:
+            /*case 1:
                 if (!follower.isBusy()) {
-                    follower.followPath(gotoObeliskReadPose, true);
+                    follower.followPath(gotoFirstShootPose, true);
                     setPathState(2);
                 }
-                break;
+                break;*/
             case 2:
                 if (!follower.isBusy()) {
+                    //setPathState(-1);
                     shootPreloadMotif(oState);
                     setPathState(3);
                 }
@@ -287,9 +288,9 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 }
             case 7:
                 if(!follower.isBusy()) {
-                    launcher.deactivateIntake();
                     launcher.startShooter(shootVelocity);
                     follower.followPath(gotoSecondShootPose,true);
+                    launcher.deactivateIntake();
                     setPathState(8);
                 }
                 break;
@@ -426,7 +427,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         logger.logData("launcher state", launcher.state);
         logger.logData("x", follower.getPose().getX());
         logger.logData("y", follower.getPose().getY());
-        logger.logData("heading", follower.getPose().getHeading());
+        logger.logData("heading", Math.toDegrees(follower.getPose().getHeading()));
         logger.logData("right shooter velocity", rightShooter.getVelocity());
         logger.logData("left shooter velocity", leftShooter.getVelocity());
         logger.update();

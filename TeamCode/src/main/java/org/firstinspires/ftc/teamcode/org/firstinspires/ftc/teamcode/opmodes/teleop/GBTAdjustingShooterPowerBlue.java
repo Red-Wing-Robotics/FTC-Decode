@@ -25,8 +25,8 @@ import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
 @Configurable
-@TeleOp(name = "GBT Adjusting Shooter Power", group = "Examples")
-public class GBTAdjustingShooterPower extends OpMode {
+@TeleOp(name = "GBT Adjusting Shooter Power Blue", group = "Examples")
+public class GBTAdjustingShooterPowerBlue extends OpMode {
 
     public static boolean robotCentric = true;
     private Follower follower;
@@ -229,10 +229,12 @@ public class GBTAdjustingShooterPower extends OpMode {
 
         setShooterVelocity( shooterVelocity );
 
-        if(gamepad2.dpad_right){
-            diverter.setPosition( 0.34 );
-        } else if (gamepad2.dpad_left ) {
-            diverter.setPosition(0.02);
+        if(gamepad2.dpad_right || gamepad2.dpad_left){
+            if(diverter.getPosition() == 0.02) {
+                diverter.setPosition(0.34);
+            } else {
+                diverter.setPosition(0.02);
+            }
         }
 
         telemetry.addData( "Shooter Velocity", shooterVelocity);

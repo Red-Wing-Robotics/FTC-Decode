@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.util.ObeliskState;
 
 @SuppressWarnings("unused")
 @Configurable
-@Autonomous(name = "Near Side Auto Blue", group = "Examples")
+@Autonomous(name = "Near Side Auto Red", group = "Examples")
 public class NearSideAutoRed extends RWRBaseOpMode {
 
     Limelight3A limelight;
@@ -45,7 +45,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
     public CRServo leftFeeder = null;
     public Servo diverter = null;
 
-    public static double shootVelocity = 1560;
+    public static double shootVelocity = 1360;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     public static long TIMEOUT_DEFAULT = 5000;
