@@ -184,12 +184,12 @@ public class NearSideAutoRed extends RWRBaseOpMode {
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
                 //launcher.shootLeft(true);
-                launcher.shootLeft();
+                launcher.shootLeft(true);
                 launcher.shootRight();
                 break;
             case GREEN_PURPLE_PURPLE:
                 //launcher.shootLeft(true);
-                launcher.shootLeft();
+                launcher.shootLeft(true);
                 launcher.shootRight();
                 break;
             case PURPLE_PURPLE_GREEN:
@@ -197,7 +197,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
                 launcher.shootRight(true);
                 launcher.shootLeft();
             default:
-                launcher.shootRight();
+                launcher.shootRight(true);
                 //launcher.shootLeft(true);
                 launcher.shootLeft();
                 break;

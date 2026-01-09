@@ -55,14 +55,14 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
 
     // POSES -------------------------------------------------------------
 
-    public static double startX = 33.7;
+    public static double startX = 32.7;
     public static double startY = 144 - (16.09375/2d);
     public static double startHeading = 90;
     public static double shootX = 51.73;
     public static double shootY = 96.78;
     public static double shootHeading = 135;
     public static double obeliskReadHeading = 75;
-    public static double gppX = 41.44;
+    public static double gppX = 47.44;
     public static double gppY = 87.85;
     public static double gppHeading = 180;
     public static double gppPurpleY = 87.85;
@@ -80,8 +80,8 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public static double pgpGreenX = 25.16;
     public static double pgpGreenY = 59.34;
     public static double pgpGreenHeading = 180;
-    public static double leaveY = 69.66;
-    public static double leaveX = 24;
+    public static double leaveY = 79.66;
+    public static double leaveX = 26;
     public static double leaveHeading = 180;
 
     private final Pose startPose = new Pose(startX, startY, Math.toRadians(startHeading));
@@ -184,12 +184,12 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
                 //launcher.shootLeft(true);
-                launcher.shootLeft();
+                launcher.shootLeft(true);
                 launcher.shootRight();
                 break;
             case GREEN_PURPLE_PURPLE:
                 //launcher.shootLeft(true);
-                launcher.shootLeft();
+                launcher.shootLeft(true);
                 launcher.shootRight();
                 break;
             case PURPLE_PURPLE_GREEN:
@@ -197,7 +197,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 launcher.shootRight(true);
                 launcher.shootLeft();
             default:
-                launcher.shootRight();
+                launcher.shootRight(true);
                 //launcher.shootLeft(true);
                 launcher.shootLeft();
                 break;
