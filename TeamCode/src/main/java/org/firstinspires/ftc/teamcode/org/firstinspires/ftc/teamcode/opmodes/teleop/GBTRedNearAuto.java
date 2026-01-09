@@ -16,6 +16,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 
+import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.RWRBaseOpMode;
+import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.auto.NearSideAutoRed;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
@@ -25,8 +27,8 @@ import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
 @Configurable
-@TeleOp(name = "GBT Adjusting Shooter Power Red", group = "Examples")
-public class GBTAdjustingShooterPowerRed extends OpMode {
+@TeleOp(name = "GBT Red Near Auto", group = "Examples")
+public class GBTRedNearAuto extends OpMode {
 
     public static boolean robotCentric = true;
     private Follower follower;
@@ -37,6 +39,7 @@ public class GBTAdjustingShooterPowerRed extends OpMode {
     public CRServo rightFeeder = null;
     public CRServo leftFeeder = null;
     public Servo diverter = null;
+
     Limelight3A limelight;
     private Alliance alliance = Alliance.BLUE;
     private double shooterVelocity = 500;
@@ -66,11 +69,9 @@ public class GBTAdjustingShooterPowerRed extends OpMode {
 
     @Override
     public void init() {
-        Pose start = new Pose(17.0625/2d + 0.25,16.09375/2d, Math.toRadians(90) ); // Assumed heading is 0 since we didn't specify
-        Pose shootPoseNear = new Pose(72.1, 75.15, Math.toRadians(135));
-        Pose shootPoseFar = new Pose(67.02, 19.57, 2.037);//2.037
-        //Pose leverSetUpPose = new Pose(22.95, 71.9, 0);
-        //Pose leverPose = new Pose(15.95, 71.9, 0)
+        Pose start = new Pose(NearSideAutoRed.leaveX,NearSideAutoRed.leaveY, Math.toRadians(NearSideAutoRed.leaveHeading) ); // Assumed heading is 0 since we didn't specify
+        Pose shootPoseNear = new Pose(144 - 72.1,   75.15, Math.toRadians(180 - 135));
+        Pose shootPoseFar = new Pose(144 - 67.02, 19.57, Math.PI - 2.037);//2.037
 
         gotoShootPoseNear = () -> follower.pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierLine(follower::getPose, shootPoseNear )))
@@ -112,7 +113,7 @@ public class GBTAdjustingShooterPowerRed extends OpMode {
     @Override
     public void loop() {
         follower.update();
-        telemetry.update();
+        updateTelemetry(telemetry);
 
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
@@ -149,7 +150,7 @@ public class GBTAdjustingShooterPowerRed extends OpMode {
             follower.setTeleOpDrive(
                     -gamepad1.left_stick_y,
                     -gamepad1.right_stick_x,
-                    -gamepad1.left_stick_x,
+                    -(gamepad1.left_stick_x * 0.5),
                     robotCentric
             );
         }
@@ -229,13 +230,10 @@ public class GBTAdjustingShooterPowerRed extends OpMode {
 
         setShooterVelocity( shooterVelocity );
 
-        if(gamepad2.dpad_right || gamepad2.dpad_left){
-            if(diverter.getPosition() == 0.02) {
-                diverter.setPosition(0.34);
-            } else {
-                diverter.setPosition(0.02);
-            }
-        }
+        //updateDiverter();
+//        if(gamepad2.dpad_right || gamepad2.dpad_left){
+//            //toggleDiverter();
+//        }
 
         telemetry.addData( "Shooter Velocity", shooterVelocity);
         telemetry.addData( "Right Motor Velocity", rightShooter.getVelocity());
@@ -266,5 +264,6 @@ public class GBTAdjustingShooterPowerRed extends OpMode {
         }
     }*/
 }
+
 
 

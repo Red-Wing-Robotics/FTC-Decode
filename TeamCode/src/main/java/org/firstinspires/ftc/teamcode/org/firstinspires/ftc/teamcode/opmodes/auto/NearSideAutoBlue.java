@@ -39,6 +39,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
 
     private ObeliskState oState = ObeliskState.UNKNOWN;
     private NonBlockingTimer waitTimer;
+    public static long WAIT_TIME = 500;
 
     public DcMotor intake = null;
     public DcMotorEx leftShooter = null;
@@ -47,7 +48,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public CRServo leftFeeder = null;
     public Servo diverter = null;
 
-    public static double shootVelocity = 1380;
+    public static double shootVelocity = 1060;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     public static long TIMEOUT_DEFAULT = 5000;
@@ -65,7 +66,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public static double gppY = 87.85;
     public static double gppHeading = 180;
     public static double gppPurpleY = 87.85;
-    public static double gppPurpleX = 36.28;
+    public static double gppPurpleX = 40.28;
     public static double gppPurpleHeading = 180;
     public static double gppGreenX = 25.16;
     public static double gppGreenY = 87.85;
@@ -182,22 +183,22 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public void shootGPP(ObeliskState oState) {
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
-                launcher.shootLeft(true);
+                //launcher.shootLeft(true);
                 launcher.shootLeft();
                 launcher.shootRight();
                 break;
             case GREEN_PURPLE_PURPLE:
-                launcher.shootLeft(true);
+                //launcher.shootLeft(true);
                 launcher.shootLeft();
                 launcher.shootRight();
                 break;
             case PURPLE_PURPLE_GREEN:
-                launcher.shootLeft();
+                //launcher.shootLeft();
                 launcher.shootRight(true);
                 launcher.shootLeft();
             default:
                 launcher.shootRight();
-                launcher.shootLeft(true);
+                //launcher.shootLeft(true);
                 launcher.shootLeft();
                 break;
         }
@@ -299,10 +300,11 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 10:
                 if (!follower.isBusy()){
-                    launcher.activateIntake();
-                    diverter.setPosition(0.02);
-                    follower.followPath(gotoPgpPose, true);
-                    setPathState(11);
+                    //launcher.activateIntake();
+                    //diverter.setPosition(0.02);
+                    //follower.followPath(gotoPgpPose, true);
+                    follower.followPath(gotoLeavePose);
+                    setPathState(-1);
                 }
                 break;
             case 11:
@@ -376,7 +378,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         buildPaths();
 
         launcher = new Launcher(hardwareMap, telemetry);
-        waitTimer = new NonBlockingTimer(1000);
+        waitTimer = new NonBlockingTimer(WAIT_TIME);
     }
 
     public void start() {

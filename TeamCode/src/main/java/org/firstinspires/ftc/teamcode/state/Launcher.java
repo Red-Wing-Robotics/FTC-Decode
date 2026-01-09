@@ -18,7 +18,7 @@ public class Launcher {
     public static double FEED_TIME_MS = 2500; // in milliseconds
     public static double LAUNCHER_VELOCITY_PERCENT_FUDGE_FACTOR = 0.20; // Decimal percentage
     public static double LAUNCHER_RAMPING_TIME = 3000;
-    public static double TIME_BETWEEN_SHOTS_MS = 1000; // in milliseconds
+    public static double TIME_BETWEEN_SHOTS_MS = 750; // in milliseconds
     public static double INTAKE_TIME_MS = 1000; // in milliseconds
 
     private double targetVelocity;

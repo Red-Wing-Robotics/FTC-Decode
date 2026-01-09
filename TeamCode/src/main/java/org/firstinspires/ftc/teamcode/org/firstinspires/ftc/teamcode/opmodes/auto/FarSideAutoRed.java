@@ -45,7 +45,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
     public CRServo leftFeeder = null;
     public Servo diverter = null;
 
-    public static double shootVelocity = 1560;
+    public static double shootVelocity = 1380;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     public static long TIMEOUT_DEFAULT = 5000;
@@ -58,7 +58,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
     public static double firstShootX = 144 - FarSideAutoBlue.firstShootX;
     public static double firstShootY = 10;
     public static double firstShootHeading = 180 - FarSideAutoBlue.firstShootHeading;
-    public static double secondLoadingZoneCollectY = 13;
+    public static double secondLoadingZoneCollectY = 15;
     public static double secondLoadingZoneCollectX = 144 - FarSideAutoBlue.secondLoadingZoneCollectX;
     public static double secondLoadingZoneCollectHeading = 180 - FarSideAutoBlue.secondLoadingZoneCollectHeading;
     public static double firstLoadingZoneCollectY = 14.3;
@@ -252,9 +252,9 @@ public class FarSideAutoRed extends RWRBaseOpMode {
                 break;
             case 8:
                 if (!follower.isBusy()) {
-                    launcher.activateIntake();
-                    follower.followPath(gotoGreenCollectPose, true);
-                    setPathState(9);
+                    //launcher.activateIntake();
+                    follower.followPath(gotoLeavePose, true);
+                    setPathState(-1);
                 }
                 break;
             case 9:
