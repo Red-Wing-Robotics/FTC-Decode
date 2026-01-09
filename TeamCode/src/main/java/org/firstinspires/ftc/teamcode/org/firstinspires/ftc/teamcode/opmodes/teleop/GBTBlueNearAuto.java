@@ -16,12 +16,13 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 
-import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.RWRBaseOpMode;
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.auto.NearSideAutoBlue;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.state.Diverter;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.VelocityCalculation;
+import org.firstinspires.ftc.teamcode.util.log.Logger;
 
 import java.util.function.Supplier;
 
@@ -29,6 +30,8 @@ import java.util.function.Supplier;
 @Configurable
 @TeleOp(name = "GBT Blue Near Auto", group = "Examples")
 public class GBTBlueNearAuto extends OpMode {
+
+    private Logger logger;
 
     public static boolean robotCentric = true;
     private Follower follower;
@@ -38,7 +41,8 @@ public class GBTBlueNearAuto extends OpMode {
     public DcMotorEx rightShooter = null;
     public CRServo rightFeeder = null;
     public CRServo leftFeeder = null;
-    public Servo diverter = null;
+
+    private Diverter diverterStateMachine;
 
     Limelight3A limelight;
     private Alliance alliance = Alliance.BLUE;
@@ -69,6 +73,8 @@ public class GBTBlueNearAuto extends OpMode {
 
     @Override
     public void init() {
+        logger = new Logger(telemetry);
+
         Pose start = new Pose(NearSideAutoBlue.leaveX, NearSideAutoBlue.leaveY, Math.toRadians(NearSideAutoBlue.leaveHeading) ); // Assumed heading is 0 since we didn't specify
         Pose shootPoseNear = new Pose(72.1, 75.15, Math.toRadians(135));
         Pose shootPoseFar = new Pose(67.02, 19.57, 2.037);//2.037
@@ -98,14 +104,13 @@ public class GBTBlueNearAuto extends OpMode {
 
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
-        diverter = hardwareMap.get( Servo.class, "diverter");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
         limelight.start(); // This tells Limelight to start looking!
         limelight.pipelineSwitch(1); // Switch to pipeline
 
-        diverter.setPosition( 0.02 );
+        diverterStateMachine = new Diverter(hardwareMap, telemetry);
     }
 
     public void start() {
@@ -114,8 +119,12 @@ public class GBTBlueNearAuto extends OpMode {
 //72.1x, 75.155y,134h
     @Override
     public void loop() {
+        // State Machine Updates
         follower.update();
-        updateTelemetry(telemetry);
+        diverterStateMachine.update();
+
+        // Logging Updates
+        logger.update();
 
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
@@ -123,13 +132,13 @@ public class GBTBlueNearAuto extends OpMode {
         if (result != null && result.isValid()) {
             LLResultTypes.FiducialResult fResult = result.getFiducialResults().get(0);
             int id = result.getFiducialResults().get(0).getFiducialId();
-            telemetry.addData("April Tag ID", "" + id);
+            logger.logData("April Tag ID", "" + id);
 
             double tx = result.getTx();
             double ty = result.getTy();
             double ta = result.getTa();
 
-            telemetry.addData( "Tx", tx);
+            logger.logData( "Tx", tx);
 
             trigDistanceToGoal = DistanceCalculation.getTrigDistanceToTarget(ty);
             taDistanceToGoal = DistanceCalculation.getAreaDistanceToTarget(ta);
@@ -232,21 +241,20 @@ public class GBTBlueNearAuto extends OpMode {
 
         setShooterVelocity( shooterVelocity );
 
-        //updateDiverter();
-//        if(gamepad2.dpad_right || gamepad2.dpad_left){
-//            //toggleDiverter();
-//        }
+        if(gamepad2.dpad_right || gamepad2.dpad_left){
+            diverterStateMachine.toggleDiverter();
+        }
 
-        telemetry.addData( "Shooter Velocity", shooterVelocity);
-        telemetry.addData( "Right Motor Velocity", rightShooter.getVelocity());
-        telemetry.addData("Left Motor Velocity", leftShooter.getVelocity());
-        telemetry.addData( "Distance To Goal", distanceToGoal);
-        telemetry.addData("Driving Mode", robotCentric ? "Robot-Centric" : "Field-Centric");
-        telemetry.addData("PP x", follower.getPose().getX());
-        telemetry.addData("PP y", follower.getPose().getY());
-        telemetry.addData("PP heading", Math.toDegrees(follower.getPose().getHeading()));
+        logger.logData( "Shooter Velocity", shooterVelocity);
+        logger.logData( "Right Motor Velocity", rightShooter.getVelocity());
+        logger.logData("Left Motor Velocity", leftShooter.getVelocity());
+        logger.logData( "Distance To Goal", distanceToGoal);
+        logger.logData("Driving Mode", robotCentric ? "Robot-Centric" : "Field-Centric");
+        logger.logData("PP x", follower.getPose().getX());
+        logger.logData("PP y", follower.getPose().getY());
+        logger.logData("PP heading", Math.toDegrees(follower.getPose().getHeading()));
         if (elapsedTime > 0) {
-            telemetry.addData( "Flywheel spin-up time (ms)", elapsedTime );
+            logger.logData( "Flywheel spin-up time (ms)", elapsedTime );
         }
 
     }
