@@ -150,7 +150,7 @@ public class GBTRedFarAuto extends OpMode {
             distanceToGoal = 0;
         }
 
-        if(automatedDrive && !follower.isBusy()){
+        if(automatedDrive && (!follower.isBusy() || gamepad1.xWasPressed())) {
             automatedDrive = false;
             follower.startTeleopDrive();
         }
@@ -203,27 +203,6 @@ public class GBTRedFarAuto extends OpMode {
             intake.setPower( 0 );
         }
 
-        /*if( gamepad1.dpad_up ){
-            if (shooterVelocity < MAX_SHOOTER_VELOCITY && !dpad_up) {
-                //ShooterVelocity = ShooterVelocity + 100;
-                shooterVelocity = shooterVelocity + 10;
-                setShooterVelocity(shooterVelocity);
-            }
-            dpad_up = true;
-        } else if ( gamepad1.dpad_down ) {
-            if( shooterVelocity > 0 && !dpad_down ) {
-                //ShooterVelocity = ShooterVelocity - 100;
-                shooterVelocity = shooterVelocity - 10;
-                setShooterVelocity(shooterVelocity);
-
-            }
-            dpad_down = true;
-            dpad_up = false;
-        }else{
-            dpad_down = false;
-            dpad_up = false;
-        }*/
-
         if( isShooterOn ){
             shooterVelocity = VelocityCalculation.getTargetVelocity( distanceToGoal );
 
@@ -258,19 +237,7 @@ public class GBTRedFarAuto extends OpMode {
     }
 
     private void setShooterVelocity(double p ){
-        //rightShooter.setPower( -1 * p );
-        //leftShooter.setPower(  p );
         rightShooter.setVelocity(-1 * p);
         leftShooter.setVelocity(p);
     }
-/*
-    public void setDrivePower(double frontLeft, double backLeft, double frontRight, double backRight) {
-            leftFrontDrive.setPower(frontLeft);
-            leftBackDrive.setPower(backLeft);
-            rightFrontDrive.setPower(frontRight);
-            rightBackDrive.setPower(backRight);
-        }
-    }*/
 }
-
-

@@ -151,7 +151,7 @@ public class GBTBlueFarAuto extends OpMode {
             distanceToGoal = 0;
         }
 
-        if(automatedDrive && !follower.isBusy()){
+        if(automatedDrive && (!follower.isBusy() || gamepad1.xWasPressed())) {
             automatedDrive = false;
             follower.startTeleopDrive();
         }
