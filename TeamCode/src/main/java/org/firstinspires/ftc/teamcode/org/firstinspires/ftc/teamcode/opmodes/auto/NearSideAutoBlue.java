@@ -48,7 +48,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public CRServo leftFeeder = null;
     public Servo diverter = null;
 
-    public static double shootVelocity = 1060;
+    public static double shootVelocity = 1080;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     public static long TIMEOUT_DEFAULT = 5000;
@@ -81,7 +81,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public static double pgpGreenY = 59.34;
     public static double pgpGreenHeading = 180;
     public static double leaveY = 79.66;
-    public static double leaveX = 26;
+    public static double leaveX = 30;
     public static double leaveHeading = 180;
 
     private final Pose startPose = new Pose(startX, startY, Math.toRadians(startHeading));

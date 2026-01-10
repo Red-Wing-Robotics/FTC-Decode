@@ -76,7 +76,7 @@ public class GBTRedFarAuto extends OpMode {
         logger = new Logger(telemetry);
 
         Pose start = new Pose(FarSideAutoRed.leaveX,FarSideAutoRed.leaveY, Math.toRadians(FarSideAutoRed.leaveHeading) ); // Assumed heading is 0 since we didn't specify
-        Pose shootPoseNear = new Pose(144 - 72.1,   75.15, Math.toRadians(180 - 135));
+        Pose shootPoseNear = new Pose(81,   92, Math.toRadians(180 - 135));
         Pose shootPoseFar = new Pose(144 - 67.02, 19.57, Math.PI - 2.037);//2.037
 
         gotoShootPoseNear = () -> follower.pathBuilder() //Lazy Curve Generation

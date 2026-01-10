@@ -76,7 +76,7 @@ public class GBTBlueNearAuto extends OpMode {
         logger = new Logger(telemetry);
 
         Pose start = new Pose(NearSideAutoBlue.leaveX, NearSideAutoBlue.leaveY, Math.toRadians(NearSideAutoBlue.leaveHeading) ); // Assumed heading is 0 since we didn't specify
-        Pose shootPoseNear = new Pose(72.1, 75.15, Math.toRadians(135));
+        Pose shootPoseNear = new Pose(144 - 81, 92, Math.toRadians(135));
         Pose shootPoseFar = new Pose(67.02, 19.57, 2.037);//2.037
         //Pose leverSetUpPose = new Pose(22.95, 71.9, 0);
         //Pose leverPose = new Pose(15.95, 71.9, 0)

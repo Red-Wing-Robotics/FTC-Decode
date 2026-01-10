@@ -75,7 +75,7 @@ public class GBTBlueFarAuto extends OpMode {
         logger = new Logger(telemetry);
 
         Pose start = new Pose( FarSideAutoBlue.leaveX, FarSideAutoBlue.leaveY, Math.toRadians(FarSideAutoBlue.leaveHeading) ); // Assumed heading is 0 since we didn't specify
-        Pose shootPoseNear = new Pose(72.1, 75.15, Math.toRadians(135));
+        Pose shootPoseNear = new Pose(144 - 81.1, 92.15, Math.toRadians(135));
         Pose shootPoseFar = new Pose(67.02, 19.57, 2.037);//2.037
         //Pose leverSetUpPose = new Pose(22.95, 71.9, 0);
         //Pose leverPose = new Pose(15.95, 71.9, 0)
