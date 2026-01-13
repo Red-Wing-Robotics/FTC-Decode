@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.state.Launcher;
+import org.firstinspires.ftc.teamcode.state.SingleLauncher;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.VelocityCalculation;
@@ -33,10 +34,8 @@ public class BlueTeleop extends OpMode {
     private Follower follower;
 
     public DcMotor intake = null;
-    public DcMotorEx shooter = null;
-    public Servo feeder = null;
-    public Servo spindexer = null;
     public Servo turret = null;
+    public SingleLauncher launcher = null;
 
 
     Limelight3A limelight;
@@ -57,6 +56,10 @@ public class BlueTeleop extends OpMode {
 
     private boolean dpad_up = false;
     private boolean dpad_down = false;
+    private boolean xPressed = false;
+    private boolean yPressed = false;
+    private boolean bPressed = false;
+
 
     private double trigDistanceToGoal = 0;
     private double taDistanceToGoal = 0;//9
@@ -96,12 +99,9 @@ public class BlueTeleop extends OpMode {
         follower.update();
 
         intake = hardwareMap.get(DcMotor.class, "intake");
-        shooter = hardwareMap.get(DcMotorEx.class, "shooter");
-        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        feeder = hardwareMap.get(Servo.class, "feeder");
-        spindexer = hardwareMap.get(Servo.class, "spindexer");
         turret = hardwareMap.get( Servo.class, "turret");
+        launcher = new SingleLauncher( hardwareMap, telemetry );
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
@@ -112,8 +112,8 @@ public class BlueTeleop extends OpMode {
 
     public void start() {
         follower.startTeleopDrive();
-        spindexer.setPosition(INTAKE_ONE);
-        feeder.setPosition(FEEDER_DOWN);
+        launcher.initializeSpindexer();
+        launcher.deactivateFeeders();
         turret.setPosition(SHOOT_FORWARD);
     }
     //72.1x, 75.155y,134h
@@ -173,8 +173,11 @@ public class BlueTeleop extends OpMode {
 
         }
 
-        if (gamepad2.right_bumper  ) {
-            feeder.setPosition(FEEDER_UP);
+        if ( gamepad2.x && !xPressed ) {
+            launcher.shootSecond();
+            xPressed = true;
+        } else if(!gamepad2.x){
+            xPressed = false;
         }
         /*Shooter sequence:
         Set Spindexer Position for shooting
@@ -184,23 +187,33 @@ public class BlueTeleop extends OpMode {
         */
 
 
-        if (gamepad2.left_bumper ) {
-            feeder.setPosition(FEEDER_DOWN);
+        if ( gamepad2.y && !yPressed ) {
+            launcher.shootThird();
+            yPressed = true;
+        } else if(!gamepad2.y){
+            yPressed = false;
         }
 
-        if (gamepad2.x) {
-            isShooterOn = true;
+        if ( gamepad2.b && !bPressed ) {
+            launcher.shootFirst();
+            bPressed = true;
+        } else if(!gamepad2.b){
+            bPressed = false;
+        }
+
+        if (gamepad2.dpad_up) {
+            isShooterOn = !true;
             if( flyWheelStart == 0 ){
                 elapsedTime = 0;
                 flyWheelStart = System.currentTimeMillis();
             }
-        } else if (gamepad2.y) {
+        } else if (gamepad2.dpad_down) {
             isShooterOn = false;
         }
 
-        if(gamepad2.a){
+        if(gamepad2.right_bumper){
             intake.setPower( -1.0 );
-        } else if (gamepad2.b) {
+        } else if (gamepad2.left_bumper) {
             intake.setPower( 0 );
         }
 
@@ -231,23 +244,23 @@ public class BlueTeleop extends OpMode {
         }else{
             shooterVelocity = 0;
         }
-
+/*
         if( Math.abs(shooterVelocity - shooter.getVelocity() ) < SHOOTER_VELOCITY_FUDGE_FACTOR && elapsedTime == 0 && flyWheelStart != 0){
             long now = System.currentTimeMillis();
             elapsedTime = now - flyWheelStart;
             flyWheelStart = 0;
-        }
+        }*/
 
         setShooterVelocity( shooterVelocity );
 
         if(gamepad2.dpad_right ){
-            spindexer.setPosition((spindexer.getPosition() + 0.33) % 1.0 );
+            launcher.turnSpindexerClockwise();
         } else if (gamepad2.dpad_left) {
-            spindexer.setPosition((spindexer.getPosition() - 0.33) % 1.0 );
+            launcher.turnSpindexerCounterClockwise();
         }
 
         telemetry.addData( "Shooter Velocity", shooterVelocity);
-        telemetry.addData( "Motor Velocity", shooter.getVelocity());
+        telemetry.addData( "Motor Velocity", launcher.getShooterVelocity());
         telemetry.addData( "Distance To Goal", distanceToGoal);
         telemetry.addData("Driving Mode", robotCentric ? "Robot-Centric" : "Field-Centric");
         telemetry.addData("PP x", follower.getPose().getX());
@@ -262,7 +275,7 @@ public class BlueTeleop extends OpMode {
     private void setShooterVelocity(double p ){
         //rightShooter.setPower( -1 * p );
         //leftShooter.setPower(  p );
-        shooter.setVelocity(p);
+        launcher.startShooter( p );
     }
 /*
     public void setDrivePower(double frontLeft, double backLeft, double frontRight, double backRight) {

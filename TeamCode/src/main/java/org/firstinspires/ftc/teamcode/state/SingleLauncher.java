@@ -24,6 +24,8 @@ public class SingleLauncher {
     public static double FEEDER_SHOOT_POSITION = 0;
     public static double FEEDER_INDEX_POSITION = 0;
 
+    public static double SPINDEXER_START = 0;
+
     private double targetVelocity;
 
     private static class ShotRequest {
@@ -52,7 +54,6 @@ public class SingleLauncher {
 
     public final DcMotorEx shooter;
     public final Servo feeder;
-    public final Servo turret;
     public final Servo spindexer;
 
     public LauncherState state = LauncherState.IDLE;
@@ -66,7 +67,6 @@ public class SingleLauncher {
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         feeder = hardwareMap.get(Servo.class, "feeder");
-        turret = hardwareMap.get(Servo.class, "turret");
         spindexer = hardwareMap.get(Servo.class, "spindexer");
 
         this.shotQueue = new ArrayDeque<>();
@@ -220,11 +220,11 @@ public class SingleLauncher {
         this.shootLeft(false);
     }*/
 
-    private void activateFeeder() {
+    public void activateFeeder() {
         feeder.setPosition(FEEDER_SHOOT_POSITION);
     }
 
-    private void deactivateFeeders() {
+    public void deactivateFeeders() {
         feeder.setPosition(FEEDER_INDEX_POSITION);
     }
 
@@ -241,6 +241,10 @@ public class SingleLauncher {
         spindexer.setPosition( (spindexer.getPosition() - 0.33) % 1 );
     }
 
+    public void initializeSpindexer(){
+        spindexer.setPosition( SPINDEXER_START );
+    }
+
     private void turnSpindexer( SpindexerSlot slot ){
         switch (slot) {
             case EXTRA:
@@ -250,6 +254,10 @@ public class SingleLauncher {
                 turnSpindexerClockwise();
                 break;
         }
+    }
+
+    public double getShooterVelocity(){
+        return shooter.getVelocity();
     }
 
 }
