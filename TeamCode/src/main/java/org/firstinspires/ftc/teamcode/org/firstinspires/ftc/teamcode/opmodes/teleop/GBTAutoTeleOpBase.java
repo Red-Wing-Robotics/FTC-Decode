@@ -167,13 +167,17 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
 
         if (gamepad2.right_bumper) {
             rightFeeder.setPower(1);
+        } else if (gamepad2.dpad_down) {
+            rightFeeder.setPower(-1);
         } else {
             rightFeeder.setPower(0);
         }
 
         if (gamepad2.left_bumper) {
             leftFeeder.setPower(-1);
-        } else {
+        } else if (gamepad2.dpad_down) {
+            leftFeeder.setPower(1);
+        }else {
             leftFeeder.setPower(0);
         }
 
@@ -191,6 +195,8 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
             intake.setPower(-1.0);
         } else if (gamepad2.b) {
             intake.setPower(0);
+        }else if (gamepad2.dpad_down) {
+            intake.setPower(1);
         }
 
         if (isShooterOn) {
@@ -205,11 +211,15 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
             flyWheelStart = 0;
         }
 
+        if (gamepad2.dpad_down){
+            shooterVelocity = -1500;
+        }
         setShooterVelocity(shooterVelocity);
 
         if (gamepad2.dpad_right || gamepad2.dpad_left) {
             diverterStateMachine.toggleDiverter();
         }
+
 
         logger.logData("Shooter Velocity", shooterVelocity);
         logger.logData("Right Motor Velocity", rightShooter.getVelocity());
