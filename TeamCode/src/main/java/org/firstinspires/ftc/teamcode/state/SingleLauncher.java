@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.state;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -53,7 +54,7 @@ public class SingleLauncher {
     }
 
     public final DcMotorEx shooter;
-    public final Servo feeder;
+    public final CRServo feeder;
     public final Servo spindexer;
 
     public LauncherState state = LauncherState.IDLE;
@@ -66,7 +67,7 @@ public class SingleLauncher {
         this.logger = new Logger(telemetry);
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        feeder = hardwareMap.get(Servo.class, "feeder");
+        feeder = hardwareMap.get(CRServo.class, "feeder");
         spindexer = hardwareMap.get(Servo.class, "spindexer");
 
         this.shotQueue = new ArrayDeque<>();
@@ -221,11 +222,11 @@ public class SingleLauncher {
     }*/
 
     public void activateFeeder() {
-        feeder.setPosition(FEEDER_SHOOT_POSITION);
+        feeder.setPower(1);
     }
 
     public void deactivateFeeders() {
-        feeder.setPosition(FEEDER_INDEX_POSITION);
+        feeder.setPower(0);
     }
 
     private void setShooterVelocity(double p){
