@@ -18,14 +18,20 @@ public class SingleLauncher {
 
     public static double FEED_TIME_MS = 400; // in milliseconds
     public static double LAUNCHER_VELOCITY_PERCENT_FUDGE_FACTOR = 0.20; // Decimal percentage
-    public static double LAUNCHER_RAMPING_TIME = 3000;
+    public static double LAUNCHER_RAMPING_TIME = 300;
     public static double TIME_BETWEEN_SHOTS_MS = 750; // in milliseconds
     public static double SPINDEXER_TURN_TIME_MS = 1000; // in milliseconds
+    public static double SPINDERXER_TURN_MAGNITUDE = 0.38;
+    public static double SPINDERXER_POSITION_1 = 0.04;
+    public static double SPINDERXER_POSITION_2 = 0.42;//0.38
+    public static double SPINDERXER_POSITION_3 = 0.8;//0.38
+
+
 
     public static double FEEDER_SHOOT_POSITION = 0;
     public static double FEEDER_INDEX_POSITION = 0;
 
-    public static double SPINDEXER_START = 0;
+    public static double SPINDEXER_START = 0.04;
 
     private double targetVelocity;
 
@@ -235,11 +241,11 @@ public class SingleLauncher {
     }
 
     public void turnSpindexerCounterClockwise(){
-        spindexer.setPosition( (spindexer.getPosition() + 0.33) % 1 );
+        spindexer.setPosition( (spindexer.getPosition() + SPINDERXER_TURN_MAGNITUDE) % 1.14 );
     }
 
     public void turnSpindexerClockwise(){
-        spindexer.setPosition( (spindexer.getPosition() - 0.33) % 1 );
+        spindexer.setPosition( (spindexer.getPosition() - SPINDERXER_TURN_MAGNITUDE) % 1.14 );
     }
 
     public void initializeSpindexer(){
@@ -259,6 +265,14 @@ public class SingleLauncher {
 
     public double getShooterVelocity(){
         return shooter.getVelocity();
+    }
+
+    public double getSpindexerPosition(){
+        return spindexer.getPosition();
+    }
+
+    public LauncherState getState(){
+        return this.state;
     }
 
 }

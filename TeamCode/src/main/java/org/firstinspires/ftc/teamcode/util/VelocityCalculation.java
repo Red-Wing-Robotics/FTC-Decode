@@ -10,10 +10,10 @@ public class VelocityCalculation {
     public static double NEAR_VELOCITY_COEFFICIENT_2 = 0.177;
 
     public static double getTargetVelocity( double distanceToGoal ){
-        if(distanceToGoal < 75 ){
-            return 1827  - ( NEAR_VELOCITY_COEFFICIENT_1 * distanceToGoal ) + ( NEAR_VELOCITY_COEFFICIENT_2 * Math.pow( distanceToGoal, 2 ) );
-        } else if (distanceToGoal > 105 ) {
-            return 3215 - ( 30.5 * distanceToGoal ) + ( 0.141 * Math.pow( distanceToGoal, 2 ) );
+        if(distanceToGoal < 90 ){
+            return 6.27 * distanceToGoal + 1121;
+        } else if (distanceToGoal > 110 ) {
+            return 1850;
         } else {
             return 1480;
         }

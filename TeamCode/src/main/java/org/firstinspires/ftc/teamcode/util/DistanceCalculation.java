@@ -24,6 +24,15 @@ public class DistanceCalculation {
         return (targetHeight - limelightHeight) / Math.tan(angleToTarget);
     }
 
+    public static double getTrigDistanceToTargetBot2(double ty) {
+        double targetHeight = 29.4375;
+        double limelightHeight = 13;
+        double limelightAngle = 0;
+
+        double angleToTarget = Math.toRadians(limelightAngle + ty);
+        return (targetHeight - limelightHeight) / Math.tan(angleToTarget);
+    }
+
     /**
      *
      * @param ta the area of the limelight's display that contains the april tag

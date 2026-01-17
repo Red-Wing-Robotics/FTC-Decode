@@ -44,13 +44,15 @@ public class BlueTeleop extends OpMode {
     private boolean isShooterOn = false;
 
     public static double SHOOTER_DEFAULT_VELOCITY = 500;
+
+    public static double SHOOTER_VELOCITY = 1300;
     public static double MAX_SHOOTER_VELOCITY = (280 * 6);
     public static double MAX_SHOOTER_POWER = 1d;
 
     public static double INTAKE_ONE = 0;
     public static double INTAKE_TWO = 0.33;
     public static double INTAKE_THREE = 0.67;
-    public static double SHOOT_FORWARD = 0;
+    public static double SHOOT_FORWARD = 9.0;
     public static double FEEDER_DOWN = 0;
     public static double FEEDER_UP = 0.3;
 
@@ -59,6 +61,7 @@ public class BlueTeleop extends OpMode {
     private boolean xPressed = false;
     private boolean yPressed = false;
     private boolean bPressed = false;
+    private boolean indexing = false;
 
 
     private double trigDistanceToGoal = 0;
@@ -114,6 +117,7 @@ public class BlueTeleop extends OpMode {
         follower.startTeleopDrive();
         launcher.initializeSpindexer();
         launcher.deactivateFeeders();
+        isShooterOn = true;
         turret.setPosition(SHOOT_FORWARD);
     }
     //72.1x, 75.155y,134h
@@ -136,7 +140,7 @@ public class BlueTeleop extends OpMode {
 
             telemetry.addData( "Tx", tx);
 
-            trigDistanceToGoal = DistanceCalculation.getTrigDistanceToTarget(ty);
+            trigDistanceToGoal = DistanceCalculation.getTrigDistanceToTargetBot2(ty);
             taDistanceToGoal = DistanceCalculation.getAreaDistanceToTarget(ta);
 
             if (0.5 * (trigDistanceToGoal + taDistanceToGoal) > 74.4) {
@@ -202,7 +206,7 @@ public class BlueTeleop extends OpMode {
         }
 
         if (gamepad2.dpad_up) {
-            isShooterOn = !true;
+            isShooterOn = true;
             if( flyWheelStart == 0 ){
                 elapsedTime = 0;
                 flyWheelStart = System.currentTimeMillis();
@@ -212,7 +216,7 @@ public class BlueTeleop extends OpMode {
         }
 
         if(gamepad2.right_bumper){
-            intake.setPower( -1.0 );
+            intake.setPower( 1.0 );
         } else if (gamepad2.left_bumper) {
             intake.setPower( 0 );
         }
@@ -243,6 +247,7 @@ public class BlueTeleop extends OpMode {
 
         }else{
             shooterVelocity = 0;
+            launcher.stopShooter();
         }
 /*
         if( Math.abs(shooterVelocity - shooter.getVelocity() ) < SHOOTER_VELOCITY_FUDGE_FACTOR && elapsedTime == 0 && flyWheelStart != 0){
@@ -253,10 +258,14 @@ public class BlueTeleop extends OpMode {
 
         setShooterVelocity( shooterVelocity );
 
-        if(gamepad2.dpad_right ){
-            launcher.turnSpindexerClockwise();
-        } else if (gamepad2.dpad_left) {
+        if(gamepad2.dpad_right && !indexing){
             launcher.turnSpindexerCounterClockwise();
+            indexing = true;
+        } else if (gamepad2.dpad_left && !indexing) {
+            launcher.turnSpindexerClockwise();
+            indexing = true;
+        }else if (!gamepad2.dpad_right && !gamepad2.dpad_left){
+            indexing = false;
         }
 
         telemetry.addData( "Shooter Velocity", shooterVelocity);
@@ -266,6 +275,8 @@ public class BlueTeleop extends OpMode {
         telemetry.addData("PP x", follower.getPose().getX());
         telemetry.addData("PP y", follower.getPose().getY());
         telemetry.addData("PP heading", Math.toDegrees(follower.getPose().getHeading()));
+        telemetry.addData("Spindexer position", launcher.getSpindexerPosition() );
+        telemetry.addData("Shooter State", launcher.getState());
         if (elapsedTime > 0) {
             telemetry.addData( "Flywheel spin-up time (ms)", elapsedTime );
         }
