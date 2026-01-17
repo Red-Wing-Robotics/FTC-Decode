@@ -258,6 +258,7 @@ public class BlueTeleop extends OpMode {
 
         setShooterVelocity( shooterVelocity );
 
+        /*
         if(gamepad2.dpad_right && !indexing){
             launcher.turnSpindexerCounterClockwise();
             indexing = true;
@@ -266,6 +267,11 @@ public class BlueTeleop extends OpMode {
             indexing = true;
         }else if (!gamepad2.dpad_right && !gamepad2.dpad_left){
             indexing = false;
+        }*/
+        if(gamepad2.dpad_right){
+            launcher.turnSpindexerCounterClockwise();
+        } else if (gamepad2.dpad_left) {
+            launcher.turnSpindexerClockwise();
         }
 
         telemetry.addData( "Shooter Velocity", shooterVelocity);

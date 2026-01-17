@@ -22,9 +22,6 @@ public class SingleLauncher {
     public static double TIME_BETWEEN_SHOTS_MS = 750; // in milliseconds
     public static double SPINDEXER_TURN_TIME_MS = 1000; // in milliseconds
     public static double SPINDERXER_TURN_MAGNITUDE = 0.38;
-    public static double SPINDERXER_POSITION_1 = 0.04;
-    public static double SPINDERXER_POSITION_2 = 0.42;//0.38
-    public static double SPINDERXER_POSITION_3 = 0.8;//0.38
 
 
 
@@ -61,7 +58,7 @@ public class SingleLauncher {
 
     public final DcMotorEx shooter;
     public final CRServo feeder;
-    public final Servo spindexer;
+    public final Spindexer spindexer;
 
     public LauncherState state = LauncherState.IDLE;
     private final Queue<ShotRequest> shotQueue;
@@ -74,7 +71,7 @@ public class SingleLauncher {
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         feeder = hardwareMap.get(CRServo.class, "feeder");
-        spindexer = hardwareMap.get(Servo.class, "spindexer");
+        spindexer = new Spindexer(hardwareMap,telemetry);
 
         this.shotQueue = new ArrayDeque<>();
     }
@@ -82,6 +79,7 @@ public class SingleLauncher {
     public void update() {
         long currentTime = System.currentTimeMillis();
         logger.logData("Launcher State", this.state.toString());
+        spindexer.update();
 
         switch(this.state) {
             case IDLE:
@@ -241,15 +239,15 @@ public class SingleLauncher {
     }
 
     public void turnSpindexerCounterClockwise(){
-        spindexer.setPosition( (spindexer.getPosition() + SPINDERXER_TURN_MAGNITUDE) % 1.14 );
+        spindexer.moveCounterClockwise();
     }
 
     public void turnSpindexerClockwise(){
-        spindexer.setPosition( (spindexer.getPosition() - SPINDERXER_TURN_MAGNITUDE) % 1.14 );
+        spindexer.moveClockwise();
     }
 
     public void initializeSpindexer(){
-        spindexer.setPosition( SPINDEXER_START );
+        spindexer.initialize();
     }
 
     private void turnSpindexer( SpindexerSlot slot ){
