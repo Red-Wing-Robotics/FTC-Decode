@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.RWRBaseOpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.state.Launcher;
+import org.firstinspires.ftc.teamcode.state.SingleLauncher;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.ObeliskState;
 
@@ -32,7 +32,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
 
     private Follower follower;
 
-    private Launcher launcher;
+    private SingleLauncher launcher;
 
     private int pathState;
 
@@ -143,40 +143,40 @@ public class FarSideAutoRed extends RWRBaseOpMode {
     }
 
     public void shootPreloadMotif(ObeliskState oState) {
+        // TODO - Refactor with Single Launcher
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
-                launcher.shootRight();
-                launcher.shootLeft();
-                launcher.shootRight(true);
                 break;
             case GREEN_PURPLE_PURPLE:
-                launcher.shootLeft();
-                launcher.shootRight();
-                launcher.shootRight(true);
                 break;
             case PURPLE_PURPLE_GREEN:
             default:
-                launcher.shootRight();
-                launcher.shootRight(true);
-                launcher.shootLeft();
                 break;
         }
     }
 
-    public void shootLoadingZoneBalls(ObeliskState oState) {
+    public void shootGPP(ObeliskState oState) {
+        // TODO - Refactor with Single Launcher
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
-                launcher.shootRight();
-                launcher.shootLeft();
                 break;
             case GREEN_PURPLE_PURPLE:
-                launcher.shootLeft();
-                launcher.shootRight();
                 break;
             case PURPLE_PURPLE_GREEN:
             default:
-                launcher.shootRight();
-                launcher.shootLeft();
+                break;
+        }
+    }
+
+    public void shootPGP(ObeliskState oState) {
+        // TODO - Refactor with Single Launcher
+        switch (oState) {
+            case PURPLE_GREEN_PURPLE:
+                break;
+            case GREEN_PURPLE_PURPLE:
+                break;
+            case PURPLE_PURPLE_GREEN:
+            default:
                 break;
         }
     }
@@ -219,7 +219,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
                 break;
             case 3:
                 if (!follower.isBusy()){
-                    launcher.activateIntake();
+                    //launcher.activateIntake();
                     follower.followPath(gotoFirstLoadingZoneCollectPose, true);
                     setPathState(4);
                 }
@@ -239,8 +239,8 @@ public class FarSideAutoRed extends RWRBaseOpMode {
                 break;
             case 6:
                 if (!follower.isBusy()) {
-                    launcher.deactivateIntake();
-                    shootLoadingZoneBalls(oState);
+                    //launcher.deactivateIntake();
+                    //shootLoadingZoneBalls(oState);
                     setPathState(7);
                 }
                 break;
@@ -267,7 +267,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
                 break;
             case 10:
                 if(!follower.isBusy()) {
-                    launcher.deactivateIntake();
+                    //launcher.deactivateIntake();
                     launcher.startShooter(shootVelocity);
                     follower.followPath(gotoThirdShootPose,true);
                     setPathState(11);
@@ -315,7 +315,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
         follower.setStartingPose(startPose);
         buildPaths();
 
-        launcher = new Launcher(hardwareMap, telemetry);
+        launcher = new SingleLauncher(hardwareMap, telemetry);
     }
 
     public void start() {

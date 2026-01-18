@@ -15,7 +15,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.state.Diverter;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.VelocityCalculation;
 import org.firstinspires.ftc.teamcode.util.log.Logger;
@@ -36,8 +35,6 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
     public DcMotorEx rightShooter = null;
     public CRServo rightFeeder = null;
     public CRServo leftFeeder = null;
-
-    private Diverter diverterStateMachine;
 
     Limelight3A limelight;
     private double shooterVelocity = 500;
@@ -93,8 +90,6 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
         limelight.setPollRateHz(100);
         limelight.start();
         limelight.pipelineSwitch(getLimelightPipeline());
-
-        diverterStateMachine = new Diverter(hardwareMap, telemetry);
     }
 
     @Override
@@ -106,7 +101,6 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
     public void loop() {
         // State Machine Updates
         follower.update();
-        diverterStateMachine.update();
 
         // Logging Updates
         logger.update();
@@ -215,11 +209,6 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
             shooterVelocity = -1500;
         }
         setShooterVelocity(shooterVelocity);
-
-        if (gamepad2.dpad_right || gamepad2.dpad_left) {
-            diverterStateMachine.toggleDiverter();
-        }
-
 
         logger.logData("Shooter Velocity", shooterVelocity);
         logger.logData("Right Motor Velocity", rightShooter.getVelocity());
