@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.RWRBaseOpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.state.Launcher;
+import org.firstinspires.ftc.teamcode.state.SingleLauncher;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.ObeliskState;
 import org.firstinspires.ftc.teamcode.util.timer.NonBlockingTimer;
@@ -33,7 +33,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
 
     private Follower follower;
 
-    private Launcher launcher;
+    private SingleLauncher launcher;
     private NonBlockingTimer waitTimer;
     public static long WAIT_TIME = 500;
 
@@ -160,70 +160,40 @@ public class NearSideAutoRed extends RWRBaseOpMode {
     }
 
     public void shootPreloadMotif(ObeliskState oState) {
+        // TODO - Refactor with Single Launcher
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
-                launcher.shootRight();
-                launcher.shootLeft();
-                launcher.shootRight(true);
                 break;
             case GREEN_PURPLE_PURPLE:
-                launcher.shootLeft();
-                launcher.shootRight();
-                launcher.shootRight(true);
                 break;
             case PURPLE_PURPLE_GREEN:
             default:
-                launcher.shootRight();
-                launcher.shootRight(true);
-                launcher.shootLeft();
                 break;
         }
     }
 
     public void shootGPP(ObeliskState oState) {
+        // TODO - Refactor with Single Launcher
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
-                //launcher.shootLeft(true);
-                launcher.shootLeft(true);
-                launcher.shootRight();
                 break;
             case GREEN_PURPLE_PURPLE:
-                //launcher.shootLeft(true);
-                launcher.shootLeft(true);
-                launcher.shootRight();
                 break;
             case PURPLE_PURPLE_GREEN:
-                //launcher.shootLeft();
-                launcher.shootRight(true);
-                launcher.shootLeft();
             default:
-                launcher.shootRight(true);
-                //launcher.shootLeft(true);
-                launcher.shootLeft();
                 break;
         }
     }
 
     public void shootPGP(ObeliskState oState) {
+        // TODO - Refactor with Single Launcher
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
-                launcher.shootRight();
-                launcher.shootLeft(true);
-                launcher.shootLeft();
                 break;
             case GREEN_PURPLE_PURPLE:
-                launcher.shootLeft(true);
-                launcher.shootLeft();
-                launcher.shootRight();
                 break;
             case PURPLE_PURPLE_GREEN:
-                launcher.shootRight();
-                launcher.shootLeft(true);
-                launcher.shootLeft();
             default:
-                launcher.shootRight();
-                launcher.shootLeft(true);
-                launcher.shootLeft();
                 break;
         }
     }
@@ -271,7 +241,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
                 break;
             case 4:
                 if (!follower.isBusy()){
-                    launcher.activateIntake();
+                    //launcher.activateIntake();
                     follower.followPath(gotoGppPose, true);
                     setPathState(5);
                 }
@@ -296,7 +266,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
                 break;
             case 8:
                 if(!follower.isBusy()) {
-                    launcher.deactivateIntake();
+                    //launcher.deactivateIntake();
                     launcher.startShooter(shootVelocity);
                     follower.followPath(gotoSecondShootPose,true);
                     setPathState(9);
@@ -334,7 +304,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
                 }
             case 14:
                 if(!follower.isBusy()) {
-                    launcher.deactivateIntake();
+                    //launcher.deactivateIntake();
                     launcher.startShooter(shootVelocity);
                     follower.followPath(gotoSecondShootPose,true);
                     setPathState(15);
@@ -382,7 +352,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
         follower.setStartingPose(startPose);
         buildPaths();
 
-        launcher = new Launcher(hardwareMap, telemetry);
+        launcher = new SingleLauncher(hardwareMap, telemetry);
         waitTimer = new NonBlockingTimer(WAIT_TIME);
     }
 
