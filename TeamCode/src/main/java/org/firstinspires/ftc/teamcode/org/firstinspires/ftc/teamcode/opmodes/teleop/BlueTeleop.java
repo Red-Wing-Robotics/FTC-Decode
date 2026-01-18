@@ -52,7 +52,7 @@ public class BlueTeleop extends OpMode {
     public static double INTAKE_ONE = 0;
     public static double INTAKE_TWO = 0.33;
     public static double INTAKE_THREE = 0.67;
-    public static double SHOOT_FORWARD = 9.0;
+    public static double SHOOT_FORWARD = 0.8;
     public static double FEEDER_DOWN = 0;
     public static double FEEDER_UP = 0.3;
 
@@ -62,6 +62,8 @@ public class BlueTeleop extends OpMode {
     private boolean yPressed = false;
     private boolean bPressed = false;
     private boolean indexing = false;
+    private boolean right_bumper = false;
+    private boolean left_bumper = false;
 
 
     private double trigDistanceToGoal = 0;
@@ -125,6 +127,7 @@ public class BlueTeleop extends OpMode {
     public void loop() {
         follower.update();
         telemetry.update();
+        launcher.update();
 
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
@@ -205,20 +208,22 @@ public class BlueTeleop extends OpMode {
             bPressed = false;
         }
 
-        if (gamepad2.dpad_up) {
-            isShooterOn = true;
+        if (gamepad2.right_bumper && !right_bumper) {
+            isShooterOn = !isShooterOn;
             if( flyWheelStart == 0 ){
                 elapsedTime = 0;
                 flyWheelStart = System.currentTimeMillis();
             }
-        } else if (gamepad2.dpad_down) {
-            isShooterOn = false;
+            right_bumper = true;
+        } else if (!gamepad2.right_bumper) {
+            right_bumper = false;
         }
 
-        if(gamepad2.right_bumper){
-            intake.setPower( 1.0 );
-        } else if (gamepad2.left_bumper) {
-            intake.setPower( 0 );
+        if(gamepad2.left_bumper && !left_bumper){
+            intake.setPower( Math.abs( intake.getPower() - 1.0) );
+            left_bumper = true;
+        } else if (!gamepad2.left_bumper) {
+            left_bumper = false;
         }
 
         /*if( gamepad1.dpad_up ){

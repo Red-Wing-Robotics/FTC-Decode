@@ -55,12 +55,15 @@ public class Spindexer {
                 case SHOOT_1:
                     spindexer.setPosition(SPINDERXER_POSITION_3);
                     position = SpindexerPosition.SHOOT_3;
+                    break;
                 case SHOOT_2:
                     spindexer.setPosition(SPINDERXER_POSITION_1);
                     position = SpindexerPosition.SHOOT_1;
+                    break;
                 case SHOOT_3:
                     spindexer.setPosition(SPINDERXER_POSITION_2);
                     position = SpindexerPosition.SHOOT_2;
+                    break;
             }
         }
     }
@@ -73,12 +76,15 @@ public class Spindexer {
                 case SHOOT_1:
                     spindexer.setPosition(SPINDERXER_POSITION_2);
                     position = SpindexerPosition.SHOOT_2;
+                    break;
                 case SHOOT_2:
                     spindexer.setPosition(SPINDERXER_POSITION_3);
                     position = SpindexerPosition.SHOOT_3;
+                    break;
                 case SHOOT_3:
                     spindexer.setPosition(SPINDERXER_POSITION_1);
                     position = SpindexerPosition.SHOOT_1;
+                    break;
             }
         }
     }
