@@ -290,7 +290,6 @@ public class BlueTeleop extends OpMode {
         telemetry.addData("PP x", follower.getPose().getX());
         telemetry.addData("PP y", follower.getPose().getY());
         telemetry.addData("PP heading", Math.toDegrees(follower.getPose().getHeading()));
-        telemetry.addData("Spindexer position", launcher.getSpindexerPosition() );
         telemetry.addData("Shooter State", launcher.getState());
         telemetry.addData("Turret Position", turret.getPosition());
         if (elapsedTime > 0) {
