@@ -193,7 +193,6 @@ public class BlueTeleop extends OpMode {
         feeder down
         */
 
-
         if ( gamepad2.y && !yPressed ) {
             launcher.shootThird();
             yPressed = true;
