@@ -12,12 +12,9 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.CRServo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.state.Launcher;
 import org.firstinspires.ftc.teamcode.state.SingleLauncher;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
@@ -56,14 +53,15 @@ public class BlueTeleop extends OpMode {
     public static double FEEDER_DOWN = 0;
     public static double FEEDER_UP = 0.3;
 
-    private boolean dpad_up = false;
-    private boolean dpad_down = false;
-    private boolean xPressed = false;
-    private boolean yPressed = false;
-    private boolean bPressed = false;
-    private boolean indexing = false;
-    private boolean right_bumper = false;
-    private boolean left_bumper = false;
+    private boolean isDpadUP = false;
+    private boolean isDpadDown = false;
+    private boolean isXPressed = false;
+    private boolean isYPressed = false;
+    private boolean isBPressed = false;
+    private boolean isRobotIndexing = false;
+    private boolean isRightBumperPressed = false;
+    private boolean isLeftBumperPressed = false;
+    private boolean isAPressed = false;
 
 
     private double trigDistanceToGoal = 0;
@@ -164,7 +162,7 @@ public class BlueTeleop extends OpMode {
             follower.setTeleOpDrive(
                     -gamepad1.left_stick_y,
                     -gamepad1.right_stick_x,
-                    -gamepad1.left_stick_x,
+                    -gamepad1.left_stick_x * 0.75,
                     robotCentric
             );
         }
@@ -180,11 +178,11 @@ public class BlueTeleop extends OpMode {
 
         }
 
-        if ( gamepad2.x && !xPressed ) {
+        if ( gamepad2.x && !isXPressed) {
             launcher.shootSecond();
-            xPressed = true;
+            isXPressed = true;
         } else if(!gamepad2.x){
-            xPressed = false;
+            isXPressed = false;
         }
         /*Shooter sequence:
         Set Spindexer Position for shooting
@@ -193,36 +191,36 @@ public class BlueTeleop extends OpMode {
         feeder down
         */
 
-        if ( gamepad2.y && !yPressed ) {
+        if ( gamepad2.y && !isYPressed) {
             launcher.shootThird();
-            yPressed = true;
+            isYPressed = true;
         } else if(!gamepad2.y){
-            yPressed = false;
+            isYPressed = false;
         }
 
-        if ( gamepad2.b && !bPressed ) {
+        if ( gamepad2.b && !isBPressed) {
             launcher.shootFirst();
-            bPressed = true;
+            isBPressed = true;
         } else if(!gamepad2.b){
-            bPressed = false;
+            isBPressed = false;
         }
 
-        if (gamepad2.right_bumper && !right_bumper) {
+        if (gamepad2.right_bumper && !isRightBumperPressed) {
             isShooterOn = !isShooterOn;
             if( flyWheelStart == 0 ){
                 elapsedTime = 0;
                 flyWheelStart = System.currentTimeMillis();
             }
-            right_bumper = true;
+            isRightBumperPressed = true;
         } else if (!gamepad2.right_bumper) {
-            right_bumper = false;
+            isRightBumperPressed = false;
         }
 
-        if(gamepad2.left_bumper && !left_bumper){
+        if(gamepad2.left_bumper && !isLeftBumperPressed){
             intake.setPower( Math.abs( intake.getPower() - 1.0) );
-            left_bumper = true;
+            isLeftBumperPressed = true;
         } else if (!gamepad2.left_bumper) {
-            left_bumper = false;
+            isLeftBumperPressed = false;
         }
 
         /*if( gamepad1.dpad_up ){
@@ -273,9 +271,16 @@ public class BlueTeleop extends OpMode {
             indexing = false;
         }*/
         if(gamepad2.dpad_right){
-            launcher.turnSpindexerCounterClockwise();
-        } else if (gamepad2.dpad_left) {
             launcher.turnSpindexerClockwise();
+        } else if (gamepad2.dpad_left) {
+            launcher.turnSpindexerCounterClockwise();
+        }
+
+        if(gamepad2.a && !isAPressed){
+            launcher.switchSpindexerMode();
+            isAPressed = true;
+        }else if(!gamepad2.a){
+            isAPressed = false;
         }
 
         telemetry.addData( "Shooter Velocity", shooterVelocity);

@@ -7,10 +7,12 @@ public class VelocityCalculation {
 
     public static double NEAR_VELOCITY_COEFFICIENT_1 = 18.2;
 
-    public static double NEAR_VELOCITY_COEFFICIENT_2 = 0.177;
+    public static double VELOCITY_DEFAULT = 1350;
 
     public static double getTargetVelocity( double distanceToGoal ){
-        if(distanceToGoal < 90 ){
+        if(distanceToGoal == 0){
+            return VELOCITY_DEFAULT;
+        } else if(distanceToGoal < 90 ){
             return 6.27 * distanceToGoal + 1121;
         } else if (distanceToGoal > 110 ) {
             return 1850;

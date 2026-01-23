@@ -16,11 +16,11 @@ import java.util.Queue;
 @Configurable
 public class SingleLauncher {
 
-    public static double FEED_TIME_MS = 400; // in milliseconds
+    public static double FEED_TIME_MS = 700; // in milliseconds
     public static double LAUNCHER_VELOCITY_PERCENT_FUDGE_FACTOR = 0.20; // Decimal percentage
     public static double LAUNCHER_RAMPING_TIME = 300;
     public static double TIME_BETWEEN_SHOTS_MS = 750; // in milliseconds
-    public static double SPINDEXER_TURN_TIME_MS = 1000; // in milliseconds
+    public static double SPINDEXER_TURN_TIME_MS = 700; // in milliseconds
     public static double SPINDERXER_TURN_MAGNITUDE = 0.38;
 
 
@@ -57,7 +57,7 @@ public class SingleLauncher {
     }
 
     public final DcMotorEx shooter;
-    public final CRServo feeder;
+    public final DcMotor feeder;
     public final Spindexer spindexer;
 
     public LauncherState state = LauncherState.IDLE;
@@ -70,7 +70,7 @@ public class SingleLauncher {
         this.logger = new Logger(telemetry);
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        feeder = hardwareMap.get(CRServo.class, "feeder");
+        feeder = hardwareMap.get(DcMotor.class, "feederMotor");
         spindexer = new Spindexer(hardwareMap,telemetry);
 
         this.shotQueue = new ArrayDeque<>();
@@ -128,7 +128,7 @@ public class SingleLauncher {
                     shotQueue.poll(); // remove shot from queue
                     logger.logLine("Finished shot.");
                     if (shotQueue.isEmpty()) {
-                        this.state = LauncherState.DONE;
+                        this.state = LauncherState.READY;
                         logger.logLine("Shot queue empty, returning to ready.");
                     } else {
                         this.state = LauncherState.WAITING;
@@ -168,7 +168,11 @@ public class SingleLauncher {
         if (this.state == LauncherState.IDLE || this.state == LauncherState.RAMPING || this.state == LauncherState.READY) {
             if (this.targetVelocity != velocity) {
                 setShooterVelocity(velocity);
-                this.state = LauncherState.RAMPING;
+                if( this.state == LauncherState.IDLE) {
+                    this.state = LauncherState.RAMPING;
+                }else{
+                    this.state = LauncherState.READY;
+                }
                 stateStartTime = System.currentTimeMillis();
                 logger.logLine("Starting/adjusting flywheel speed to " + velocity);
             }
@@ -226,11 +230,11 @@ public class SingleLauncher {
     }*/
 
     public void activateFeeder() {
-        feeder.setPower(1);
+        feeder.setPower(-1.0);
     }
 
     public void deactivateFeeders() {
-        feeder.setPower(0);
+        feeder.setPower(0.0);
     }
 
     private void setShooterVelocity(double p){
@@ -271,6 +275,14 @@ public class SingleLauncher {
 
     public LauncherState getState(){
         return this.state;
+    }
+
+    public void setToDone(){
+        this.state = LauncherState.DONE;
+    }
+
+    public void switchSpindexerMode(){
+        spindexer.switchMode();
     }
 
 }
