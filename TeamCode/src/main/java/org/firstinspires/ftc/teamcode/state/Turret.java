@@ -13,6 +13,8 @@ public class Turret {
     public static double TURRET_MIDPOINT = 0.5;
     public static double FUDGE_FACTOR = 1.0;
 
+    public static double FACTOR_ADJUSTMENT = 250;
+
     public final Servo turret;
     private final Logger logger;
 
@@ -28,11 +30,13 @@ public class Turret {
     public void update(LLResult result) {
         if (result != null && result.isValid()) {
             double tx = result.getTx();
+            logger.logData("TX", tx);
+            logger.logData("Turret Pos", turret.getPosition());
             if(Math.abs(tx) < FUDGE_FACTOR) {
                 return;
             }
             double currentPosition = turret.getPosition();
-            turret.setPosition(currentPosition + (tx / 100));
+            turret.setPosition(currentPosition + (tx / FACTOR_ADJUSTMENT));
         } else {
             setToDefault();
         }
