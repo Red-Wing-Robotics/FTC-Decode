@@ -80,7 +80,7 @@ public class BlueTeleop extends OpMode {
 
     @Override
     public void init() {
-        Pose start = new Pose(17.0625/2d + 0.25,16.09375/2d, Math.toRadians(90) ); // Assumed heading is 0 since we didn't specify
+        Pose start = new Pose(17.75/2d - 144,9.75 , Math.toRadians(90) ); // Assumed heading is 0 since we didn't specify
         Pose shootPoseNear = new Pose(72.1, 75.15, Math.toRadians(135));
         Pose shootPoseFar = new Pose(67.02, 19.57, 2.037);//2.037
         //Pose leverSetUpPose = new Pose(22.95, 71.9, 0);
@@ -109,7 +109,7 @@ public class BlueTeleop extends OpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
         limelight.start(); // This tells Limelight to start looking!
-        limelight.pipelineSwitch(1); // Switch to pipeline
+        limelight.pipelineSwitch(2); // Switch to pipeline
 
     }
 
@@ -292,6 +292,7 @@ public class BlueTeleop extends OpMode {
         telemetry.addData("PP heading", Math.toDegrees(follower.getPose().getHeading()));
         telemetry.addData("Spindexer position", launcher.getSpindexerPosition() );
         telemetry.addData("Shooter State", launcher.getState());
+        telemetry.addData("Turret Position", turret.getPosition());
         if (elapsedTime > 0) {
             telemetry.addData( "Flywheel spin-up time (ms)", elapsedTime );
         }
