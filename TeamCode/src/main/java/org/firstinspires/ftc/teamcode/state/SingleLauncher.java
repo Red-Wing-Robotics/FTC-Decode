@@ -269,9 +269,9 @@ public class SingleLauncher {
         return shooter.getVelocity();
     }
 
-    public double getSpindexerPosition(){
-        return spindexer.getPosition();
-    }
+//    public double getSpindexerPosition(){
+//        return spindexer.getPosition();
+//    }
 
     public LauncherState getState(){
         return this.state;
