@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.state.Turret;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.VelocityCalculation;
 import org.firstinspires.ftc.teamcode.util.log.Logger;
@@ -49,6 +50,8 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
 
     private boolean automatedDrive = false;
 
+    private Turret turretStateMachine;
+
     // Abstract methods for subclasses to implement
     protected abstract Pose getStartingPose();
     protected abstract Pose getShootPoseNear();
@@ -58,6 +61,8 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
     @Override
     public void init() {
         logger = new Logger(telemetry);
+
+        turretStateMachine = new Turret(hardwareMap, telemetry);
 
         Pose start = getStartingPose();
         Pose shootPoseNear = getShootPoseNear();
@@ -110,6 +115,7 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
 
         double distanceToGoal = 0;
         if (result != null && result.isValid()) {
+            turretStateMachine.update(result);
             LLResultTypes.FiducialResult fResult = result.getFiducialResults().get(0);
             int id = fResult.getFiducialId();
             logger.logData("April Tag ID", "" + id);
@@ -130,6 +136,7 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
             }
         } else {
             distanceToGoal = 0;
+            turretStateMachine.update();
         }
 
         if (automatedDrive && (!follower.isBusy() || gamepad1.x)) {
