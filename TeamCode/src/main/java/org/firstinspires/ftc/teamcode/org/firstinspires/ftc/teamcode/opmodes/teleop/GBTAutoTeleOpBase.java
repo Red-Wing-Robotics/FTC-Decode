@@ -43,6 +43,18 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
     private double shooterVelocity = 500;
     private boolean isShooterOn = false;
 
+    private boolean isShootingPositionNear = false;
+
+    public static double SHOOTER_VELOCITY_DEBUG = 1180; // NEAR SHOOTING POSITION
+
+    public static double SHOOTER_VELOCITY_NEAR_LEFT = 1180;
+    public static double SHOOTER_VELOCITY_NEAR_RIGHT = 1180;
+    public static double SHOOTER_VELOCITY_FAR_LEFT = 1410;
+    public static double SHOOTER_VELOCITY_FAR_RIGHT = 1390;
+
+    // NEAR SHOOTER - 1180
+    // FAR SHOOTER POSITION - 1380
+
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     private long flyWheelStart = 0;
@@ -149,32 +161,22 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
         if (!automatedDrive) {
             follower.setTeleOpDrive(
                     -gamepad1.left_stick_y,
-                    -gamepad1.left_stick_x, // Corrected from right_stick_x for strafing
-                    -gamepad1.right_stick_x, // Corrected from left_stick_x for turning
+                    -gamepad1.right_stick_x,
+                    -gamepad1.left_stick_x,
                     robotCentric
             );
 
             if (gamepad1.a && !follower.isBusy()) {
                 follower.followPath(gotoShootPoseNear.get());
                 automatedDrive = true;
+                isShootingPositionNear = true;
             }
 
             if (gamepad1.b && !follower.isBusy()) {
                 follower.followPath(gotoShootPoseFar.get());
                 automatedDrive = true;
+                isShootingPositionNear = false;
             }
-        }
-
-        if (gamepad2.right_bumper) {
-            rightFeeder.setPower(1);
-        } else {
-            rightFeeder.setPower(0);
-        }
-
-        if (gamepad2.left_bumper) {
-            leftFeeder.setPower(-1);
-        } else {
-            leftFeeder.setPower(0);
         }
 
         if (gamepad2.x) {
@@ -193,19 +195,36 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
             intake.setPower(0);
         }
 
+        // Turn off bumpers if not pressing bumpers
+        if (!gamepad2.right_bumper) {
+            rightFeeder.setPower(0);
+        }
+        if (!gamepad2.left_bumper) {
+            leftFeeder.setPower(0);
+        }
+
+        // Set the shooter velocity based on position and the bumpers being used
         if (isShooterOn) {
-            shooterVelocity = VelocityCalculation.getTargetVelocity(distanceToGoal);
+            if (gamepad2.right_bumper) {
+                rightFeeder.setPower(1);
+                shooterVelocity = (isShootingPositionNear) ? SHOOTER_VELOCITY_NEAR_RIGHT : SHOOTER_VELOCITY_FAR_RIGHT;
+            } else if (gamepad2.left_bumper) {
+                leftFeeder.setPower(-1);
+                shooterVelocity = (isShootingPositionNear) ? SHOOTER_VELOCITY_NEAR_LEFT : SHOOTER_VELOCITY_FAR_LEFT;
+            } else {
+                shooterVelocity = (isShootingPositionNear) ? SHOOTER_VELOCITY_NEAR_LEFT : SHOOTER_VELOCITY_FAR_LEFT;
+            }
         } else {
             shooterVelocity = 0;
         }
+
+        setShooterVelocity(shooterVelocity);
 
         if (Math.abs(shooterVelocity - rightShooter.getVelocity()) < SHOOTER_VELOCITY_FUDGE_FACTOR && elapsedTime == 0 && flyWheelStart != 0) {
             long now = System.currentTimeMillis();
             elapsedTime = now - flyWheelStart;
             flyWheelStart = 0;
         }
-
-        setShooterVelocity(shooterVelocity);
 
         if (gamepad2.dpad_right || gamepad2.dpad_left) {
             diverterStateMachine.toggleDiverter();
