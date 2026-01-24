@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.state.SingleLauncher;
+import org.firstinspires.ftc.teamcode.state.Turret;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.VelocityCalculation;
@@ -31,7 +32,7 @@ public class BlueTeleop extends OpMode {
     private Follower follower;
 
     public DcMotor intake = null;
-    public Servo turret = null;
+
     public SingleLauncher launcher = null;
 
 
@@ -78,6 +79,8 @@ public class BlueTeleop extends OpMode {
 
     private boolean automatedDrive = false;
 
+    private Turret turretStateMachine;
+
     @Override
     public void init() {
         Pose start = new Pose(17.75/2d - 144,9.75 , Math.toRadians(90) ); // Assumed heading is 0 since we didn't specify
@@ -85,6 +88,8 @@ public class BlueTeleop extends OpMode {
         Pose shootPoseFar = new Pose(67.02, 19.57, 2.037);//2.037
         //Pose leverSetUpPose = new Pose(22.95, 71.9, 0);
         //Pose leverPose = new Pose(15.95, 71.9, 0)
+
+        turretStateMachine = new Turret(hardwareMap, telemetry);
 
         gotoShootPoseNear = () -> follower.pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierLine(follower::getPose, shootPoseNear )))
@@ -103,7 +108,6 @@ public class BlueTeleop extends OpMode {
 
         intake = hardwareMap.get(DcMotor.class, "intake");
 
-        turret = hardwareMap.get( Servo.class, "turret");
         launcher = new SingleLauncher( hardwareMap, telemetry );
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -118,7 +122,6 @@ public class BlueTeleop extends OpMode {
         launcher.initializeSpindexer();
         launcher.deactivateFeeders();
         isShooterOn = true;
-        turret.setPosition(SHOOT_FORWARD);
     }
     //72.1x, 75.155y,134h
     @Override
@@ -131,6 +134,7 @@ public class BlueTeleop extends OpMode {
         LLResult result = limelight.getLatestResult();
 
         if (result != null && result.isValid()) {
+            //turretStateMachine.update(result);
             LLResultTypes.FiducialResult fResult = result.getFiducialResults().get(0);
             int id = result.getFiducialResults().get(0).getFiducialId();
             telemetry.addData("April Tag ID", "" + id);
@@ -150,6 +154,7 @@ public class BlueTeleop extends OpMode {
                 distanceToGoal = trigDistanceToGoal;
             }
         } else {
+            //turretStateMachine.update();
             distanceToGoal = 0;
         }
 
@@ -292,7 +297,6 @@ public class BlueTeleop extends OpMode {
         telemetry.addData("PP y", follower.getPose().getY());
         telemetry.addData("PP heading", Math.toDegrees(follower.getPose().getHeading()));
         telemetry.addData("Shooter State", launcher.getState());
-        telemetry.addData("Turret Position", turret.getPosition());
         if (elapsedTime > 0) {
             telemetry.addData( "Flywheel spin-up time (ms)", elapsedTime );
         }
