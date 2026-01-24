@@ -17,6 +17,7 @@ public class Turret {
     public Turret(HardwareMap hardwareMap, Telemetry telemetry) {
         this.logger = new Logger(telemetry);
         turret = hardwareMap.get(Servo.class, "turret");
+        setToDefault();
     }
 
     public void update() {
