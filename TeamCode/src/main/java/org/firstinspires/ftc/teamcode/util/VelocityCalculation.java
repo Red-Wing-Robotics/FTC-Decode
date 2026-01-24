@@ -11,7 +11,7 @@ public class VelocityCalculation {
 
     public static double getTargetVelocity( double distanceToGoal ){
         if(distanceToGoal == 0){
-            return VELOCITY_DEFAULT;
+            return 0;
         } else if(distanceToGoal < 90 ){
             return 6.27 * distanceToGoal + 1121;
         } else if (distanceToGoal > 110 ) {

@@ -207,6 +207,7 @@ public class BlueTeleop extends OpMode {
 
         if (gamepad2.right_bumper && !isRightBumperPressed) {
             isShooterOn = !isShooterOn;
+            shooterVelocity = VelocityCalculation.VELOCITY_DEFAULT;
             if( flyWheelStart == 0 ){
                 elapsedTime = 0;
                 flyWheelStart = System.currentTimeMillis();
@@ -245,10 +246,12 @@ public class BlueTeleop extends OpMode {
         }*/
 
         if( isShooterOn ){
-            shooterVelocity = VelocityCalculation.getTargetVelocity( distanceToGoal );
-
+            if( distanceToGoal != 0 ) {
+                shooterVelocity = VelocityCalculation.getTargetVelocity(distanceToGoal);
+            }
+            setShooterVelocity( shooterVelocity );
         }else{
-            shooterVelocity = 0;
+            setShooterVelocity( 0 );
             launcher.stopShooter();
         }
 /*
@@ -257,8 +260,6 @@ public class BlueTeleop extends OpMode {
             elapsedTime = now - flyWheelStart;
             flyWheelStart = 0;
         }*/
-
-        setShooterVelocity( shooterVelocity );
 
         /*
         if(gamepad2.dpad_right && !indexing){
