@@ -80,6 +80,9 @@ public class SingleLauncher {
         long currentTime = System.currentTimeMillis();
         logger.logData("Launcher State", this.state.toString());
         spindexer.update();
+        if( spindexer.state == Spindexer.SpindexerState.NOT_MOVING && feeder.getPower() == 1.0){
+            deactivateFeeders();
+        }
 
         switch(this.state) {
             case IDLE:
@@ -237,6 +240,10 @@ public class SingleLauncher {
         feeder.setPower(0.0);
     }
 
+    public void reverseFeeder(){
+        feeder.setPower(1.0);
+    }
+
     private void setShooterVelocity(double p){
         this.targetVelocity = p;
         shooter.setVelocity(-1 * p);
@@ -244,10 +251,12 @@ public class SingleLauncher {
 
     public void turnSpindexerCounterClockwise(){
         spindexer.moveCounterClockwise();
+        reverseFeeder();
     }
 
     public void turnSpindexerClockwise(){
         spindexer.moveClockwise();
+        reverseFeeder();
     }
 
     public void initializeSpindexer(){
@@ -257,10 +266,10 @@ public class SingleLauncher {
     private void turnSpindexer( SpindexerSlot slot ){
         switch (slot) {
             case EXTRA:
-                turnSpindexerCounterClockwise();
+                spindexer.moveCounterClockwise();
                 break;
             case INTAKE:
-                turnSpindexerClockwise();
+                spindexer.moveClockwise();
                 break;
         }
     }
