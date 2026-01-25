@@ -13,14 +13,14 @@ public class Turret {
 
     // Proportional gain: how much servo position changes per degree of tx.
     // Start small (0.005 to 0.02). Increase until it tracks well but doesn't oscillate.
-    public static double kP = 0.015;
+    public static double kP = 0.001;
 
     // Exponential smoothing factor:
     // 0.10 = very smooth (more lag), 0.30 = more responsive (less smoothing).
-    public static double alpha = 0.25;
+    public static double alpha = 0.6;
 
     // Degrees inside which we treat tx as "close enough" to avoid buzzing.
-    public static double deadbandDeg = 1.0;
+    public static double deadbandDeg = 1.5;
 
     // Maximum change in servo position per update (limits speed / prevents jumps).
     // Useful if your loop timing varies or you want smoother motion.
@@ -31,8 +31,8 @@ public class Turret {
     private boolean enabled = true;
 
     // Servo limits and state
-    public static double minPos = 0.10;
-    public static double maxPos = 0.90;
+    public static double minPos = 0;
+    public static double maxPos = 1;
     private double turretPos;
 
     // Filter state
