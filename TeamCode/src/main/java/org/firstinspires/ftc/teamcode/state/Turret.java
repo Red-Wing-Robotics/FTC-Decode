@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.state;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -7,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.log.Logger;
 
+@Configurable
 public class Turret {
 
     // Proportional gain: how much servo position changes per degree of tx.
@@ -26,7 +28,7 @@ public class Turret {
 
     public static double TURRET_MIDPOINT = 0.5;
 
-    private boolean enabled = false;
+    private boolean enabled = true;
 
     // Servo limits and state
     public static double minPos = 0.10;
