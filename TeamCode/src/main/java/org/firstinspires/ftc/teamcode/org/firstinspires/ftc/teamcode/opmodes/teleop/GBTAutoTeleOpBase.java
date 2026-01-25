@@ -47,15 +47,17 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
 
     public static double SHOOTER_VELOCITY_DEBUG = 1180; // NEAR SHOOTING POSITION
 
-    public static double SHOOTER_VELOCITY_NEAR_LEFT = 1180;
+    public static double SHOOTER_VELOCITY_NEAR_LEFT = 1150;
     public static double SHOOTER_VELOCITY_NEAR_RIGHT = 1180;
-    public static double SHOOTER_VELOCITY_FAR_LEFT = 1410;
+    public static double SHOOTER_VELOCITY_FAR_LEFT = 1330;
     public static double SHOOTER_VELOCITY_FAR_RIGHT = 1390;
 
     // NEAR SHOOTER - 1180
     // FAR SHOOTER POSITION - 1380
 
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
+
+    public static double PRECISION_CONTROL_FACTOR = 0.25;
 
     private long flyWheelStart = 0;
     private long elapsedTime = 0;
@@ -160,9 +162,9 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
 
         if (!automatedDrive) {
             follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y,
-                    -gamepad1.right_stick_x,
-                    -gamepad1.left_stick_x,
+                    updateForPreciseControl(-gamepad1.left_stick_y),
+                    updateForPreciseControl(-gamepad1.right_stick_x),
+                    updateForPreciseControl(-gamepad1.left_stick_x),
                     robotCentric
             );
 
@@ -246,5 +248,12 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
     private void setShooterVelocity(double p) {
         rightShooter.setVelocity(-1 * p);
         leftShooter.setVelocity(p);
+    }
+
+    private double updateForPreciseControl(double value) {
+        if(Math.abs(value) > 0.5) {
+            return value;
+        }
+        return value * PRECISION_CONTROL_FACTOR;
     }
 }
