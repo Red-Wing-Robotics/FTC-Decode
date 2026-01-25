@@ -32,7 +32,7 @@ public class BlueTeleop extends OpMode {
     private Follower follower;
 
     public DcMotor intake = null;
-    public Servo turret = null;
+
     public SingleLauncher launcher = null;
 
 
@@ -108,7 +108,6 @@ public class BlueTeleop extends OpMode {
 
         intake = hardwareMap.get(DcMotor.class, "intake");
 
-        turret = hardwareMap.get( Servo.class, "turret");
         launcher = new SingleLauncher( hardwareMap, telemetry );
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -123,7 +122,6 @@ public class BlueTeleop extends OpMode {
         launcher.initializeSpindexer();
         launcher.deactivateFeeders();
         isShooterOn = true;
-        turret.setPosition(SHOOT_FORWARD);
     }
     //72.1x, 75.155y,134h
     @Override
@@ -299,7 +297,6 @@ public class BlueTeleop extends OpMode {
         telemetry.addData("PP y", follower.getPose().getY());
         telemetry.addData("PP heading", Math.toDegrees(follower.getPose().getHeading()));
         telemetry.addData("Shooter State", launcher.getState());
-        telemetry.addData("Turret Position", turret.getPosition());
         if (elapsedTime > 0) {
             telemetry.addData( "Flywheel spin-up time (ms)", elapsedTime );
         }
