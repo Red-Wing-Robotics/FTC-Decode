@@ -58,6 +58,7 @@ public class Turret {
         filteredTxDeg = 0.0;
         lastHasTarget = false;
         setToDefault();
+        logTurret();
     }
 
     public void update(LLResult result) {
@@ -92,6 +93,7 @@ public class Turret {
             // Apply and clamp to turret safe range
             turretPos = clip(turretPos + delta, minPos, maxPos);
             turret.setPosition(turretPos);
+            logTurret();
         } else {
             update();
         }
