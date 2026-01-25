@@ -131,9 +131,9 @@ public class BlueTeleop extends OpMode {
 
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
+        turretStateMachine.update(result);
 
         if (result != null && result.isValid()) {
-            turretStateMachine.update(result);
             LLResultTypes.FiducialResult fResult = result.getFiducialResults().get(0);
             int id = result.getFiducialResults().get(0).getFiducialId();
             telemetry.addData("April Tag ID", "" + id);
@@ -153,7 +153,6 @@ public class BlueTeleop extends OpMode {
                 distanceToGoal = trigDistanceToGoal;
             }
         } else {
-            turretStateMachine.update();
             distanceToGoal = 0;
         }
 

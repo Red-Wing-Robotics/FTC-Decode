@@ -136,7 +136,7 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
             }
         } else {
             distanceToGoal = 0;
-            turretStateMachine.update();
+            //turretStateMachine.update();
         }
 
         if (automatedDrive && (!follower.isBusy() || gamepad1.x)) {

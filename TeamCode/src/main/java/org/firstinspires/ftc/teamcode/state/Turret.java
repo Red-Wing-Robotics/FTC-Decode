@@ -7,6 +7,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.log.Logger;
+enum TurretState {
+    DISABLED,
+    READY,
+    TRACKING,
+    SEARCHING,
+}
 
 @Configurable
 public class Turret {
@@ -28,8 +34,6 @@ public class Turret {
 
     public static double TURRET_MIDPOINT = 0.5;
 
-    private boolean enabled = true;
-
     // Servo limits and state
     public static double minPos = 0;
     public static double maxPos = 1;
@@ -38,67 +42,92 @@ public class Turret {
     // Filter state
     private double filteredTxDeg = 0.0;
     private double lastTxDeg = 0.0;
-    private boolean lastHasTarget = false;
 
     public final Servo turret;
     private final Logger logger;
+
+    private TurretState state;
+
+    private long searchStartTime = 0;
+
+    public static long SEARCH_TIMEOUT_MS = 2000;
 
     public Turret(HardwareMap hardwareMap, Telemetry telemetry) {
         this.logger = new Logger(telemetry);
         turret = hardwareMap.get(Servo.class, "turret");
         setToDefault();
+        this.state = TurretState.DISABLED;
+    }
+
+    private void setState(TurretState newState) {
+        if (this.state == newState) return; // No change
+
+        this.state = newState;
+        logger.logLine("Turret new state: " + newState);
+
+        switch (newState) {
+            case DISABLED:
+            case READY:
+                turretPos = TURRET_MIDPOINT;
+                turret.setPosition(turretPos);
+                break;
+            case SEARCHING:
+                // Start the timer and initiate a sweep to the last known direction
+                searchStartTime = System.currentTimeMillis();
+                turretPos = lastTxDeg > 0 ? minPos : maxPos;
+                turret.setPosition(turretPos);
+                break;
+            case TRACKING:
+                // Reset timer when we start tracking again
+                searchStartTime = 0;
+                break;
+        }
     }
 
     public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        if (!enabled) {
-            turret.setPosition(TURRET_MIDPOINT);
-        }
-    }
-
-    public void update() {
-        filteredTxDeg = 0.0;
-        lastHasTarget = false;
-        setToDefault();
-        logTurret();
+        setState(enabled ? TurretState.READY : TurretState.DISABLED);
     }
 
     public void update(LLResult result) {
-        // bail out if not enabled
-        if (!enabled) {
-            return;
+        if (state == TurretState.DISABLED) {
+            return; // Do nothing if disabled
         }
 
         if (result != null && result.isValid()) {
-            double txDeg = result.getTx(); // degrees
+            // --- TARGET FOUND ---
+            setState(TurretState.TRACKING);
 
-            lastHasTarget = true;
+            double txDeg = result.getTx();
             lastTxDeg = txDeg;
 
             // Exponential smoothing (EMA)
             filteredTxDeg = alpha * txDeg + (1.0 - alpha) * filteredTxDeg;
 
             // Deadband to prevent chatter
-            if (Math.abs(filteredTxDeg) < deadbandDeg) {
-                filteredTxDeg = 0.0;
-                return; // we're basically aligned; hold position
+            if (Math.abs(filteredTxDeg) > deadbandDeg) {
+                // Proportional correction
+                double delta = -kP * filteredTxDeg;
+                delta = clip(delta, -maxStepPerUpdate, maxStepPerUpdate);
+                turretPos = clip(turretPos + delta, minPos, maxPos);
+                turret.setPosition(turretPos);
             }
-
-            // Proportional correction
-            // NOTE: Sign convention matters.
-            // Commonly, if tx is positive (target right), turret must rotate left -> negative servo delta.
-            double delta = -kP * filteredTxDeg;
-
-            // Limit step per loop (optional but helpful)
-            delta = clip(delta, -maxStepPerUpdate, maxStepPerUpdate);
-
-            // Apply and clamp to turret safe range
-            turretPos = clip(turretPos + delta, minPos, maxPos);
-            turret.setPosition(turretPos);
-            logTurret();
         } else {
-            update();
+            // --- NO TARGET ---
+            switch (state) {
+                case TRACKING: // Target was just lost
+                    setState(TurretState.SEARCHING);
+                    break;
+                case SEARCHING:
+                    // Check if search has timed out
+                    if (System.currentTimeMillis() - searchStartTime > SEARCH_TIMEOUT_MS) {
+                        logger.logLine("Search timed out, returning to READY");
+                        setState(TurretState.READY);
+                    }
+                    break;
+                // If READY or DISABLED, do nothing
+            }
         }
+        logTurret();
     }
 
     private void setToDefault() {
@@ -112,7 +141,7 @@ public class Turret {
     private void logTurret() {
         logger.logData("Turret TX", lastTxDeg);
         logger.logData("Turret Pos", turretPos);
-        logger.logData("Turret Enabled", enabled);
+        logger.logData("Turret State", state);
     }
 
 }
