@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode.state;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.log.Logger;
@@ -192,7 +190,7 @@ public class SingleLauncher {
         logger.logLine("Shooter stopped and returned to idle.");
     }
 
-    public void shootFirst() {
+    public void shootShoot() {
         if (state != LauncherState.IDLE) {
             this.shotQueue.add(new ShotRequest(SpindexerSlot.SHOOT));
             logger.logLine("Queued RIGHT shot. Intake: " + false);
@@ -201,7 +199,7 @@ public class SingleLauncher {
         }
     }
 
-    public void shootSecond() {
+    public void shootExtra() {
         if (state != LauncherState.IDLE) {
             this.shotQueue.add(new ShotRequest(SpindexerSlot.EXTRA));
             logger.logLine("Queued RIGHT shot. Intake: " + false);
@@ -210,7 +208,7 @@ public class SingleLauncher {
         }
     }
 
-    public void shootThird() {
+    public void shootIntake() {
         if (state != LauncherState.IDLE) {
             this.shotQueue.add(new ShotRequest(SpindexerSlot.INTAKE));
             logger.logLine("Queued RIGHT shot. Intake: " + false);

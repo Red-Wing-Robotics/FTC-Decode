@@ -24,8 +24,8 @@ import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
 @Configurable
-@TeleOp(name = "Blue Teleop", group = "Examples")
-public class BlueTeleop extends OpMode {
+@TeleOp(name = "Red Teleop", group = "Examples")
+public class RedTeleop extends OpMode {
 
     public static boolean robotCentric = true;
     private Follower follower;
@@ -112,7 +112,7 @@ public class BlueTeleop extends OpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
         limelight.start(); // This tells Limelight to start looking!
-        limelight.pipelineSwitch(1); // Switch to pipeline
+        limelight.pipelineSwitch(2); // Switch to pipeline
 
     }
 
