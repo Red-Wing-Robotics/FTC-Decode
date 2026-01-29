@@ -244,36 +244,36 @@ public class NearSideAutoBlue2 extends RWRBaseOpMode {
                     setPathState(5);
                 }
                 break;
-            case 6:
+            case 5:
                 if (!follower.isBusy()) {
                     launcher.turnSpindexerClockwise();
                     follower.followPath( gotoGppGreenPose, true);//pick up green
-                    setPathState(7);
+                    setPathState(6);
                 }
                 break;
-            case 7:
+            case 6:
                 if(!follower.isBusy()) {
                     launcher.startShooter(shootVelocity);
                     launcher.turnSpindexerCounterClockwise();
                     turret.setPosition(0.5);
                     follower.followPath(gotoSecondShootPose,true);
                     intake.setPower(0);
+                    setPathState(7);
+                }
+                break;
+            case 7:
+                if (!follower.isBusy()) {
+                    shoot(oState);
                     setPathState(8);
                 }
                 break;
             case 8:
-                if (!follower.isBusy()) {
-                    shoot(oState);
+                if (!launcher.isBusy()) {
+                    launcher.stopShooter();
                     setPathState(9);
                 }
                 break;
             case 9:
-                if (!launcher.isBusy()) {
-                    launcher.stopShooter();
-                    setPathState(10);
-                }
-                break;
-            case 10:
                 if (!follower.isBusy()){
                     //launcher.activateIntake();
                     //diverter.setPosition(0.02);

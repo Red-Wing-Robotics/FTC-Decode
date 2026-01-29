@@ -226,19 +226,16 @@ public class FarSideAutoBlue2 extends RWRBaseOpMode {
         switch (pathState) {
             case 0:
                 launcher.startShooter(shootVelocity);
-                turret.setPosition(1);
                 follower.followPath(gotoFirstShootPose, true);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    turret.setPosition(0);
                     shoot(oState);
                     setPathState(2);
                 }
                 break;
             case 2:
-                // Launcher should have its own caser for this
                 if (!launcher.isBusy()) {
                     launcher.stopShooter();
                     setPathState(3);
@@ -247,8 +244,8 @@ public class FarSideAutoBlue2 extends RWRBaseOpMode {
             case 3:
                 if (!follower.isBusy()){
                     //launcher.activateIntake();
-                    follower.followPath(gotoFirstLoadingZoneCollectPose, true);
-                    setPathState(4);
+                    follower.followPath(gotoLeavePose, true);
+                    setPathState(-1);
                 }
                 break;
             case 4:
@@ -301,7 +298,7 @@ public class FarSideAutoBlue2 extends RWRBaseOpMode {
                 break;
             case 11:
                 if (!follower.isBusy()) {
-                    shootPreloadMotif(oState);
+                    shoot(oState);
                     setPathState(12);
                 }
                 break;
@@ -339,8 +336,8 @@ public class FarSideAutoBlue2 extends RWRBaseOpMode {
 
     public void start() {
         pathState = 0;
-        diverter.setPosition(0.02);
         intake.setPower(0);
+        turret.setPosition(0.5);
     }
 
     @Override
