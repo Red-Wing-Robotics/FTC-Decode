@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.log.Logger;
+
 enum TurretState {
     DISABLED,
     READY,
@@ -23,7 +24,7 @@ public class Turret {
 
     // Exponential smoothing factor:
     // 0.10 = very smooth (more lag), 0.30 = more responsive (less smoothing).
-    public static double alpha = 0.6;
+    public static double alpha = 1.0;
 
     // Degrees inside which we treat tx as "close enough" to avoid buzzing.
     public static double deadbandDeg = 1.5;
@@ -56,7 +57,7 @@ public class Turret {
         this.logger = new Logger(telemetry);
         turret = hardwareMap.get(Servo.class, "turret");
         setToDefault();
-        this.state = TurretState.DISABLED;
+        this.state = TurretState.READY;
     }
 
     private void setState(TurretState newState) {
