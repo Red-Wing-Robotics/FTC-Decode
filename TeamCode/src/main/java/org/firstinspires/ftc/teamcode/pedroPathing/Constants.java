@@ -15,32 +15,32 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(13.83)
-            .forwardZeroPowerAcceleration(-38.798490281988165)
-            .lateralZeroPowerAcceleration(-58.29162662591579)
+            .forwardZeroPowerAcceleration(-34.30537347818821)
+            .lateralZeroPowerAcceleration(-241.50027821714204)
             .translationalPIDFCoefficients(new PIDFCoefficients(
-                    0.2,
+                    0.14,
                     0,
                     0,
-                    0
+                    -0.7
             ))
             .translationalPIDFSwitch(4)
             .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(
-                    0.6,
+                    0.15,
                     0,
                     0.001,
-                    0.02
+                    -0.4
             ))
             .headingPIDFCoefficients(new PIDFCoefficients(
-                    0.5,
+                    0.8,
                     0,
-                    0,
-                    0.2
+                    0.002,
+                    -0.5
             ))
             .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(
-                    0.5,
+                    0.9,
                     0,
                     0.001,
-                    0.02
+                    -0.5
             ))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(
                     0.5,
@@ -68,8 +68,8 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(44.404368483175446)
-            .yVelocity(34.098888006735976);
+            .xVelocity(52.2883615568867)
+            .yVelocity(45.78680937684427);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY( -0.5 )//0.375 for other chasee
