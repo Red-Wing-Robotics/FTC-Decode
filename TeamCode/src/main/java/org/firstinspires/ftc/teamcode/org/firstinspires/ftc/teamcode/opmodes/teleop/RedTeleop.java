@@ -107,7 +107,7 @@ public class RedTeleop extends OpMode {
 
         intake = hardwareMap.get(DcMotor.class, "intake");
 
-        launcher = new SingleLauncher( hardwareMap, telemetry );
+        launcher = new SingleLauncher( hardwareMap, telemetry, turretStateMachine);
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
@@ -153,7 +153,7 @@ public class RedTeleop extends OpMode {
                 distanceToGoal = trigDistanceToGoal;
             }
         } else {
-            turretStateMachine.update();
+            turretStateMachine.update( result );
             distanceToGoal = 0;
         }
 

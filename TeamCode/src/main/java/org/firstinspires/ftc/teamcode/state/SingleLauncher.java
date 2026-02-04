@@ -64,13 +64,15 @@ public class SingleLauncher {
 
     private final Logger logger;
 
-    public SingleLauncher(HardwareMap hardwareMap, Telemetry telemetry) {
+    private final Turret turret;
+
+    public SingleLauncher(HardwareMap hardwareMap, Telemetry telemetry, Turret turret) {
         this.logger = new Logger(telemetry);
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         feeder = hardwareMap.get(DcMotor.class, "feederMotor");
         spindexer = new Spindexer(hardwareMap,telemetry);
-
+        this.turret = turret;
         this.shotQueue = new ArrayDeque<>();
     }
 
@@ -192,6 +194,7 @@ public class SingleLauncher {
 
     public void shootShoot() {
         if (state != LauncherState.IDLE) {
+            shootTurret();
             this.shotQueue.add(new ShotRequest(SpindexerSlot.SHOOT));
             logger.logLine("Queued RIGHT shot. Intake: " + false);
         } else {
@@ -201,6 +204,7 @@ public class SingleLauncher {
 
     public void shootExtra() {
         if (state != LauncherState.IDLE) {
+            shootTurret();
             this.shotQueue.add(new ShotRequest(SpindexerSlot.EXTRA));
             logger.logLine("Queued RIGHT shot. Intake: " + false);
         } else {
@@ -210,6 +214,7 @@ public class SingleLauncher {
 
     public void shootIntake() {
         if (state != LauncherState.IDLE) {
+            shootTurret();
             this.shotQueue.add(new ShotRequest(SpindexerSlot.INTAKE));
             logger.logLine("Queued RIGHT shot. Intake: " + false);
         } else {
@@ -290,6 +295,12 @@ public class SingleLauncher {
 
     public void switchSpindexerMode(){
         spindexer.switchMode();
+    }
+
+    private void shootTurret() {
+        if(turret != null) {
+            turret.shoot();
+        }
     }
 
 }

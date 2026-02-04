@@ -39,12 +39,12 @@ public class NearSideAutoBlue2 extends RWRBaseOpMode {
 
     private ObeliskState oState = ObeliskState.UNKNOWN;
     private NonBlockingTimer waitTimer;
-    public static long WAIT_TIME = 500;
+    public static long WAIT_TIME = 2000;
 
     public DcMotor intake = null;
     public Servo turret = null;
 
-    public static double shootVelocity = 1080;
+    public static double shootVelocity = 1300;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     public static long TIMEOUT_DEFAULT = 5000;
@@ -200,6 +200,9 @@ public class NearSideAutoBlue2 extends RWRBaseOpMode {
                 launcher.shootIntake();
                 launcher.shootIntake();
             default:
+                launcher.shootShoot();
+                launcher.shootIntake();
+                launcher.shootIntake();
                 break;
         }
     }
@@ -213,18 +216,24 @@ public class NearSideAutoBlue2 extends RWRBaseOpMode {
         switch (pathState) {
             case 0:
                 launcher.startShooter(shootVelocity);
-                turret.setPosition(1);
-                follower.followPath(gotoFirstShootPose, true);
+                turret.setPosition(0);
+                //follower.followPath(gotoFirstShootPose, true);
+                waitTimer.start();
                 setPathState(1);
                 break;
             case 1:
-                if (!follower.isBusy()) {
-                    turret.setPosition(0);
-                    shoot(oState);
+                if(waitTimer.isFinished()){
+                    turret.setPosition(1);
+                    waitTimer.start();
                     setPathState(2);
                 }
-                break;
             case 2:
+                if (waitTimer.isFinished()) {
+                    shoot(oState);
+                    setPathState(-1);
+                }
+                break;
+            case 29:
                 if (!launcher.isBusy()) {
                     launcher.stopShooter();
                     setPathState(3);
@@ -345,14 +354,15 @@ public class NearSideAutoBlue2 extends RWRBaseOpMode {
         follower.setStartingPose(startPose);
         buildPaths();
 
-        launcher = new SingleLauncher(hardwareMap, telemetry);
+        launcher = new SingleLauncher(hardwareMap, telemetry, null);
         waitTimer = new NonBlockingTimer(WAIT_TIME);
     }
 
     public void start() {
         pathState = 0;
-        diverter.setPosition(0.02);
+        //diverter.setPosition(0.02);
         intake.setPower(0);
+        launcher.initializeSpindexer();
     }
 
     @Override
@@ -395,6 +405,7 @@ public class NearSideAutoBlue2 extends RWRBaseOpMode {
         // Feedback to Driver Hub for debugging
         logger.logData("path state", pathState);
         logger.logData("launcher state", launcher.state);
+        logger.logData("Obelisk State", oState);
         logger.logData("x", follower.getPose().getX());
         logger.logData("y", follower.getPose().getY());
         logger.logData("heading", Math.toDegrees(follower.getPose().getHeading()));

@@ -314,7 +314,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
         follower.setStartingPose(startPose);
         buildPaths();
 
-        launcher = new SingleLauncher(hardwareMap, telemetry);
+        launcher = new SingleLauncher(hardwareMap, telemetry, null);
     }
 
     public void start() {

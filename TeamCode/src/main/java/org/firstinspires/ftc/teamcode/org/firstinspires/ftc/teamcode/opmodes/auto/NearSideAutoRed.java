@@ -352,7 +352,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
         follower.setStartingPose(startPose);
         buildPaths();
 
-        launcher = new SingleLauncher(hardwareMap, telemetry);
+        launcher = new SingleLauncher(hardwareMap, telemetry, null);
         waitTimer = new NonBlockingTimer(WAIT_TIME);
     }
 

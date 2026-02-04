@@ -13,6 +13,7 @@ enum TurretState {
     READY,
     TRACKING,
     SEARCHING,
+    SHOOTING
 }
 
 @Configurable
@@ -50,6 +51,9 @@ public class Turret {
     private TurretState state;
 
     private long searchStartTime = 0;
+    private long shootingStartTime = 0;
+
+    public static long SHOOT_TIMEOUT_MS = 8000;
 
     public static long SEARCH_TIMEOUT_MS = 2000;
 
@@ -82,7 +86,14 @@ public class Turret {
                 // Reset timer when we start tracking again
                 searchStartTime = 0;
                 break;
+            case SHOOTING:
+                shootingStartTime = System.currentTimeMillis();
+                break;
         }
+    }
+
+    public void shoot() {
+        setState(TurretState.SHOOTING);
     }
 
     public void setEnabled(boolean enabled) {
@@ -92,6 +103,16 @@ public class Turret {
     public void update(LLResult result) {
         if (state == TurretState.DISABLED) {
             return; // Do nothing if disabled
+        }
+
+        if(state == TurretState.SHOOTING) {
+            if (System.currentTimeMillis() - shootingStartTime > SHOOT_TIMEOUT_MS) {
+                logger.logLine("Shooting ending, returning to READY");
+                shootingStartTime = 0;
+                setState(TurretState.READY);
+            } else {
+                return;
+            }
         }
 
         if (result != null && result.isValid()) {
