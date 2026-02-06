@@ -39,16 +39,12 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
 
     private ObeliskState oState = ObeliskState.UNKNOWN;
     private NonBlockingTimer waitTimer;
-    public static long WAIT_TIME = 500;
+    public static long WAIT_TIME = 2000;
 
     public DcMotor intake = null;
-    public DcMotorEx leftShooter = null;
-    public DcMotorEx rightShooter = null;
-    public CRServo rightFeeder = null;
-    public CRServo leftFeeder = null;
-    public Servo diverter = null;
+    public Servo turret = null;
 
-    public static double shootVelocity = 1080;
+    public static double shootVelocity = 1340;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     public static long TIMEOUT_DEFAULT = 5000;
@@ -58,18 +54,18 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public static double startX = 32.7;
     public static double startY = 144 - (16.09375/2d);
     public static double startHeading = 90;
-    public static double shootX = 51.73;
-    public static double shootY = 96.78;
-    public static double shootHeading = 135;
+    public static double shootX = 30;
+    public static double shootY = 114;
+    public static double shootHeading = 90;
     public static double obeliskReadHeading = 75;
-    public static double gppX = 47.44;
-    public static double gppY = 87.85;
+    public static double gppX = 41;
+    public static double gppY = 78;
     public static double gppHeading = 180;
-    public static double gppPurpleY = 87.85;
-    public static double gppPurpleX = 40.28;
+    public static double gppPurpleY = 78;
+    public static double gppPurpleX = 36;
     public static double gppPurpleHeading = 180;
-    public static double gppGreenX = 25.16;
-    public static double gppGreenY = 87.85;
+    public static double gppGreenX = 25;
+    public static double gppGreenY = 78;
     public static double gppGreenHeading = 180;
     public static double pgpX = 41.44;
     public static double pgpY = 59.34;
@@ -158,7 +154,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
 
 
     }
-
+/*
     public void shootPreloadMotif(ObeliskState oState) {
         // TODO - Refactor with Single Launcher
         switch (oState) {
@@ -183,20 +179,34 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
             default:
                 break;
         }
-    }
+    }*/
 
-    public void shootPGP(ObeliskState oState) {
+    public void shoot(ObeliskState oState) {
         // TODO - Refactor with Single Launcher
+        // load will be Shoot: Purple; Intake: Purple; Extra: Green
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
+                launcher.shootShoot();
+                launcher.shootExtra();
+                launcher.shootExtra();
                 break;
             case GREEN_PURPLE_PURPLE:
+                launcher.shootExtra();
+                launcher.shootExtra();
+                launcher.shootExtra();
                 break;
             case PURPLE_PURPLE_GREEN:
+                launcher.shootShoot();
+                launcher.shootIntake();
+                launcher.shootIntake();
             default:
+                launcher.shootShoot();
+                launcher.shootIntake();
+                launcher.shootIntake();
                 break;
         }
     }
+
 
     public void setPathState(int pState) {
         pathState = pState;
@@ -206,16 +216,24 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         switch (pathState) {
             case 0:
                 launcher.startShooter(shootVelocity);
+                turret.setPosition(0);
                 follower.followPath(gotoFirstShootPose, true);
+                waitTimer.start();
                 setPathState(1);
                 break;
             case 1:
-                if (!follower.isBusy()) {
-                    shootPreloadMotif(oState);
+                if(waitTimer.isFinished() && !follower.isBusy()){
+                    turret.setPosition(1);
+                    waitTimer.start();
                     setPathState(2);
                 }
-                break;
             case 2:
+                if (waitTimer.isFinished()) {
+                    shoot(oState);
+                    setPathState(3);
+                }
+                break;
+            case 29:
                 if (!launcher.isBusy()) {
                     launcher.stopShooter();
                     setPathState(3);
@@ -223,52 +241,48 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 3:
                 if (!follower.isBusy()){
-                    //launcher.activateIntake();
-                    follower.followPath(gotoGppPose, true);
+                    intake.setPower(1.0);
+                    follower.followPath(gotoGppPose, true);//pick up first purple
                     setPathState(4);
                 }
                 break;
             case 4:
                 if (!follower.isBusy()){
-                    follower.followPath( gotoGppPurplePose, true);
+                    launcher.turnSpindexerClockwise();
+                    follower.followPath( gotoGppPurplePose, true);//pick up second purple
                     setPathState(5);
                 }
                 break;
             case 5:
-                if (!follower.isBusy()){
-                    diverter.setPosition(0.34);
-                    waitTimer.start();
+                if (!follower.isBusy()) {
+                    launcher.turnSpindexerClockwise();
+                    follower.followPath( gotoGppGreenPose, true);//pick up green
                     setPathState(6);
                 }
                 break;
             case 6:
-                if (waitTimer.isFinished()) {
-                    waitTimer.reset();
-                    follower.followPath( gotoGppGreenPose, true);
+                if(!follower.isBusy()) {
+                    launcher.startShooter(shootVelocity);
+                    launcher.turnSpindexerCounterClockwise();
+                    turret.setPosition(0.5);
+                    follower.followPath(gotoSecondShootPose,true);
+                    intake.setPower(0);
                     setPathState(7);
                 }
                 break;
             case 7:
-                if(!follower.isBusy()) {
-                    launcher.startShooter(shootVelocity);
-                    follower.followPath(gotoSecondShootPose,true);
-                    //launcher.deactivateIntake();
+                if (!follower.isBusy()) {
+                    shoot(oState);
                     setPathState(8);
                 }
                 break;
             case 8:
-                if (!follower.isBusy()) {
-                    shootGPP(oState);
+                if (!launcher.isBusy()) {
+                    launcher.stopShooter();
                     setPathState(9);
                 }
                 break;
             case 9:
-                if (!launcher.isBusy()) {
-                    launcher.stopShooter();
-                    setPathState(10);
-                }
-                break;
-            case 10:
                 if (!follower.isBusy()){
                     //launcher.activateIntake();
                     //diverter.setPosition(0.02);
@@ -307,7 +321,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 15:
                 if (!follower.isBusy()) {
-                    shootPGP(oState);
+                    //shootPGP(oState);
                     setPathState(16);
                 }
                 break;
@@ -329,14 +343,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     @Override
     public void init() {
         intake = hardwareMap.get(DcMotor.class, "intake");
-        leftShooter = hardwareMap.get(DcMotorEx.class, "leftShooter");
-        leftShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightShooter = hardwareMap.get(DcMotorEx.class, "rightShooter");
-        rightShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
-        leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
-        diverter = hardwareMap.get(Servo.class, "diverter");
+        turret = hardwareMap.get(Servo.class, "turret");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
@@ -353,8 +360,9 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
 
     public void start() {
         pathState = 0;
-        diverter.setPosition(0.02);
+        //diverter.setPosition(0.02);
         intake.setPower(0);
+        launcher.initializeSpindexer();
     }
 
     @Override
@@ -397,11 +405,12 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         // Feedback to Driver Hub for debugging
         logger.logData("path state", pathState);
         logger.logData("launcher state", launcher.state);
+        logger.logData("Obelisk State", oState);
         logger.logData("x", follower.getPose().getX());
         logger.logData("y", follower.getPose().getY());
         logger.logData("heading", Math.toDegrees(follower.getPose().getHeading()));
-        logger.logData("right shooter velocity", rightShooter.getVelocity());
-        logger.logData("left shooter velocity", leftShooter.getVelocity());
+        logger.logData("right shooter velocity", launcher.getShooterVelocity());
         logger.update();
     }
 }
+
