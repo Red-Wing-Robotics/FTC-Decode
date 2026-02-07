@@ -200,7 +200,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                launcher.startShooter(shootVelocity);
+                launcher.setShooterVelocity(shootVelocity);
                 follower.followPath(gotoFirstShootPose, true);
                 setPathState(1);
                 break;
@@ -232,7 +232,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
                 }
             case 5:
                 if(!follower.isBusy()) {
-                    launcher.startShooter(shootVelocity);
+                    launcher.setShooterVelocity(shootVelocity);
                     follower.followPath(gotoSecondShootPose,true);
                     setPathState(6);
                 }
@@ -268,7 +268,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
             case 10:
                 if(!follower.isBusy()) {
                     //launcher.deactivateIntake();
-                    launcher.startShooter(shootVelocity);
+                    launcher.setShooterVelocity(shootVelocity);
                     follower.followPath(gotoThirdShootPose,true);
                     setPathState(11);
                 }

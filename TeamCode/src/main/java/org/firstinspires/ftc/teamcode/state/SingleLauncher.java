@@ -86,7 +86,7 @@ public class SingleLauncher {
 
         switch(this.state) {
             case IDLE:
-                // Waiting for startShooter() to be called
+                // Waiting for setShooterVelocity() to be called
                 break;
             case RAMPING:
                 if(System.currentTimeMillis() - stateStartTime >= LAUNCHER_RAMPING_TIME) {//isShooterWithinFudgeFactor()
@@ -131,7 +131,7 @@ public class SingleLauncher {
                     shotQueue.poll(); // remove shot from queue
                     logger.logLine("Finished shot.");
                     if (shotQueue.isEmpty()) {
-                        this.state = LauncherState.READY;
+                        this.state = LauncherState.DONE;
                         logger.logLine("Shot queue empty, returning to ready.");
                     } else {
                         this.state = LauncherState.WAITING;
@@ -167,20 +167,21 @@ public class SingleLauncher {
         return this.state == LauncherState.SHOOTING || this.state == LauncherState.WAITING || this.state == LauncherState.TURN_SPINDEXER || this.state == LauncherState.RAMPING || this.state == LauncherState.READY;
     }
 
-    public void startShooter(double velocity) {
-        if (this.state == LauncherState.IDLE || this.state == LauncherState.RAMPING || this.state == LauncherState.READY) {
+    public void setShooterVelocity(double velocity) {
+        if (this.state == LauncherState.IDLE || this.state == LauncherState.RAMPING || this.state == LauncherState.READY || this.state == LauncherState.DONE) {
             if (this.targetVelocity != velocity) {
-                setShooterVelocity(velocity);
-                if( this.state == LauncherState.IDLE) {
-                    this.state = LauncherState.RAMPING;
-                }else{
-                    this.state = LauncherState.READY;
-                }
-                stateStartTime = System.currentTimeMillis();
+                setVelocity( velocity );
                 logger.logLine("Starting/adjusting flywheel speed to " + velocity);
             }
         } else {
             logger.logLine("CANNOT start/adjust shooter, currently shooting or intaking.");
+        }
+    }
+
+    public void startShooter(){
+        if( this.state == LauncherState.IDLE) {
+            stateStartTime = System.currentTimeMillis();
+            this.state = LauncherState.RAMPING;
         }
     }
 
@@ -247,7 +248,7 @@ public class SingleLauncher {
         feeder.setPower(1.0);
     }
 
-    private void setShooterVelocity(double p){
+    private void setVelocity(double p){
         this.targetVelocity = p;
         shooter.setVelocity(-1 * p);
     }

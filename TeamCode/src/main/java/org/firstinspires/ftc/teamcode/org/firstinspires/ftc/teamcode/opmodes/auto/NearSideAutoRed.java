@@ -217,7 +217,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                launcher.startShooter(shootVelocity);
+                launcher.setShooterVelocity(shootVelocity);
                 follower.followPath(gotoFirstShootPose, true);
                 setPathState(2);
                 break;
@@ -267,7 +267,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
             case 8:
                 if(!follower.isBusy()) {
                     //launcher.deactivateIntake();
-                    launcher.startShooter(shootVelocity);
+                    launcher.setShooterVelocity(shootVelocity);
                     follower.followPath(gotoSecondShootPose,true);
                     setPathState(9);
                 }
@@ -305,7 +305,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
             case 14:
                 if(!follower.isBusy()) {
                     //launcher.deactivateIntake();
-                    launcher.startShooter(shootVelocity);
+                    launcher.setShooterVelocity(shootVelocity);
                     follower.followPath(gotoSecondShootPose,true);
                     setPathState(15);
                 }

@@ -9,9 +9,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
@@ -215,7 +213,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                launcher.startShooter(shootVelocity);
+                launcher.setShooterVelocity(shootVelocity);
                 turret.setPosition(0);
                 follower.followPath(gotoFirstShootPose, true);
                 waitTimer.start();
@@ -233,14 +231,9 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                     setPathState(3);
                 }
                 break;
-            case 29:
+            case 3:
                 if (!launcher.isBusy()) {
                     launcher.stopShooter();
-                    setPathState(3);
-                }
-                break;
-            case 3:
-                if (!follower.isBusy()){
                     intake.setPower(1.0);
                     follower.followPath(gotoGppPose, true);//pick up first purple
                     setPathState(4);
@@ -262,9 +255,9 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 6:
                 if(!follower.isBusy()) {
-                    launcher.startShooter(shootVelocity);
+                    launcher.setShooterVelocity(shootVelocity);
                     launcher.turnSpindexerCounterClockwise();
-                    turret.setPosition(0.5);
+                    turret.setPosition(1);
                     follower.followPath(gotoSecondShootPose,true);
                     intake.setPower(0);
                     setPathState(7);
@@ -314,7 +307,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
             case 14:
                 if(!follower.isBusy()) {
                     //launcher.deactivateIntake();
-                    launcher.startShooter(shootVelocity);
+                    launcher.setShooterVelocity(shootVelocity);
                     follower.followPath(gotoSecondShootPose,true);
                     setPathState(15);
                 }

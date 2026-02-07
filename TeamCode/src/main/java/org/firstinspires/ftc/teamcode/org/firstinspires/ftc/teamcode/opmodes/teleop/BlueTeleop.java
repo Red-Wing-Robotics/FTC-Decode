@@ -211,6 +211,9 @@ public class BlueTeleop extends OpMode {
 
         if (gamepad2.right_bumper && !isRightBumperPressed) {
             isShooterOn = !isShooterOn;
+            if( isShooterOn){
+                launcher.startShooter();
+            }
             shooterVelocity = VelocityCalculation.VELOCITY_DEFAULT;
             if( flyWheelStart == 0 ){
                 elapsedTime = 0;
@@ -305,7 +308,7 @@ public class BlueTeleop extends OpMode {
     private void setShooterVelocity(double p ){
         //rightShooter.setPower( -1 * p );
         //leftShooter.setPower(  p );
-        launcher.startShooter( p );
+        launcher.setShooterVelocity( p );
     }
 /*
     public void setDrivePower(double frontLeft, double backLeft, double frontRight, double backRight) {
