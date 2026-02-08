@@ -121,6 +121,7 @@ public class RedTeleop extends OpMode {
         launcher.initializeSpindexer();
         launcher.deactivateFeeders();
         isShooterOn = true;
+        launcher.startShooter();
     }
     //72.1x, 75.155y,134h
     @Override

@@ -23,39 +23,39 @@ public class Constants {
                     0.001,
                     0.02
             ))
-            .translationalPIDFSwitch(4)
+            .translationalPIDFSwitch(4)/*
             .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(
                     0.7,
                     0,
                     0,
                     1.5
-            ))
+            ))*/
             .headingPIDFCoefficients(new PIDFCoefficients(
                     0.7,
                     0,
                     0.0001,
                     0.03
-            ))
+            ))/*
             .secondaryHeadingPIDFCoefficients( new PIDFCoefficients(
                     0.5,
                     0,
                     0,
                     0.02
-            ))
+            ))*/
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(
                     0.1,
                     0,
                     0.000,
                     0.6,
                     0.08
-            ))
+            ))/*
             .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(
                     0.02,
                     0,
                     0.000005,
                     0.6,
                     0.01
-            ))
+            ))*/
             .drivePIDFSwitch(15)
             .centripetalScaling(0.0005);
 

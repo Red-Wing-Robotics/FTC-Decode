@@ -12,15 +12,23 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
 
+import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.state.SingleLauncher;
 import org.firstinspires.ftc.teamcode.state.Turret;
 import org.firstinspires.ftc.teamcode.util.Alliance;
+import org.firstinspires.ftc.teamcode.util.BallColor;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.VelocityCalculation;
 
 import java.util.function.Supplier;
+
+import android.graphics.Color;
+
 
 @SuppressWarnings("unused")
 @Configurable
@@ -80,6 +88,17 @@ public class BlueTeleop extends OpMode {
 
     private Turret turretStateMachine;
 
+    private BallColor[] indexerLoad = {BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE};// extra,intake,shoot
+
+    NormalizedColorSensor colorSensorIntake;
+    private int purpleHueMin = 165;
+    private int purpleHueMax = 240;
+    private int greenHueMin = 150;
+    private int greenHueMax = 163;
+    private float intakeHue;
+    private int extraHue;
+    private int shootHue;
+
     @Override
     public void init() {
         Pose start = new Pose(17.75/2d - 144,9.75 , Math.toRadians(90) ); // Assumed heading is 0 since we didn't specify
@@ -106,6 +125,7 @@ public class BlueTeleop extends OpMode {
         follower.update();
 
         intake = hardwareMap.get(DcMotor.class, "intake");
+        colorSensorIntake = hardwareMap.get(NormalizedColorSensor.class, "color sensor intake");
 
         launcher = new SingleLauncher( hardwareMap, telemetry, turretStateMachine );
 
@@ -121,6 +141,11 @@ public class BlueTeleop extends OpMode {
         launcher.initializeSpindexer();
         launcher.deactivateFeeders();
         isShooterOn = true;
+        launcher.startShooter();
+
+        if (colorSensorIntake instanceof SwitchableLight) {
+            ((SwitchableLight)colorSensorIntake).enableLight(true);
+        }
     }
     //72.1x, 75.155y,134h
     @Override
@@ -157,6 +182,16 @@ public class BlueTeleop extends OpMode {
             distanceToGoal = 0;
         }
 
+        intakeHue = getColorSensorHue();
+        if( purpleHueMin <= intakeHue && intakeHue <= purpleHueMax){
+            indexerLoad[1] = BallColor.PURPLE;
+        } else if (greenHueMin <= intakeHue && intakeHue <= greenHueMax) {
+            indexerLoad[1] = BallColor.GREEN;
+        }else {
+            indexerLoad[1] = null;
+        }
+
+
         if(automatedDrive && !follower.isBusy()){
             automatedDrive = false;
             follower.startTeleopDrive();
@@ -184,6 +219,8 @@ public class BlueTeleop extends OpMode {
 
         if ( gamepad2.x && !isXPressed) {
             launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
             isXPressed = true;
         } else if(!gamepad2.x){
             isXPressed = false;
@@ -197,6 +234,8 @@ public class BlueTeleop extends OpMode {
 
         if ( gamepad2.y && !isYPressed) {
             launcher.shootIntake();
+            adjustColorSensingClockwise();
+            removeShootColor();
             isYPressed = true;
         } else if(!gamepad2.y){
             isYPressed = false;
@@ -204,6 +243,7 @@ public class BlueTeleop extends OpMode {
 
         if ( gamepad2.b && !isBPressed) {
             launcher.shootShoot();
+            removeShootColor();
             isBPressed = true;
         } else if(!gamepad2.b){
             isBPressed = false;
@@ -280,8 +320,10 @@ public class BlueTeleop extends OpMode {
         }*/
         if(gamepad2.dpad_right){
             launcher.turnSpindexerClockwise();
+            adjustColorSensingClockwise();
         } else if (gamepad2.dpad_left) {
             launcher.turnSpindexerCounterClockwise();
+            adjustColorSensingCounterClockwise();
         }
 
         if(gamepad2.a && !isAPressed){
@@ -299,6 +341,10 @@ public class BlueTeleop extends OpMode {
         telemetry.addData("PP y", follower.getPose().getY());
         telemetry.addData("PP heading", Math.toDegrees(follower.getPose().getHeading()));
         telemetry.addData("Shooter State", launcher.getState());
+        telemetry.addData( "Intake Hue", intakeHue);
+        telemetry.addData("Extra Color", indexerLoad[0] );
+        telemetry.addData("Intake Color", indexerLoad[1] );
+        telemetry.addData("Shooter Color", indexerLoad[2] );
         if (elapsedTime > 0) {
             telemetry.addData( "Flywheel spin-up time (ms)", elapsedTime );
         }
@@ -310,6 +356,35 @@ public class BlueTeleop extends OpMode {
         //leftShooter.setPower(  p );
         launcher.setShooterVelocity( p );
     }
+
+    private float getColorSensorHue(){
+       NormalizedRGBA colors = colorSensorIntake.getNormalizedColors();
+       float hue = JavaUtil.colorToHue(colors.toColor());
+       logColors(colors);
+       return hue;
+        // Convert the RGB colors to HSV values
+        //Color.RGBToHSV((int)(colors.red * SCALE_FACTOR), (int)(colors.green * SCALE_FACTOR), (int)(colors.blue * SCALE_FACTOR), hsvValues);
+
+        //return hsvValues[0];
+    }
+
+    private void adjustColorSensingClockwise(){
+        BallColor extra = indexerLoad[0];
+        indexerLoad[0] = indexerLoad[2];
+        indexerLoad[2] = indexerLoad[1];
+        indexerLoad[1] = extra;
+    }
+
+    private void adjustColorSensingCounterClockwise(){
+        BallColor extra = indexerLoad[0];
+        indexerLoad[0] = indexerLoad[1];
+        indexerLoad[1] = indexerLoad[2];
+        indexerLoad[2] = extra;
+    }
+
+    private void removeShootColor(){
+        indexerLoad[2] = null;
+    }
 /*
     public void setDrivePower(double frontLeft, double backLeft, double frontRight, double backRight) {
             leftFrontDrive.setPower(frontLeft);
@@ -318,5 +393,12 @@ public class BlueTeleop extends OpMode {
             rightBackDrive.setPower(backRight);
         }
     }*/
+
+    private void logColors(NormalizedRGBA colors) {
+        telemetry.addData("R", colors.red);
+        telemetry.addData("G", colors.green);
+        telemetry.addData("B", colors.blue);
+        telemetry.addData("A", colors.alpha);
+    }
 }
 

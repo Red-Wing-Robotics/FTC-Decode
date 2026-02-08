@@ -213,6 +213,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+                launcher.startShooter();
                 launcher.setShooterVelocity(shootVelocity);
                 turret.setPosition(0);
                 follower.followPath(gotoFirstShootPose, true);
@@ -255,6 +256,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 6:
                 if(!follower.isBusy()) {
+                    launcher.startShooter();
                     launcher.setShooterVelocity(shootVelocity);
                     launcher.turnSpindexerCounterClockwise();
                     turret.setPosition(1);
