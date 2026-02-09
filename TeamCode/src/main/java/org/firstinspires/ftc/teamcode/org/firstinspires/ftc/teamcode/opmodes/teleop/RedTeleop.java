@@ -12,11 +12,16 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
 
+import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.state.SingleLauncher;
 import org.firstinspires.ftc.teamcode.state.Turret;
 import org.firstinspires.ftc.teamcode.util.Alliance;
+import org.firstinspires.ftc.teamcode.util.BallColor;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.VelocityCalculation;
 
@@ -79,6 +84,16 @@ public class RedTeleop extends OpMode {
     private boolean automatedDrive = false;
 
     private Turret turretStateMachine;
+    private BallColor[] indexerLoad = {BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE};// extra,intake,shoot
+
+    NormalizedColorSensor colorSensorIntake;
+    private int purpleHueMin = 165;
+    private int purpleHueMax = 240;
+    private int greenHueMin = 150;
+    private int greenHueMax = 163;
+    private float intakeHue;
+    private int extraHue;
+    private int shootHue;
 
     @Override
     public void init() {
@@ -106,6 +121,7 @@ public class RedTeleop extends OpMode {
         follower.update();
 
         intake = hardwareMap.get(DcMotor.class, "intake");
+        colorSensorIntake = hardwareMap.get(NormalizedColorSensor.class, "color sensor intake");
 
         launcher = new SingleLauncher( hardwareMap, telemetry, turretStateMachine);
 
@@ -122,6 +138,9 @@ public class RedTeleop extends OpMode {
         launcher.deactivateFeeders();
         isShooterOn = true;
         launcher.startShooter();
+        if (colorSensorIntake instanceof SwitchableLight) {
+            ((SwitchableLight)colorSensorIntake).enableLight(true);
+        }
     }
     //72.1x, 75.155y,134h
     @Override
@@ -156,6 +175,15 @@ public class RedTeleop extends OpMode {
         } else {
             turretStateMachine.update( result );
             distanceToGoal = 0;
+        }
+
+        intakeHue = getColorSensorHue();
+        if( purpleHueMin <= intakeHue && intakeHue <= purpleHueMax){
+            indexerLoad[1] = BallColor.PURPLE;
+        } else if (greenHueMin <= intakeHue && intakeHue <= greenHueMax) {
+            indexerLoad[1] = BallColor.GREEN;
+        }else {
+            indexerLoad[1] = null;
         }
 
         if(automatedDrive && !follower.isBusy()){
@@ -311,6 +339,34 @@ public class RedTeleop extends OpMode {
         //leftShooter.setPower(  p );
         launcher.setShooterVelocity( p );
     }
+    private float getColorSensorHue(){
+        NormalizedRGBA colors = colorSensorIntake.getNormalizedColors();
+        float hue = JavaUtil.colorToHue(colors.toColor());
+        logColors(colors);
+        return hue;
+        // Convert the RGB colors to HSV values
+        //Color.RGBToHSV((int)(colors.red * SCALE_FACTOR), (int)(colors.green * SCALE_FACTOR), (int)(colors.blue * SCALE_FACTOR), hsvValues);
+
+        //return hsvValues[0];
+    }
+
+    private void adjustColorSensingClockwise(){
+        BallColor extra = indexerLoad[0];
+        indexerLoad[0] = indexerLoad[2];
+        indexerLoad[2] = indexerLoad[1];
+        indexerLoad[1] = extra;
+    }
+
+    private void adjustColorSensingCounterClockwise(){
+        BallColor extra = indexerLoad[0];
+        indexerLoad[0] = indexerLoad[1];
+        indexerLoad[1] = indexerLoad[2];
+        indexerLoad[2] = extra;
+    }
+
+    private void removeShootColor(){
+        indexerLoad[2] = null;
+    }
 /*
     public void setDrivePower(double frontLeft, double backLeft, double frontRight, double backRight) {
             leftFrontDrive.setPower(frontLeft);
@@ -319,5 +375,46 @@ public class RedTeleop extends OpMode {
             rightBackDrive.setPower(backRight);
         }
     }*/
+
+    private void logColors(NormalizedRGBA colors) {
+        telemetry.addData("R", colors.red);
+        telemetry.addData("G", colors.green);
+        telemetry.addData("B", colors.blue);
+        telemetry.addData("A", colors.alpha);
+    }
+
+    private void shootGreen (){
+        if(indexerLoad[2] == BallColor.GREEN){
+            launcher.shootShoot();
+            removeShootColor();
+        }else if(indexerLoad[1] == BallColor.GREEN){
+            launcher.shootIntake();
+            adjustColorSensingClockwise();
+            removeShootColor();
+        }else if(indexerLoad[0] == BallColor.GREEN){
+            launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
+        }else{
+            //otPurple();
+        }
+    }
+
+    private void shootPurple(){
+        if(indexerLoad[2] == BallColor.PURPLE){
+            launcher.shootShoot();
+            removeShootColor();
+        }else if(indexerLoad[1] == BallColor.PURPLE){
+            launcher.shootIntake();
+            adjustColorSensingClockwise();
+            removeShootColor();
+        }else if(indexerLoad[0] == BallColor.PURPLE){
+            launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
+        }else{
+            //shootGreen();
+        }
+    }
 }
 

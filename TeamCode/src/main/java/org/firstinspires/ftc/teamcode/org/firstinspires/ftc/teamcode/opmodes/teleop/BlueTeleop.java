@@ -400,5 +400,39 @@ public class BlueTeleop extends OpMode {
         telemetry.addData("B", colors.blue);
         telemetry.addData("A", colors.alpha);
     }
+
+    private void shootGreen (){
+        if(indexerLoad[2] == BallColor.GREEN){
+            launcher.shootShoot();
+            removeShootColor();
+        }else if(indexerLoad[1] == BallColor.GREEN){
+            launcher.shootIntake();
+            adjustColorSensingClockwise();
+            removeShootColor();
+        }else if(indexerLoad[0] == BallColor.GREEN){
+            launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
+        }else{
+            //otPurple();
+        }
+    }
+
+    private void shootPurple(){
+        if(indexerLoad[2] == BallColor.PURPLE){
+            launcher.shootShoot();
+            removeShootColor();
+        }else if(indexerLoad[1] == BallColor.PURPLE){
+            launcher.shootIntake();
+            adjustColorSensingClockwise();
+            removeShootColor();
+        }else if(indexerLoad[0] == BallColor.PURPLE){
+            launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
+        }else{
+            //shootGreen();
+        }
+    }
 }
 
