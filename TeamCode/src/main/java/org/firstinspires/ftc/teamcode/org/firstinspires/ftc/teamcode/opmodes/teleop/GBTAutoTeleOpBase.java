@@ -38,7 +38,6 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
     public CRServo leftFeeder = null;
 
     Limelight3A limelight;
-    private double shooterVelocity = 500;
     private boolean isShooterOn = false;
 
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
@@ -115,7 +114,7 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
 
-        double distanceToGoal = 0;
+        double distanceToGoal;
         if (result != null && result.isValid()) {
             turretStateMachine.update(result);
             if (!result.getFiducialResults().isEmpty()) {
@@ -203,6 +202,7 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
             intake.setPower(1);
         }
 
+        double shooterVelocity = 500;
         if (isShooterOn) {
             shooterVelocity = VelocityCalculation.getTargetVelocity(distanceToGoal);
         } else {

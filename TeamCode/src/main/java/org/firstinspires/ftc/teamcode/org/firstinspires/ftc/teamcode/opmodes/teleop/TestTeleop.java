@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.state.OdometryTurret;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 
+@SuppressWarnings("unused")
 @Configurable
 @TeleOp(name = "Test Odometry Turret", group = "Testing")
 public class TestTeleop extends OpMode {

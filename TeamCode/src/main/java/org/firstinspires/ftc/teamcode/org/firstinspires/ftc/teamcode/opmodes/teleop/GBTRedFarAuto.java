@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.auto.FarSideAutoRed;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 
+@SuppressWarnings("unused")
 @Configurable
 @TeleOp(name = "GBT Red Far Auto", group = "Examples")
 public class GBTRedFarAuto extends GBTAutoTeleOpBase {
