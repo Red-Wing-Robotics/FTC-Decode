@@ -202,7 +202,7 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
             intake.setPower(1);
         }
 
-        double shooterVelocity = 500;
+        double shooterVelocity;
         if (isShooterOn) {
             shooterVelocity = VelocityCalculation.getTargetVelocity(distanceToGoal);
         } else {
