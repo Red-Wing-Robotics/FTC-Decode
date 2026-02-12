@@ -12,50 +12,52 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(13.83)
-            .forwardZeroPowerAcceleration(-34.30537347818821)
-            .lateralZeroPowerAcceleration(-241.50027821714204)
+            .forwardZeroPowerAcceleration(-30.0217536779079)
+            .lateralZeroPowerAcceleration(-58.02154355743423)
             .translationalPIDFCoefficients(new PIDFCoefficients(
-                    0.09,
+                    0.1,
                     0,
-                    0.001,
+                    0,
+                    0.03
+            ))
+            .translationalPIDFSwitch(4)
+            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(
+                    0.1,
+                    0,
+                    0,
                     0.02
             ))
-            .translationalPIDFSwitch(4)/*
-            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(
-                    0.7,
-                    0,
-                    0,
-                    1.5
-            ))*/
             .headingPIDFCoefficients(new PIDFCoefficients(
-                    0.7,
+                    0.1,
                     0,
-                    0.0001,
-                    0.03
-            ))/*
+                    0,
+                    0.5
+            ))
             .secondaryHeadingPIDFCoefficients( new PIDFCoefficients(
-                    0.5,
+                    0.3,
                     0,
                     0,
                     0.02
-            ))*/
+            ))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(
                     0.1,
                     0,
                     0.000,
                     0.6,
                     0.08
-            ))/*
+            ))
             .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(
                     0.02,
                     0,
                     0.000005,
                     0.6,
                     0.01
-            ))*/
+            ))
             .drivePIDFSwitch(15)
             .centripetalScaling(0.0005);
 
@@ -68,12 +70,13 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(52.2883615568867)
-            .yVelocity(45.78680937684427);
+            .xVelocity(62.701253095011076)
+            .yVelocity(49.72732904389149);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY( -0.5 )//0.375 for other chasee
             .strafePodX( -6.125 )//-6.045 for other chasee
+            .distanceUnit(DistanceUnit.INCH)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
@@ -91,9 +94,9 @@ public class Constants {
             0.1,
             0.009,
             50,
-            1,
+            0.9,
             10,
-            0.75
+            0.7
     );
 
     //Add custom localizers or drivetrains here
