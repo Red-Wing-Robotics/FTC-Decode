@@ -9,9 +9,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
@@ -31,19 +29,16 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     private int pipeline;
 
     private Follower follower;
-
     private SingleLauncher launcher;
+
 
     private int pathState;
 
     private ObeliskState oState = ObeliskState.UNKNOWN;
 
     public DcMotor intake = null;
-    public DcMotorEx leftShooter = null;
-    public DcMotorEx rightShooter = null;
-    public CRServo rightFeeder = null;
-    public CRServo leftFeeder = null;
-    public Servo diverter = null;
+    public Servo turret = null;
+
 
     public static double shootVelocity = 1400;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
@@ -70,6 +65,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public static double purpleCollectX = 20;
     public static double purpleCollectY = 37;
     public static double purpleCollectHeading = 180;
+    public static double secondPurpleCollectX = 15;
     public static double leaveY = 24;
     public static double leaveX = 24;
     public static double leaveHeading = 180;
@@ -80,10 +76,11 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     private final Pose secondLoadingZoneCollectPose = new Pose(secondLoadingZoneCollectX, secondLoadingZoneCollectY, Math.toRadians(secondLoadingZoneCollectHeading));
     private final Pose greenCollectPose = new Pose( greenCollectX, greenCollectY, Math.toRadians(greenCollectHeading));
     private final Pose purpleCollectPose = new Pose( purpleCollectX, purpleCollectY, Math.toRadians(purpleCollectHeading));
+    private final Pose secondPurpleCollectPose = new Pose( secondPurpleCollectX, purpleCollectY, Math.toRadians(purpleCollectHeading));
     private final Pose leavePose = new Pose(leaveX, leaveY, Math.toRadians(leaveHeading));
 
 
-    private PathChain gotoFirstShootPose, gotoFirstLoadingZoneCollectPose, gotoSecondLoadingZoneCollectPose, gotoSecondShootPose, gotoPurpleCollectPose, gotoGreenCollectPose, gotoThirdShootPose, gotoLeavePose, gotoGPPCollect, gotoPGPCollect, gotoPPGCollect;
+    private PathChain gotoFirstShootPose, gotoFirstLoadingZoneCollectPose, gotoSecondLoadingZoneCollectPose, gotoSecondShootPose, gotoPurpleCollectPose, gotoGreenCollectPose, gotoSecondPurpleCollectPose, gotoThirdShootPose, gotoLeavePose, gotoGPPCollect, gotoPGPCollect, gotoPPGCollect;
 
     //private Supplier<PathChain> extra;
 
@@ -118,9 +115,14 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 .setLinearHeadingInterpolation(greenCollectPose.getHeading(), purpleCollectPose.getHeading())
                 .build();
 
+        gotoSecondPurpleCollectPose = follower.pathBuilder()
+                .addPath(new BezierLine(purpleCollectPose, secondPurpleCollectPose))
+                .setLinearHeadingInterpolation(purpleCollectPose.getHeading(), secondPurpleCollectPose.getHeading())
+                .build();
+
         gotoThirdShootPose =  follower.pathBuilder()
-                .addPath(new BezierLine(purpleCollectPose, firstShootPose))
-                .setLinearHeadingInterpolation(purpleCollectPose.getHeading(), firstShootPose.getHeading())
+                .addPath(new BezierLine(secondPurpleCollectPose, firstShootPose))
+                .setLinearHeadingInterpolation(secondPurpleCollectPose.getHeading(), firstShootPose.getHeading())
                 .build();
 
         gotoLeavePose = follower.pathBuilder()
@@ -141,15 +143,25 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 .setLinearHeadingInterpolation(ppgPose.getHeading(), ppgCollectPose.getHeading())
                 .build();*/
     }
-
+/*
     public void shootPreloadMotif(ObeliskState oState) {
         // TODO - Refactor with Single Launcher
+        // Preload will be Shoot: Purple; Intake: Green; Extra: Purple
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
+                launcher.shootShoot();
+                launcher.shootIntake();
+                launcher.shootIntake();
                 break;
             case GREEN_PURPLE_PURPLE:
+                launcher.shootIntake();
+                launcher.shootIntake();
+                launcher.shootIntake();
                 break;
             case PURPLE_PURPLE_GREEN:
+                launcher.shootShoot();
+                launcher.shootExtra();
+                launcher.shootExtra();
             default:
                 break;
         }
@@ -157,25 +169,45 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
 
     public void shootGPP(ObeliskState oState) {
         // TODO - Refactor with Single Launcher
+        // load will be Shoot: Purple; Intake: Purple; Extra: Green
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
+                launcher.shootShoot();
+                launcher.shootExtra();
+                launcher.shootExtra();
                 break;
             case GREEN_PURPLE_PURPLE:
+                launcher.shootExtra();
+                launcher.shootExtra();
+                launcher.shootExtra();
                 break;
             case PURPLE_PURPLE_GREEN:
+                launcher.shootShoot();
+                launcher.shootIntake();
+                launcher.shootIntake();
             default:
                 break;
         }
-    }
+    }*/
 
-    public void shootPGP(ObeliskState oState) {
+    public void shoot(ObeliskState oState) {
         // TODO - Refactor with Single Launcher
+        // load will be Shoot: Purple; Intake: Purple; Extra: Green
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
+                launcher.shootShoot();
+                launcher.shootExtra();
+                launcher.shootExtra();
                 break;
             case GREEN_PURPLE_PURPLE:
+                launcher.shootExtra();
+                launcher.shootExtra();
+                launcher.shootExtra();
                 break;
             case PURPLE_PURPLE_GREEN:
+                launcher.shootShoot();
+                launcher.shootIntake();
+                launcher.shootIntake();
             default:
                 break;
         }
@@ -206,12 +238,11 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    shootPreloadMotif(oState);
+                    shoot(oState);
                     setPathState(2);
                 }
                 break;
             case 2:
-                // Launcher should have its own caser for this
                 if (!launcher.isBusy()) {
                     launcher.stopShooter();
                     setPathState(3);
@@ -226,7 +257,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 4:
                 if (!follower.isBusy()){
-                    diverter.setPosition(0.34);
+                    launcher.turnSpindexerClockwise();
                     follower.followPath( gotoSecondLoadingZoneCollectPose, true);
                     setPathState(5);
                 }
@@ -252,39 +283,47 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 8:
                 if (!follower.isBusy()) {
-                    follower.followPath(gotoLeavePose, true);
-                    setPathState(-1);
+                    follower.followPath(gotoGreenCollectPose, true);
+                    setPathState(9);
                 }
                 break;
             case 9:
                 if (!follower.isBusy()) {
-                    diverter.setPosition(0.02);
+                    launcher.turnSpindexerCounterClockwise();
                     //insert sleep
                     follower.followPath(gotoPurpleCollectPose, true);
                     setPathState(10);
                 }
                 break;
             case 10:
-                if(!follower.isBusy()) {
-                    //launcher.deactivateIntake();
-                    launcher.setShooterVelocity(shootVelocity);
-                    follower.followPath(gotoThirdShootPose,true);
+                if (!follower.isBusy()) {
+                    launcher.turnSpindexerCounterClockwise();
+                    //insert sleep
+                    follower.followPath(gotoSecondPurpleCollectPose, true);
                     setPathState(11);
                 }
                 break;
             case 11:
-                if (!follower.isBusy()) {
-                    shootPreloadMotif(oState);
+                if(!follower.isBusy()) {
+                    //launcher.deactivateIntake();
+                    launcher.setShooterVelocity(shootVelocity);
+                    follower.followPath(gotoThirdShootPose,true);
                     setPathState(12);
                 }
                 break;
             case 12:
-                if (!launcher.isBusy()) {
-                    launcher.stopShooter();
+                if (!follower.isBusy()) {
+                    shoot(oState);
                     setPathState(13);
                 }
                 break;
             case 13:
+                if (!launcher.isBusy()) {
+                    launcher.stopShooter();
+                    setPathState(14);
+                }
+                break;
+            case 14:
                 if(!follower.isBusy()) {
                     follower.followPath(gotoLeavePose);
                     setPathState(-1);
@@ -296,14 +335,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     @Override
     public void init() {
         intake = hardwareMap.get(DcMotor.class, "intake");
-        leftShooter = hardwareMap.get(DcMotorEx.class, "leftShooter");
-        leftShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightShooter = hardwareMap.get(DcMotorEx.class, "rightShooter");
-        rightShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
-        leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
-        diverter = hardwareMap.get(Servo.class, "diverter");
+        turret = hardwareMap.get(Servo.class, "turret");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
@@ -319,8 +351,8 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
 
     public void start() {
         pathState = 0;
-        diverter.setPosition(0.02);
         intake.setPower(0);
+        turret.setPosition(0.5);
     }
 
     @Override
@@ -366,8 +398,8 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
         logger.logData("x", follower.getPose().getX());
         logger.logData("y", follower.getPose().getY());
         logger.logData("heading", follower.getPose().getHeading());
-        logger.logData("right shooter velocity", rightShooter.getVelocity());
-        logger.logData("left shooter velocity", leftShooter.getVelocity());
+        logger.logData("shooter velocity", launcher.getShooterVelocity());
         logger.update();
     }
 }
+

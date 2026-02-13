@@ -27,7 +27,7 @@ public class DistanceCalculation {
     public static double getTrigDistanceToTargetBot2(double ty) {
         double targetHeight = 29.4375;
         double limelightHeight = 13;
-        double limelightAngle = 20.8;
+        double limelightAngle = 25;
 
         double angleToTarget = Math.toRadians(limelightAngle + ty);
         return (targetHeight - limelightHeight) / Math.tan(angleToTarget);

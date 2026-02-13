@@ -42,7 +42,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public DcMotor intake = null;
     public Servo turret = null;
 
-    public static double shootVelocity = 1340;
+    public static double shootVelocity = 1370;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     public static long TIMEOUT_DEFAULT = 5000;
@@ -52,19 +52,20 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public static double startX = 32.7;
     public static double startY = 144 - (16.09375/2d);
     public static double startHeading = 90;
-    public static double shootX = 30;
-    public static double shootY = 114;
-    public static double shootHeading = 90;
+    public static double shootX = 45;
+    public static double shootY = 99;
+    public static double shootHeading = 105;
     public static double obeliskReadHeading = 75;
-    public static double gppX = 41;
-    public static double gppY = 78;
+    public static double gppX = 50;
+    public static double gppY = 86;
     public static double gppHeading = 180;
-    public static double gppPurpleY = 78;
-    public static double gppPurpleX = 36;
+    public static double gppPurpleY = 86;
+    public static double gppPurpleX = 32;
     public static double gppPurpleHeading = 180;
-    public static double gppGreenX = 25;
-    public static double gppGreenY = 78;
+    public static double gppGreenX = 29;
+    public static double gppGreenY = 86;
     public static double gppGreenHeading = 180;
+    public static double gppLastX = 15;
     public static double pgpX = 41.44;
     public static double pgpY = 59.34;
     public static double pgpHeading = 180;
@@ -84,13 +85,14 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     private final Pose gppPose = new Pose(gppX, gppY, Math.toRadians(gppHeading));
     private final Pose gppPurplePose = new Pose(gppPurpleX, gppPurpleY, Math.toRadians(gppPurpleHeading));
     private final Pose gppGreenPose = new Pose(gppGreenX, gppGreenY, Math.toRadians(gppGreenHeading));
+    private final Pose gppLastPose = new Pose(gppLastX, gppGreenY, Math.toRadians(gppGreenHeading));
     private final Pose pgpPose = new Pose(pgpX, pgpY, Math.toRadians(pgpHeading));
     private final Pose pgpPurplePose = new Pose(pgpPurpleX, pgpPurpleY, Math.toRadians(pgpPurpleHeading));
     private final Pose pgpGreenPose = new Pose(pgpGreenX, pgpGreenY, Math.toRadians(pgpGreenHeading));
     private final Pose leavePose = new Pose(leaveX, leaveY, Math.toRadians(leaveHeading));
 
 
-    private PathChain gotoObeliskReadPose, gotoFirstShootPose, gotoGppPose, gotoGppPurplePose, gotoGppGreenPose, gotoSecondShootPose, gotoPgpPose, gotoPgpPurplePose, gotoPgpGreenPose, gotoThirdShootPose, gotoLeavePose;
+    private PathChain gotoObeliskReadPose, gotoFirstShootPose, gotoGppPose, gotoGppPurplePose, gotoGppGreenPose, gotoGppLastPose, gotoSecondShootPose, gotoPgpPose, gotoPgpPurplePose, gotoPgpGreenPose, gotoThirdShootPose, gotoLeavePose;
 
     //private Supplier<PathChain> extra;
 
@@ -120,9 +122,14 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 .setLinearHeadingInterpolation(gppPurplePose.getHeading(), gppGreenPose.getHeading())
                 .build();
 
+        gotoGppLastPose = follower.pathBuilder()
+                .addPath(new BezierLine(gppGreenPose, gppLastPose))
+                .setLinearHeadingInterpolation(gppGreenPose.getHeading(), gppLastPose.getHeading())
+                .build();
+
         gotoSecondShootPose =  follower.pathBuilder()
-                .addPath(new BezierLine(gppGreenPose, shootPose))
-                .setLinearHeadingInterpolation(gppGreenPose.getHeading(), shootPose.getHeading())
+                .addPath(new BezierLine(gppLastPose, shootPose))
+                .setLinearHeadingInterpolation(gppLastPose.getHeading(), shootPose.getHeading())
                 .build();
 
         gotoPgpPose = follower.pathBuilder()
@@ -197,11 +204,11 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 launcher.shootShoot();
                 launcher.shootIntake();
                 launcher.shootIntake();
-            default:
+            /*default:
                 launcher.shootShoot();
                 launcher.shootIntake();
                 launcher.shootIntake();
-                break;
+                break;*/
         }
     }
 
@@ -237,47 +244,54 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                     launcher.stopShooter();
                     intake.setPower(1.0);
                     follower.followPath(gotoGppPose, true);//pick up first purple
+                    launcher.turnSpindexerCounterClockwise();
                     setPathState(4);
                 }
                 break;
             case 4:
                 if (!follower.isBusy()){
-                    launcher.turnSpindexerClockwise();
                     follower.followPath( gotoGppPurplePose, true);//pick up second purple
                     setPathState(5);
                 }
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    launcher.turnSpindexerClockwise();
+                    launcher.turnSpindexerCounterClockwise();
                     follower.followPath( gotoGppGreenPose, true);//pick up green
                     setPathState(6);
                 }
                 break;
             case 6:
+                if (!follower.isBusy()) {
+                    launcher.turnSpindexerCounterClockwise();
+                    follower.followPath( gotoGppLastPose, true);//pick up green
+                    setPathState(7);
+                }
+                break;
+            case 7:
                 if(!follower.isBusy()) {
                     launcher.startShooter();
                     launcher.setShooterVelocity(shootVelocity);
                     launcher.turnSpindexerCounterClockwise();
                     turret.setPosition(1);
                     follower.followPath(gotoSecondShootPose,true);
-                    intake.setPower(0);
-                    setPathState(7);
-                }
-                break;
-            case 7:
-                if (!follower.isBusy()) {
-                    shoot(oState);
                     setPathState(8);
                 }
                 break;
             case 8:
-                if (!launcher.isBusy()) {
-                    launcher.stopShooter();
+                if (!follower.isBusy()) {
+                    launcher.turnSpindexerClockwise();
+                    shoot(oState);
                     setPathState(9);
                 }
                 break;
             case 9:
+                if (!launcher.isBusy()) {
+                    launcher.stopShooter();
+                    setPathState(10);
+                }
+                break;
+            case 10:
                 if (!follower.isBusy()){
                     //launcher.activateIntake();
                     //diverter.setPosition(0.02);
@@ -351,6 +365,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
 
         launcher = new SingleLauncher(hardwareMap, telemetry, null);
         waitTimer = new NonBlockingTimer(WAIT_TIME);
+        //follower.setMaxPower(0.5);
     }
 
     public void start() {
@@ -358,6 +373,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         //diverter.setPosition(0.02);
         intake.setPower(0);
         launcher.initializeSpindexer();
+        turret.setPosition(0);
     }
 
     @Override
