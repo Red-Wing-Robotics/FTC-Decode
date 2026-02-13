@@ -7,7 +7,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -15,7 +14,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.state.Turret;
+import org.firstinspires.ftc.teamcode.state.OdometryTurret;
+import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.VelocityCalculation;
 import org.firstinspires.ftc.teamcode.util.log.Logger;
@@ -38,7 +38,6 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
     public CRServo leftFeeder = null;
 
     Limelight3A limelight;
-    private double shooterVelocity = 500;
     private boolean isShooterOn = false;
 
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
@@ -50,19 +49,19 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
 
     private boolean automatedDrive = false;
 
-    private Turret turretStateMachine;
+    private OdometryTurret turretStateMachine;
+    public static boolean enableVisionCorrection = true;
 
     // Abstract methods for subclasses to implement
     protected abstract Pose getStartingPose();
     protected abstract Pose getShootPoseNear();
     protected abstract Pose getShootPoseFar();
     protected abstract int getLimelightPipeline();
+    protected abstract Alliance getAlliance();
 
     @Override
     public void init() {
         logger = new Logger(telemetry);
-
-        turretStateMachine = new Turret(hardwareMap, telemetry);
 
         Pose start = getStartingPose();
         Pose shootPoseNear = getShootPoseNear();
@@ -81,6 +80,8 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(start);
         follower.update();
+        turretStateMachine = new OdometryTurret(hardwareMap, telemetry, follower, getAlliance());
+        turretStateMachine.setVisionEnabled(enableVisionCorrection);
 
         intake = hardwareMap.get(DcMotor.class, "intake");
         leftShooter = hardwareMap.get(DcMotorEx.class, "leftShooter");
@@ -113,12 +114,13 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
 
-        double distanceToGoal = 0;
+        double distanceToGoal;
         if (result != null && result.isValid()) {
             turretStateMachine.update(result);
-            LLResultTypes.FiducialResult fResult = result.getFiducialResults().get(0);
-            int id = fResult.getFiducialId();
-            logger.logData("April Tag ID", "" + id);
+            if (!result.getFiducialResults().isEmpty()) {
+                int id = result.getFiducialResults().get(0).getFiducialId();
+                logger.logData("April Tag ID", "" + id);
+            }
 
             double tx = result.getTx();
             double ty = result.getTy();
@@ -136,7 +138,7 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
             }
         } else {
             distanceToGoal = 0;
-            //turretStateMachine.update();
+            turretStateMachine.update(result);
         }
 
         if (automatedDrive && (!follower.isBusy() || gamepad1.x)) {
@@ -200,6 +202,7 @@ public abstract class GBTAutoTeleOpBase extends OpMode {
             intake.setPower(1);
         }
 
+        double shooterVelocity;
         if (isShooterOn) {
             shooterVelocity = VelocityCalculation.getTargetVelocity(distanceToGoal);
         } else {

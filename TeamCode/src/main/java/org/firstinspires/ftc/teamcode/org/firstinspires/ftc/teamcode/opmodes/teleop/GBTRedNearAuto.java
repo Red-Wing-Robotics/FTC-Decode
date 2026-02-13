@@ -5,7 +5,9 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.auto.NearSideAutoRed;
+import org.firstinspires.ftc.teamcode.util.Alliance;
 
+@SuppressWarnings("unused")
 @Configurable
 @TeleOp(name = "GBT Red Near Auto", group = "Examples")
 public class GBTRedNearAuto extends GBTAutoTeleOpBase {
@@ -28,5 +30,10 @@ public class GBTRedNearAuto extends GBTAutoTeleOpBase {
     @Override
     protected int getLimelightPipeline() {
         return 2;
+    }
+
+    @Override
+    protected Alliance getAlliance() {
+        return Alliance.RED;
     }
 }

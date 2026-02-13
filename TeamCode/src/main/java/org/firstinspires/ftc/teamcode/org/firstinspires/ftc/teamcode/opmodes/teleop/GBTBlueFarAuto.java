@@ -5,7 +5,9 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.auto.FarSideAutoBlue;
+import org.firstinspires.ftc.teamcode.util.Alliance;
 
+@SuppressWarnings("unused")
 @Configurable
 @TeleOp(name = "GBT Blue Far Auto", group = "Examples")
 public class GBTBlueFarAuto extends GBTAutoTeleOpBase {
@@ -28,5 +30,10 @@ public class GBTBlueFarAuto extends GBTAutoTeleOpBase {
     @Override
     protected int getLimelightPipeline() {
         return 1;
+    }
+
+    @Override
+    protected Alliance getAlliance() {
+        return Alliance.BLUE;
     }
 }

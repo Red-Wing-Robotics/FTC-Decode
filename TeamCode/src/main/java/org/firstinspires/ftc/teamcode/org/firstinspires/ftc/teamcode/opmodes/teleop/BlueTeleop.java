@@ -7,7 +7,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -18,8 +17,8 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.state.OdometryTurret;
 import org.firstinspires.ftc.teamcode.state.SingleLauncher;
-import org.firstinspires.ftc.teamcode.state.Turret;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.BallColor;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
@@ -86,7 +85,7 @@ public class BlueTeleop extends OpMode {
 
     private boolean automatedDrive = false;
 
-    private Turret turretStateMachine;
+    private OdometryTurret turretStateMachine;
 
     private BallColor[] indexerLoad = {BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE};// extra,intake,shoot
 
@@ -107,8 +106,6 @@ public class BlueTeleop extends OpMode {
         //Pose leverSetUpPose = new Pose(22.95, 71.9, 0);
         //Pose leverPose = new Pose(15.95, 71.9, 0)
 
-        turretStateMachine = new Turret(hardwareMap, telemetry);
-
         gotoShootPoseNear = () -> follower.pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierLine(follower::getPose, shootPoseNear )))
                 .setLinearHeadingInterpolation( follower.getHeading(), shootPoseNear.getHeading())
@@ -123,11 +120,12 @@ public class BlueTeleop extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(start); //startingPose == null ? new Pose() : startingPose);
         follower.update();
+        turretStateMachine = new OdometryTurret(hardwareMap, telemetry, follower, alliance);
 
         intake = hardwareMap.get(DcMotor.class, "intake");
         colorSensorIntake = hardwareMap.get(NormalizedColorSensor.class, "color sensor intake");
 
-        launcher = new SingleLauncher( hardwareMap, telemetry, turretStateMachine );
+        launcher = new SingleLauncher( hardwareMap, telemetry, null );
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
@@ -159,7 +157,6 @@ public class BlueTeleop extends OpMode {
 
         if (result != null && result.isValid()) {
             turretStateMachine.update(result);
-            LLResultTypes.FiducialResult fResult = result.getFiducialResults().get(0);
             int id = result.getFiducialResults().get(0).getFiducialId();
             telemetry.addData("April Tag ID", "" + id);
 
