@@ -96,7 +96,7 @@ public class RedTeleop extends OpMode {
 
     @Override
     public void init() {
-        Pose start = new Pose(17.75/2d - 144,9.75 , Math.toRadians(90) ); // Assumed heading is 0 since we didn't specify
+        Pose start = new Pose(144 - (17.75/2d) ,9.75 , Math.toRadians(90) ); // Assumed heading is 0 since we didn't specify
         Pose shootPoseNear = new Pose(72.1, 75.15, Math.toRadians(135));
         Pose shootPoseFar = new Pose(67.02, 19.57, 2.037);//2.037
         //Pose leverSetUpPose = new Pose(22.95, 71.9, 0);
