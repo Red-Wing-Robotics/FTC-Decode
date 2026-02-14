@@ -16,6 +16,8 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
+import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.auto.FarSideAutoRed;
+import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.auto.NearSideAutoRed;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.state.OdometryTurret;
 import org.firstinspires.ftc.teamcode.state.SingleLauncher;
@@ -28,8 +30,8 @@ import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
 @Configurable
-@TeleOp(name = "Red Teleop", group = "Examples")
-public class RedTeleop extends OpMode {
+@TeleOp(name = "Red Teleop Far Start", group = "Examples")
+public class RedTeleopFarStart extends OpMode {
 
     public static boolean robotCentric = true;
     private Follower follower;
@@ -96,7 +98,7 @@ public class RedTeleop extends OpMode {
 
     @Override
     public void init() {
-        Pose start = new Pose(144 - (17.75/2d) ,9.75 , Math.toRadians(90) ); // Assumed heading is 0 since we didn't specify
+        Pose start = new Pose(FarSideAutoRed.leaveX, FarSideAutoRed.leaveY, Math.toRadians(FarSideAutoRed.leaveHeading) ); // Assumed heading is 0 since we didn't specify
         Pose shootPoseNear = new Pose(72.1, 75.15, Math.toRadians(135));
         Pose shootPoseFar = new Pose(67.02, 19.57, 2.037);//2.037
         //Pose leverSetUpPose = new Pose(22.95, 71.9, 0);
@@ -414,4 +416,5 @@ public class RedTeleop extends OpMode {
         }
     }
 }
+
 

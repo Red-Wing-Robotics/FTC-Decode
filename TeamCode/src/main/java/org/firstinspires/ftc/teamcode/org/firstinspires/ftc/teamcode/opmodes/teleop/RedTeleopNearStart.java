@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
+import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.auto.NearSideAutoRed;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.state.OdometryTurret;
 import org.firstinspires.ftc.teamcode.state.SingleLauncher;
@@ -26,13 +27,10 @@ import org.firstinspires.ftc.teamcode.util.VelocityCalculation;
 
 import java.util.function.Supplier;
 
-import android.graphics.Color;
-
-
 @SuppressWarnings("unused")
 @Configurable
-@TeleOp(name = "Blue Teleop", group = "Examples")
-public class BlueTeleop extends OpMode {
+@TeleOp(name = "Red Teleop Near Start", group = "Examples")
+public class RedTeleopNearStart extends OpMode {
 
     public static boolean robotCentric = true;
     private Follower follower;
@@ -43,7 +41,7 @@ public class BlueTeleop extends OpMode {
 
 
     Limelight3A limelight;
-    private Alliance alliance = Alliance.BLUE;
+    private Alliance alliance = Alliance.RED;
     private double shooterVelocity = 500;
     private boolean isShooterOn = false;
 
@@ -86,7 +84,6 @@ public class BlueTeleop extends OpMode {
     private boolean automatedDrive = false;
 
     private OdometryTurret turretStateMachine;
-
     private BallColor[] indexerLoad = {BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE};// extra,intake,shoot
 
     NormalizedColorSensor colorSensorIntake;
@@ -100,7 +97,7 @@ public class BlueTeleop extends OpMode {
 
     @Override
     public void init() {
-        Pose start = new Pose(17.75/2d - 144,9.75 , Math.toRadians(90) ); // Assumed heading is 0 since we didn't specify
+        Pose start = new Pose(NearSideAutoRed.leaveX, NearSideAutoRed.leaveY, Math.toRadians(NearSideAutoRed.leaveHeading) ); // Assumed heading is 0 since we didn't specify
         Pose shootPoseNear = new Pose(72.1, 75.15, Math.toRadians(135));
         Pose shootPoseFar = new Pose(67.02, 19.57, 2.037);//2.037
         //Pose leverSetUpPose = new Pose(22.95, 71.9, 0);
@@ -125,12 +122,12 @@ public class BlueTeleop extends OpMode {
         intake = hardwareMap.get(DcMotor.class, "intake");
         colorSensorIntake = hardwareMap.get(NormalizedColorSensor.class, "color sensor intake");
 
-        launcher = new SingleLauncher( hardwareMap, telemetry, null );
+        launcher = new SingleLauncher( hardwareMap, telemetry, null);
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
         limelight.start(); // This tells Limelight to start looking!
-        limelight.pipelineSwitch(1); // Switch to pipeline
+        limelight.pipelineSwitch(2); // Switch to pipeline
 
     }
 
@@ -140,7 +137,6 @@ public class BlueTeleop extends OpMode {
         launcher.deactivateFeeders();
         isShooterOn = true;
         launcher.startShooter();
-
         if (colorSensorIntake instanceof SwitchableLight) {
             ((SwitchableLight)colorSensorIntake).enableLight(true);
         }
@@ -175,7 +171,7 @@ public class BlueTeleop extends OpMode {
                 distanceToGoal = trigDistanceToGoal;
             }
         } else {
-            turretStateMachine.update(result);
+            turretStateMachine.update( result );
             distanceToGoal = 0;
         }
 
@@ -187,7 +183,6 @@ public class BlueTeleop extends OpMode {
         }else {
             indexerLoad[1] = null;
         }
-
 
         if(automatedDrive && !follower.isBusy()){
             automatedDrive = false;
@@ -216,8 +211,6 @@ public class BlueTeleop extends OpMode {
 
         if ( gamepad2.x && !isXPressed) {
             launcher.shootExtra();
-            adjustColorSensingCounterClockwise();
-            removeShootColor();
             isXPressed = true;
         } else if(!gamepad2.x){
             isXPressed = false;
@@ -231,8 +224,6 @@ public class BlueTeleop extends OpMode {
 
         if ( gamepad2.y && !isYPressed) {
             launcher.shootIntake();
-            adjustColorSensingClockwise();
-            removeShootColor();
             isYPressed = true;
         } else if(!gamepad2.y){
             isYPressed = false;
@@ -240,7 +231,6 @@ public class BlueTeleop extends OpMode {
 
         if ( gamepad2.b && !isBPressed) {
             launcher.shootShoot();
-            removeShootColor();
             isBPressed = true;
         } else if(!gamepad2.b){
             isBPressed = false;
@@ -317,10 +307,8 @@ public class BlueTeleop extends OpMode {
         }*/
         if(gamepad2.dpad_right){
             launcher.turnSpindexerClockwise();
-            adjustColorSensingClockwise();
         } else if (gamepad2.dpad_left) {
             launcher.turnSpindexerCounterClockwise();
-            adjustColorSensingCounterClockwise();
         }
 
         if(gamepad2.a && !isAPressed){
@@ -338,10 +326,6 @@ public class BlueTeleop extends OpMode {
         telemetry.addData("PP y", follower.getPose().getY());
         telemetry.addData("PP heading", Math.toDegrees(follower.getPose().getHeading()));
         telemetry.addData("Shooter State", launcher.getState());
-        telemetry.addData( "Intake Hue", intakeHue);
-        telemetry.addData("Extra Color", indexerLoad[0] );
-        telemetry.addData("Intake Color", indexerLoad[1] );
-        telemetry.addData("Shooter Color", indexerLoad[2] );
         if (elapsedTime > 0) {
             telemetry.addData( "Flywheel spin-up time (ms)", elapsedTime );
         }
@@ -353,12 +337,11 @@ public class BlueTeleop extends OpMode {
         //leftShooter.setPower(  p );
         launcher.setShooterVelocity( p );
     }
-
     private float getColorSensorHue(){
-       NormalizedRGBA colors = colorSensorIntake.getNormalizedColors();
-       float hue = JavaUtil.colorToHue(colors.toColor());
-       logColors(colors);
-       return hue;
+        NormalizedRGBA colors = colorSensorIntake.getNormalizedColors();
+        float hue = JavaUtil.colorToHue(colors.toColor());
+        logColors(colors);
+        return hue;
         // Convert the RGB colors to HSV values
         //Color.RGBToHSV((int)(colors.red * SCALE_FACTOR), (int)(colors.green * SCALE_FACTOR), (int)(colors.blue * SCALE_FACTOR), hsvValues);
 
