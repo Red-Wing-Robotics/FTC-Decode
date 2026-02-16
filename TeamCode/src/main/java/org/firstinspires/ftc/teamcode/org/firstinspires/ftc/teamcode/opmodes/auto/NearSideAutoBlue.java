@@ -59,18 +59,18 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     public static double startHeading = 90;
     public static double shootX = 45;
     public static double shootY = 99;
-    public static double shootHeading = 105;
+    public static double shootHeading = 100;
     public static double obeliskReadHeading = 75;
-    public static double gppX = 50;
+    public static double gppX = 54;
     public static double gppY = 86;
     public static double gppHeading = 180;
     public static double gppPurpleY = 86;
     public static double gppPurpleX = 32;
     public static double gppPurpleHeading = 180;
-    public static double gppGreenX = 29;
+    public static double gppGreenX = 25;
     public static double gppGreenY = 86;
     public static double gppGreenHeading = 180;
-    public static double gppLastX = 15;
+    public static double gppLastX = 18;
     public static double pgpX = 41.44;
     public static double pgpY = 59.34;
     public static double pgpHeading = 180;
@@ -249,6 +249,13 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 1:
                 if(waitTimer.isFinished() && !follower.isBusy()){
+                    limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
+                    LLResult result = limelight.getLatestResult();
+                    if (pipeline == 0 && result != null && result.isValid() && oState == ObeliskState.UNKNOWN) {
+                        int id = result.getFiducialResults().get(0).getFiducialId();
+                        oState = ObeliskState.fromInt(id);
+                        //pipeline = 1;
+                    }
                     turret.setPosition(1);
                     waitTimer.start();
                     setPathState(2);
@@ -410,11 +417,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
             odometryTurret.update(result);
         }
 
-        if (pipeline == 0 && result != null && result.isValid() && oState == ObeliskState.UNKNOWN) {
-            int id = result.getFiducialResults().get(0).getFiducialId();
-            oState = ObeliskState.fromInt(id);
-            pipeline = 1;
-        }
+
 
         if (pipeline == 1 && result != null && result.isValid()) {
             LLResultTypes.FiducialResult fResult = result.getFiducialResults().get(0);

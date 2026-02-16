@@ -249,6 +249,13 @@ public class NearSideAutoRed extends RWRBaseOpMode {
                 break;
             case 1:
                 if(waitTimer.isFinished() && !follower.isBusy()){
+                    limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
+                    LLResult result = limelight.getLatestResult();
+                    if (pipeline == 0 && result != null && result.isValid() && oState == ObeliskState.UNKNOWN) {
+                        int id = result.getFiducialResults().get(0).getFiducialId();
+                        oState = ObeliskState.fromInt(id);
+                        //pipeline = 1;
+                    }
                     turret.setPosition(0);
                     waitTimer.start();
                     setPathState(2);
@@ -293,7 +300,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
                     launcher.startShooter();
                     launcher.setShooterVelocity(shootVelocity);
                     launcher.turnSpindexerCounterClockwise();
-                    turret.setPosition(1);
+                    turret.setPosition(0);
                     follower.followPath(gotoSecondShootPose,true);
                     setPathState(8);
                 }
@@ -410,11 +417,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
             odometryTurret.update(result);
         }
 
-        if (pipeline == 0 && result != null && result.isValid() && oState == ObeliskState.UNKNOWN) {
-            int id = result.getFiducialResults().get(0).getFiducialId();
-            oState = ObeliskState.fromInt(id);
-            pipeline = 1;
-        }
+
 
         if (pipeline == 1 && result != null && result.isValid()) {
             LLResultTypes.FiducialResult fResult = result.getFiducialResults().get(0);

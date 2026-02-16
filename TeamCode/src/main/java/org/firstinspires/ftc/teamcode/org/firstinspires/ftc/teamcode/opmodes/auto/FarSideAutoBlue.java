@@ -40,7 +40,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public Servo turret = null;
 
 
-    public static double shootVelocity = 1400;
+    public static double shootVelocity = 1800;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     public static long TIMEOUT_DEFAULT = 5000;
@@ -50,84 +50,96 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public static double startX = 57.2;
     public static double startY = 16.09375/2d;
     public static double startHeading = 90;
-    public static double firstShootX = 57.2;
-    public static double firstShootY = 10;
-    public static double firstShootHeading = 110;
-    public static double secondLoadingZoneCollectY = 15;
-    public static double secondLoadingZoneCollectX = 14;
-    public static double secondLoadingZoneCollectHeading = 180;
-    public static double firstLoadingZoneCollectY = 14.3;
-    public static double firstLoadingZoneCollectX = 14;
-    public static double firstLoadingZoneCollectHeading = 180;
-    public static double greenCollectX = 40;
-    public static double greenCollectY = 37;
-    public static double greenCollectHeading = 180;
-    public static double purpleCollectX = 20;
-    public static double purpleCollectY = 37;
-    public static double purpleCollectHeading = 180;
+    public static double shootX = 57.2;
+    public static double shootY = 10;
+    public static double shootHeading = 90;
+    public static double secondLoadingZoneY = 15;
+    public static double secondLoadingZoneX = 14;
+    public static double secondLoadingZoneHeading = 180;
+    public static double firstLoadingZoneY = 14.3;
+    public static double firstLoadingZoneX = 14;
+    public static double firstLoadingZoneHeading = 180;
+    public static double ppgX = 50;
+    public static double ppgY = 37;
+    public static double ppgHeading = 180;
+    public static double ppgGreenX = 32;
+    public static double ppgGreenY = 37;
+    public static double ppgGreenHeading = 180;
+    public static double ppgPurpleX = 25;
+    public static double ppgPurpleY = 37;
+    public static double ppgPurpleHeading = 180;
+    public static double ppgLastX = 15;
+    public static double ppgLastY = 37;
+    public static double ppgLastHeading = 180;
     public static double secondPurpleCollectX = 15;
     public static double leaveY = 24;
     public static double leaveX = 24;
     public static double leaveHeading = 180;
 
     private final Pose startPose = new Pose(startX, startY, Math.toRadians(startHeading));
-    private final Pose firstShootPose = new Pose(firstShootX, firstShootY, Math.toRadians(firstShootHeading));
-    private final Pose firstLoadingZoneCollectPose = new Pose(firstLoadingZoneCollectX, firstLoadingZoneCollectY, Math.toRadians(firstLoadingZoneCollectHeading));
-    private final Pose secondLoadingZoneCollectPose = new Pose(secondLoadingZoneCollectX, secondLoadingZoneCollectY, Math.toRadians(secondLoadingZoneCollectHeading));
-    private final Pose greenCollectPose = new Pose( greenCollectX, greenCollectY, Math.toRadians(greenCollectHeading));
-    private final Pose purpleCollectPose = new Pose( purpleCollectX, purpleCollectY, Math.toRadians(purpleCollectHeading));
-    private final Pose secondPurpleCollectPose = new Pose( secondPurpleCollectX, purpleCollectY, Math.toRadians(purpleCollectHeading));
+    private final Pose shootPose = new Pose(shootX, shootY, Math.toRadians(shootHeading));
+    private final Pose firstLoadingZonePose = new Pose(firstLoadingZoneX, firstLoadingZoneY, Math.toRadians(firstLoadingZoneHeading));
+    private final Pose secondLoadingZonePose = new Pose(secondLoadingZoneX, secondLoadingZoneY, Math.toRadians(secondLoadingZoneHeading));
+    private final Pose ppgPose = new Pose( ppgX, ppgY, Math.toRadians(ppgHeading));
+    private final Pose ppgGreenPose = new Pose( ppgGreenX, ppgGreenY, Math.toRadians(ppgGreenHeading));
+    private final Pose ppgPurplePose = new Pose(ppgPurpleX, ppgPurpleY, Math.toRadians(ppgPurpleHeading));
+    private final Pose ppgLastPose = new Pose( secondPurpleCollectX, ppgLastY, Math.toRadians(ppgLastHeading));
     private final Pose leavePose = new Pose(leaveX, leaveY, Math.toRadians(leaveHeading));
 
 
-    private PathChain gotoFirstShootPose, gotoFirstLoadingZoneCollectPose, gotoSecondLoadingZoneCollectPose, gotoSecondShootPose, gotoPurpleCollectPose, gotoGreenCollectPose, gotoSecondPurpleCollectPose, gotoThirdShootPose, gotoLeavePose, gotoGPPCollect, gotoPGPCollect, gotoPPGCollect;
+    private PathChain gotoShootPose, gotoFirstLoadingZonePose, gotoSecondLoadingZonePose, gotoSecondShootPose, gotoPPGPose, gotoPPGGreenPose, gotoPPGPurplePose, gotoPPGLastPose, gotoThirdShootPose, gotoLeavePose;
 
     //private Supplier<PathChain> extra;
 
     public void buildPaths() {
-        gotoFirstShootPose = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, firstShootPose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), firstShootPose.getHeading())
+        gotoShootPose = follower.pathBuilder()
+                .addPath(new BezierLine(ppgLastPose, shootPose))
+                .setLinearHeadingInterpolation(ppgLastPose.getHeading(), shootPose.getHeading())
                 .build();
 
-        gotoFirstLoadingZoneCollectPose = follower.pathBuilder()
-                .addPath(new BezierLine(firstShootPose, firstLoadingZoneCollectPose))
-                .setLinearHeadingInterpolation(firstShootPose.getHeading(), firstLoadingZoneCollectPose.getHeading())
+        gotoFirstLoadingZonePose = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose, firstLoadingZonePose))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), firstLoadingZonePose.getHeading())
                 .build();
 
-        gotoSecondLoadingZoneCollectPose = follower.pathBuilder()
-                .addPath(new BezierLine(firstLoadingZoneCollectPose, secondLoadingZoneCollectPose))
-                .setLinearHeadingInterpolation(firstLoadingZoneCollectPose.getHeading(), secondLoadingZoneCollectPose.getHeading())
+        gotoSecondLoadingZonePose = follower.pathBuilder()
+                .addPath(new BezierLine(firstLoadingZonePose, secondLoadingZonePose))
+                .setLinearHeadingInterpolation(firstLoadingZonePose.getHeading(), secondLoadingZonePose.getHeading())
                 .build();
 
         gotoSecondShootPose =  follower.pathBuilder()
-                .addPath(new BezierLine(secondLoadingZoneCollectPose, firstShootPose))
-                .setLinearHeadingInterpolation(secondLoadingZoneCollectPose.getHeading(), firstShootPose.getHeading())
+                .addPath(new BezierLine(secondLoadingZonePose, shootPose))
+                .setLinearHeadingInterpolation(secondLoadingZonePose.getHeading(), shootPose.getHeading())
                 .build();
 
-        gotoGreenCollectPose = follower.pathBuilder()
-                .addPath(new BezierLine(firstShootPose, greenCollectPose))
-                .setLinearHeadingInterpolation(firstShootPose.getHeading(), greenCollectPose.getHeading())
+        gotoPPGPose = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, ppgPose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), ppgPose.getHeading())
                 .build();
 
-        gotoPurpleCollectPose = follower.pathBuilder()
-                .addPath(new BezierLine(greenCollectPose, purpleCollectPose))
-                .setLinearHeadingInterpolation(greenCollectPose.getHeading(), purpleCollectPose.getHeading())
+        gotoPPGGreenPose = follower.pathBuilder()
+                .addPath(new BezierLine(ppgPose, ppgGreenPose))
+                .setLinearHeadingInterpolation(ppgPose.getHeading(), ppgGreenPose.getHeading())
                 .build();
 
-        gotoSecondPurpleCollectPose = follower.pathBuilder()
-                .addPath(new BezierLine(purpleCollectPose, secondPurpleCollectPose))
-                .setLinearHeadingInterpolation(purpleCollectPose.getHeading(), secondPurpleCollectPose.getHeading())
+        gotoPPGPurplePose = follower.pathBuilder()
+                .addPath(new BezierLine(ppgGreenPose, ppgPurplePose))
+                .setLinearHeadingInterpolation(ppgGreenPose.getHeading(), ppgPurplePose.getHeading())
+                .build();
+
+        gotoPPGLastPose = follower.pathBuilder()
+                .addPath(new BezierLine(ppgPurplePose, ppgLastPose))
+                .setLinearHeadingInterpolation(ppgPurplePose.getHeading(), ppgLastPose.getHeading())
                 .build();
 
         gotoThirdShootPose =  follower.pathBuilder()
-                .addPath(new BezierLine(secondPurpleCollectPose, firstShootPose))
-                .setLinearHeadingInterpolation(secondPurpleCollectPose.getHeading(), firstShootPose.getHeading())
+                .addPath(new BezierLine(ppgLastPose, shootPose))
+                .setLinearHeadingInterpolation(ppgLastPose.getHeading(), shootPose.getHeading())
                 .build();
 
         gotoLeavePose = follower.pathBuilder()
-                .addPath(new BezierLine(firstShootPose, leavePose))
-                .setLinearHeadingInterpolation(firstShootPose.getHeading(), leavePose.getHeading())
+                .addPath(new BezierLine(shootPose, leavePose))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), leavePose.getHeading())
                 .build();
 /*
         gotoGPPCollect = follower.pathBuilder()
@@ -212,7 +224,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 break;
         }
     }
-
+/*
     public PathChain getCollectionPath(ObeliskState oState) {
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
@@ -223,7 +235,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
             default:
                 return gotoGPPCollect;
         }
-    }
+    }*/
 
     public void setPathState(int pState) {
         pathState = pState;
@@ -232,8 +244,9 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+                launcher.startShooter();
                 launcher.setShooterVelocity(shootVelocity);
-                follower.followPath(gotoFirstShootPose, true);
+                turret.setPosition(0.75);
                 setPathState(1);
                 break;
             case 1:
@@ -250,56 +263,55 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 3:
                 if (!follower.isBusy()){
-                    //launcher.activateIntake();
-                    follower.followPath(gotoFirstLoadingZoneCollectPose, true);
+                    intake.setPower(1.0);
+                    follower.followPath(gotoPPGPose, true);
+                    launcher.turnSpindexerCounterClockwise();
                     setPathState(4);
                 }
                 break;
             case 4:
                 if (!follower.isBusy()){
-                    launcher.turnSpindexerClockwise();
-                    follower.followPath( gotoSecondLoadingZoneCollectPose, true);
+                    follower.followPath( gotoPPGGreenPose, true);
                     setPathState(5);
                 }
             case 5:
                 if(!follower.isBusy()) {
-                    launcher.setShooterVelocity(shootVelocity);
-                    follower.followPath(gotoSecondShootPose,true);
+                    launcher.turnSpindexerCounterClockwise();
+                    follower.followPath(gotoPPGPurplePose,true);
                     setPathState(6);
                 }
                 break;
             case 6:
                 if (!follower.isBusy()) {
-                    //launcher.deactivateIntake();
-                    //shootLoadingZoneBalls(oState);
+                    launcher.turnSpindexerCounterClockwise();
+                    follower.followPath(gotoPPGLastPose,true);
                     setPathState(7);
                 }
                 break;
             case 7:
-                if (!launcher.isBusy()) {
-                    launcher.stopShooter();
+                if (!follower.isBusy()) {
+                    launcher.setShooterVelocity(shootVelocity);
+                    follower.followPath(gotoShootPose);
                     setPathState(8);
                 }
                 break;
             case 8:
                 if (!follower.isBusy()) {
-                    follower.followPath(gotoGreenCollectPose, true);
+                    shoot(oState);
                     setPathState(9);
                 }
                 break;
             case 9:
-                if (!follower.isBusy()) {
-                    launcher.turnSpindexerCounterClockwise();
-                    //insert sleep
-                    follower.followPath(gotoPurpleCollectPose, true);
-                    setPathState(10);
+                if (!launcher.isBusy()) {
+                    follower.followPath(gotoLeavePose, true);
+                    setPathState(-1);
                 }
                 break;
             case 10:
                 if (!follower.isBusy()) {
                     launcher.turnSpindexerCounterClockwise();
                     //insert sleep
-                    follower.followPath(gotoSecondPurpleCollectPose, true);
+                    follower.followPath(gotoPPGLastPose, true);
                     setPathState(11);
                 }
                 break;
@@ -351,7 +363,9 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
 
     public void start() {
         pathState = 0;
+        //diverter.setPosition(0.02);
         intake.setPower(0);
+        launcher.initializeSpindexer();
         turret.setPosition(0.5);
     }
 

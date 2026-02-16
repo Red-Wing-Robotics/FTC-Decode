@@ -60,31 +60,31 @@ public class FarSideAutoRed extends RWRBaseOpMode {
     public static double startX = 144 - FarSideAutoBlue.startX;
     public static double startY = 16.09375/2d;
     public static double startHeading = 180 - FarSideAutoBlue.startHeading;
-    public static double firstShootX = 144 - FarSideAutoBlue.firstShootX;
+    public static double firstShootX = 144 - FarSideAutoBlue.shootX;
     public static double firstShootY = 10;
-    public static double firstShootHeading = 180 - FarSideAutoBlue.firstShootHeading;
+    public static double firstShootHeading = 180 - FarSideAutoBlue.shootHeading;
     public static double secondLoadingZoneCollectY = 15;
-    public static double secondLoadingZoneCollectX = 144 - FarSideAutoBlue.secondLoadingZoneCollectX;
-    public static double secondLoadingZoneCollectHeading = 180 - FarSideAutoBlue.secondLoadingZoneCollectHeading;
-    public static double firstLoadingZoneCollectY = 14.3;
-    public static double firstLoadingZoneCollectX = 144 - FarSideAutoBlue.firstLoadingZoneCollectX;
-    public static double firstLoadingZoneCollectHeading = 180 - FarSideAutoBlue.firstLoadingZoneCollectHeading;
-    public static double greenCollectX = 144 - FarSideAutoBlue.greenCollectX;
+    //public static double secondLoadingZoneCollectX = 144 - FarSideAutoBlue.X;
+    //public static double secondLoadingZoneCollectHeading = 180 - FarSideAutoBlue.secondLoadingZoneCollectHeading;
+    //public static double firstLoadingZoneCollectY = 14.3;
+    //public static double firstLoadingZoneCollectX = 144 - FarSideAutoBlue.firstLoadingZoneCollectX;
+    //public static double firstLoadingZoneCollectHeading = 180 - FarSideAutoBlue.firstLoadingZoneCollectHeading;
+    //public static double greenCollectX = 144 - FarSideAutoBlue.greenCollectX;
     public static double greenCollectY = 37;
-    public static double greenCollectHeading = 180 - FarSideAutoBlue.greenCollectHeading;
-    public static double purpleCollectX = 144 - FarSideAutoBlue.purpleCollectX;
+    public static double greenCollectHeading = 180 - FarSideAutoBlue.ppgHeading;
+    public static double purpleCollectX = 144 - FarSideAutoBlue.ppgPurpleX;
     public static double purpleCollectY = 37;
-    public static double purpleCollectHeading = 180 - FarSideAutoBlue.purpleCollectHeading;
+    //public static double purpleCollectHeading = 180 - FarSideAutoBlue.purpleCollectHeading;
     public static double leaveY = 24;
     public static double leaveX = 144 - FarSideAutoBlue.leaveX;
     public static double leaveHeading = 180 - FarSideAutoBlue.leaveHeading;
 
     private final Pose startPose = new Pose(startX, startY, Math.toRadians(startHeading));
     private final Pose firstShootPose = new Pose(firstShootX, firstShootY, Math.toRadians(firstShootHeading));
-    private final Pose firstLoadingZoneCollectPose = new Pose(firstLoadingZoneCollectX, firstLoadingZoneCollectY, Math.toRadians(firstLoadingZoneCollectHeading));
-    private final Pose secondLoadingZoneCollectPose = new Pose(secondLoadingZoneCollectX, secondLoadingZoneCollectY, Math.toRadians(secondLoadingZoneCollectHeading));
-    private final Pose greenCollectPose = new Pose( greenCollectX, greenCollectY, Math.toRadians(greenCollectHeading));
-    private final Pose purpleCollectPose = new Pose( purpleCollectX, purpleCollectY, Math.toRadians(purpleCollectHeading));
+    //private final Pose firstLoadingZoneCollectPose = new Pose(firstLoadingZoneCollectX, firstLoadingZoneCollectY, Math.toRadians(firstLoadingZoneCollectHeading));
+    //private final Pose secondLoadingZoneCollectPose = new Pose(secondLoadingZoneCollectX, secondLoadingZoneCollectY, Math.toRadians(secondLoadingZoneCollectHeading));
+    //private final Pose greenCollectPose = new Pose( greenCollectX, greenCollectY, Math.toRadians(greenCollectHeading));
+    //private final Pose purpleCollectPose = new Pose( purpleCollectX, purpleCollectY, Math.toRadians(purpleCollectHeading));
     private final Pose leavePose = new Pose(leaveX, leaveY, Math.toRadians(leaveHeading));
 
 
@@ -97,7 +97,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
                 .addPath(new BezierLine(startPose, firstShootPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), firstShootPose.getHeading())
                 .build();
-
+/*
         gotoFirstLoadingZoneCollectPose = follower.pathBuilder()
                 .addPath(new BezierLine(firstShootPose, firstLoadingZoneCollectPose))
                 .setLinearHeadingInterpolation(firstShootPose.getHeading(), firstLoadingZoneCollectPose.getHeading())
@@ -131,7 +131,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
         gotoLeavePose = follower.pathBuilder()
                 .addPath(new BezierLine(firstShootPose, leavePose))
                 .setLinearHeadingInterpolation(firstShootPose.getHeading(), leavePose.getHeading())
-                .build();
+                .build();*/
 /*
         gotoGPPCollect = follower.pathBuilder()
                 .addPath(new BezierLine(gppPose, gppCollectPose))
