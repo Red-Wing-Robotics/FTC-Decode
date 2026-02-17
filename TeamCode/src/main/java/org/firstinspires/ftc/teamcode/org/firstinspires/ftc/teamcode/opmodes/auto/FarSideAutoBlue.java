@@ -40,7 +40,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public Servo turret = null;
 
 
-    public static double shootVelocity = 1800;
+    public static double shootVelocity = 1900;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     public static long TIMEOUT_DEFAULT = 5000;
@@ -68,7 +68,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public static double ppgPurpleX = 25;
     public static double ppgPurpleY = 37;
     public static double ppgPurpleHeading = 180;
-    public static double ppgLastX = 15;
+    public static double ppgLastX = 7;
     public static double ppgLastY = 37;
     public static double ppgLastHeading = 180;
     public static double secondPurpleCollectX = 15;
@@ -290,6 +290,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 7:
                 if (!follower.isBusy()) {
+                    launcher.startShooter();
                     launcher.setShooterVelocity(shootVelocity);
                     follower.followPath(gotoShootPose);
                     setPathState(8);

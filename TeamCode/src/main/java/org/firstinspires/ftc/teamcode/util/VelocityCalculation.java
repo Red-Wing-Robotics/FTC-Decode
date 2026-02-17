@@ -5,7 +5,7 @@ import com.bylazar.configurables.annotations.Configurable;
 @Configurable
 public class VelocityCalculation {
 
-    public static double NEAR_VELOCITY_COEFFICIENT = 1170;
+    public static double NEAR_VELOCITY_COEFFICIENT = 1150;
 
     public static double VELOCITY_DEFAULT = 1350;
 
