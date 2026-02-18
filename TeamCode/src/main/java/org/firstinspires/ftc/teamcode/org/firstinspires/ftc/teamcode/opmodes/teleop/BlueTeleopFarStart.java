@@ -130,7 +130,7 @@ public class  BlueTeleopFarStart extends OpMode {
         turretStateMachine = new OdometryTurret(hardwareMap, telemetry, follower, alliance);
 
         intake = hardwareMap.get(DcMotor.class, "intake");
-        colorSensorIntake = hardwareMap.get(NormalizedColorSensor.class, "color sensor intake");
+        colorSensorIntake = hardwareMap.get(NormalizedColorSensor.class, "color1");
 
         launcher = new SingleLauncher( hardwareMap, telemetry, null );
 
