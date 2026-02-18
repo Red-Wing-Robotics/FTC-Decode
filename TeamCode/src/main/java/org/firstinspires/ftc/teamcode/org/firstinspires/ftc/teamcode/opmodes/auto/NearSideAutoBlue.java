@@ -17,6 +17,8 @@ import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.RWR
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.state.OdometryTurret;
 import org.firstinspires.ftc.teamcode.state.SingleLauncher;
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensorController;
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensorState;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.ObeliskState;
@@ -46,6 +48,10 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
 
     public DcMotor intake = null;
     public Servo turret = null;
+
+    ColorSensorController colorSensorIntake = null;
+
+    private ColorSensorState[] indexerLoad = {ColorSensorState.GREEN, ColorSensorState.PURPLE, ColorSensorState.PURPLE};// extra,intake,shoot
 
     public static double shootVelocity = 1370;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
@@ -196,19 +202,29 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         // load will be Shoot: Purple; Intake: Purple; Extra: Green
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
+                /*
                 launcher.shootShoot();
                 launcher.shootExtra();
-                launcher.shootExtra();
+                launcher.shootExtra();*/
+                shootPurple();
+                shootGreen();
+                shootPurple();
                 break;
             case GREEN_PURPLE_PURPLE:
+                /*launcher.shootExtra();
                 launcher.shootExtra();
-                launcher.shootExtra();
-                launcher.shootExtra();
+                launcher.shootExtra();*/
+                shootGreen();
+                shootPurple();
+                shootPurple();
                 break;
             case PURPLE_PURPLE_GREEN:
-                launcher.shootShoot();
+                /*launcher.shootShoot();
                 launcher.shootIntake();
-                launcher.shootIntake();
+                launcher.shootIntake();*/
+                shootPurple();
+                shootPurple();
+                shootGreen();
             /*default:
                 launcher.shootShoot();
                 launcher.shootIntake();
@@ -271,7 +287,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                     launcher.stopShooter();
                     intake.setPower(1.0);
                     follower.followPath(gotoGppPose, true);//pick up first purple
-                    launcher.turnSpindexerCounterClockwise();
+                    turnSpindexerCounterClockwise();
                     setPathState(4);
                 }
                 break;
@@ -283,14 +299,14 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    launcher.turnSpindexerCounterClockwise();
+                    turnSpindexerCounterClockwise();
                     follower.followPath( gotoGppGreenPose, true);//pick up green
                     setPathState(6);
                 }
                 break;
             case 6:
                 if (!follower.isBusy()) {
-                    launcher.turnSpindexerCounterClockwise();
+                    turnSpindexerCounterClockwise();
                     follower.followPath( gotoGppLastPose, true);//pick up green
                     setPathState(7);
                 }
@@ -299,7 +315,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 if(!follower.isBusy()) {
                     launcher.startShooter();
                     launcher.setShooterVelocity(shootVelocity);
-                    launcher.turnSpindexerCounterClockwise();
+                    turnSpindexerCounterClockwise();
                     turret.setPosition(1);
                     follower.followPath(gotoSecondShootPose,true);
                     setPathState(8);
@@ -307,7 +323,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 break;
             case 8:
                 if (!follower.isBusy()) {
-                    launcher.turnSpindexerClockwise();
+                    turnSpindexerClockwise();
                     shoot(oState);
                     setPathState(9);
                 }
@@ -396,6 +412,8 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         launcher = new SingleLauncher(hardwareMap, telemetry, null);
         waitTimer = new NonBlockingTimer(WAIT_TIME);
         //follower.setMaxPower(0.5);
+
+        colorSensorIntake = new ColorSensorController(hardwareMap,telemetry);
     }
 
     public void start() {
@@ -440,6 +458,8 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
             logger.logData("Limelight", "No Targets");
         }
 
+        indexerLoad[1] = colorSensorIntake.getColor();
+
         follower.update();
         autonomousPathUpdate();
         launcher.update();
@@ -453,6 +473,86 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         logger.logData("heading", Math.toDegrees(follower.getPose().getHeading()));
         logger.logData("right shooter velocity", launcher.getShooterVelocity());
         logger.update();
+    }
+
+    private void turnSpindexerClockwise(){
+        launcher.turnSpindexerClockwise();
+        adjustColorSensingClockwise();
+    }
+
+    private void turnSpindexerCounterClockwise(){
+        launcher.turnSpindexerClockwise();
+        adjustColorSensingClockwise();
+    }
+
+    private void adjustColorSensingClockwise(){
+        ColorSensorState extra = indexerLoad[0];
+        indexerLoad[0] = indexerLoad[2];
+        indexerLoad[2] = indexerLoad[1];
+        indexerLoad[1] = extra;
+    }
+
+    private void adjustColorSensingCounterClockwise(){
+        ColorSensorState extra = indexerLoad[0];
+        indexerLoad[0] = indexerLoad[1];
+        indexerLoad[1] = indexerLoad[2];
+        indexerLoad[2] = extra;
+    }
+
+    private void removeShootColor(){
+        indexerLoad[2] = null;
+    }
+
+    private void shootGreen (){
+        if(indexerLoad[2] == ColorSensorState.GREEN){
+            launcher.shootShoot();
+            removeShootColor();
+        }else if(indexerLoad[1] == ColorSensorState.GREEN){
+            launcher.shootIntake();
+            adjustColorSensingClockwise();
+            removeShootColor();
+        }else if(indexerLoad[0] == ColorSensorState.GREEN){
+            launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
+        }else if(indexerLoad[2] == ColorSensorState.PURPLE){
+            launcher.shootShoot();
+            removeShootColor();
+        }else if(indexerLoad[1] == ColorSensorState.PURPLE){
+            launcher.shootIntake();
+            adjustColorSensingClockwise();
+            removeShootColor();
+        }else if(indexerLoad[0] == ColorSensorState.PURPLE) {
+            launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
+        }
+    }
+
+    private void shootPurple(){
+        if(indexerLoad[2] == ColorSensorState.PURPLE){
+            launcher.shootShoot();
+            removeShootColor();
+        }else if(indexerLoad[1] == ColorSensorState.PURPLE){
+            launcher.shootIntake();
+            adjustColorSensingClockwise();
+            removeShootColor();
+        }else if(indexerLoad[0] == ColorSensorState.PURPLE){
+            launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
+        }else if(indexerLoad[2] == ColorSensorState.GREEN){
+            launcher.shootShoot();
+            removeShootColor();
+        }else if(indexerLoad[1] == ColorSensorState.GREEN){
+            launcher.shootIntake();
+            adjustColorSensingClockwise();
+            removeShootColor();
+        }else if(indexerLoad[0] == ColorSensorState.GREEN){
+            launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
+        }
     }
 }
 

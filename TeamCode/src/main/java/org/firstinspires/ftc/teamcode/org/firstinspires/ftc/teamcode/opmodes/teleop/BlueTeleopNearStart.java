@@ -21,6 +21,8 @@ import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.aut
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.state.OdometryTurret;
 import org.firstinspires.ftc.teamcode.state.SingleLauncher;
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensorController;
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensorState;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.BallColor;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
@@ -91,9 +93,9 @@ public class BlueTeleopNearStart extends OpMode {
 
     private OdometryTurret turretStateMachine;
 
-    private BallColor[] indexerLoad = {BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE};// extra,intake,shoot
+    private ColorSensorState[] indexerLoad = {ColorSensorState.GREEN, ColorSensorState.PURPLE, ColorSensorState.PURPLE};// extra,intake,shoot
 
-    NormalizedColorSensor colorSensorIntake;
+    ColorSensorController colorSensorIntake = null;
     private Servo shooterLight;
     private int purpleHueMin = 165;
     private int purpleHueMax = 240;
@@ -128,7 +130,7 @@ public class BlueTeleopNearStart extends OpMode {
         turretStateMachine = new OdometryTurret(hardwareMap, telemetry, follower, alliance);
 
         intake = hardwareMap.get(DcMotor.class, "intake");
-        colorSensorIntake = hardwareMap.get(NormalizedColorSensor.class, "color1");
+        colorSensorIntake = new ColorSensorController(hardwareMap,telemetry);
 
         launcher = new SingleLauncher( hardwareMap, telemetry, null );
 
@@ -147,8 +149,8 @@ public class BlueTeleopNearStart extends OpMode {
         isShooterOn = true;
         launcher.startShooter();
 
-        if (colorSensorIntake instanceof SwitchableLight) {
-            ((SwitchableLight)colorSensorIntake).enableLight(true);
+        if (colorSensorIntake.isInstaceOfSwitchableLight()) {
+            colorSensorIntake.enableLight(true);
         }
     }
     //72.1x, 75.155y,134h
@@ -185,14 +187,15 @@ public class BlueTeleopNearStart extends OpMode {
             distanceToGoal = 0;
         }
 
-        intakeHue = getColorSensorHue();
-        if( purpleHueMin <= intakeHue && intakeHue <= purpleHueMax){
+        //intakeHue = getColorSensorHue();
+        /*if( purpleHueMin <= intakeHue && intakeHue <= purpleHueMax){
             indexerLoad[1] = BallColor.PURPLE;
         } else if (greenHueMin <= intakeHue && intakeHue <= greenHueMax) {
             indexerLoad[1] = BallColor.GREEN;
         }else {
             indexerLoad[1] = null;
-        }
+        }*/
+        indexerLoad[1] = colorSensorIntake.getColor();
 
 
         if(automatedDrive && !follower.isBusy()){
@@ -230,9 +233,10 @@ public class BlueTeleopNearStart extends OpMode {
         }
 
         if ( gamepad2.x && !isXPressed) {
-            launcher.shootExtra();
-            adjustColorSensingCounterClockwise();
-            removeShootColor();
+            //launcher.shootExtra();
+            //adjustColorSensingCounterClockwise();
+            //removeShootColor();
+            shootPurple();
             isXPressed = true;
         } else if(!gamepad2.x){
             isXPressed = false;
@@ -245,9 +249,10 @@ public class BlueTeleopNearStart extends OpMode {
         */
 
         if ( gamepad2.y && !isYPressed) {
-            launcher.shootIntake();
+            /*launcher.shootIntake();
             adjustColorSensingClockwise();
-            removeShootColor();
+            removeShootColor();*/
+            shootGreen();
             isYPressed = true;
         } else if(!gamepad2.y){
             isYPressed = false;
@@ -371,7 +376,7 @@ public class BlueTeleopNearStart extends OpMode {
         //leftShooter.setPower(  p );
         launcher.setShooterVelocity( p );
     }
-
+/*
     private float getColorSensorHue(){
        NormalizedRGBA colors = colorSensorIntake.getNormalizedColors();
        float hue = JavaUtil.colorToHue(colors.toColor());
@@ -381,17 +386,17 @@ public class BlueTeleopNearStart extends OpMode {
         //Color.RGBToHSV((int)(colors.red * SCALE_FACTOR), (int)(colors.green * SCALE_FACTOR), (int)(colors.blue * SCALE_FACTOR), hsvValues);
 
         //return hsvValues[0];
-    }
+    }*/
 
     private void adjustColorSensingClockwise(){
-        BallColor extra = indexerLoad[0];
+        ColorSensorState extra = indexerLoad[0];
         indexerLoad[0] = indexerLoad[2];
         indexerLoad[2] = indexerLoad[1];
         indexerLoad[1] = extra;
     }
 
     private void adjustColorSensingCounterClockwise(){
-        BallColor extra = indexerLoad[0];
+        ColorSensorState extra = indexerLoad[0];
         indexerLoad[0] = indexerLoad[1];
         indexerLoad[1] = indexerLoad[2];
         indexerLoad[2] = extra;
@@ -417,36 +422,54 @@ public class BlueTeleopNearStart extends OpMode {
     }
 
     private void shootGreen (){
-        if(indexerLoad[2] == BallColor.GREEN){
+        if(indexerLoad[2] == ColorSensorState.GREEN){
             launcher.shootShoot();
             removeShootColor();
-        }else if(indexerLoad[1] == BallColor.GREEN){
+        }else if(indexerLoad[1] == ColorSensorState.GREEN){
             launcher.shootIntake();
             adjustColorSensingClockwise();
             removeShootColor();
-        }else if(indexerLoad[0] == BallColor.GREEN){
+        }else if(indexerLoad[0] == ColorSensorState.GREEN){
             launcher.shootExtra();
             adjustColorSensingCounterClockwise();
             removeShootColor();
-        }else{
-            //otPurple();
+        }else if(indexerLoad[2] == ColorSensorState.PURPLE){
+            launcher.shootShoot();
+            removeShootColor();
+        }else if(indexerLoad[1] == ColorSensorState.PURPLE){
+            launcher.shootIntake();
+            adjustColorSensingClockwise();
+            removeShootColor();
+        }else if(indexerLoad[0] == ColorSensorState.PURPLE) {
+            launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
         }
     }
 
     private void shootPurple(){
-        if(indexerLoad[2] == BallColor.PURPLE){
+        if(indexerLoad[2] == ColorSensorState.PURPLE){
             launcher.shootShoot();
             removeShootColor();
-        }else if(indexerLoad[1] == BallColor.PURPLE){
+        }else if(indexerLoad[1] == ColorSensorState.PURPLE){
             launcher.shootIntake();
             adjustColorSensingClockwise();
             removeShootColor();
-        }else if(indexerLoad[0] == BallColor.PURPLE){
+        }else if(indexerLoad[0] == ColorSensorState.PURPLE){
             launcher.shootExtra();
             adjustColorSensingCounterClockwise();
             removeShootColor();
-        }else{
-            //shootGreen();
+        }else if(indexerLoad[2] == ColorSensorState.GREEN){
+            launcher.shootShoot();
+            removeShootColor();
+        }else if(indexerLoad[1] == ColorSensorState.GREEN){
+            launcher.shootIntake();
+            adjustColorSensingClockwise();
+            removeShootColor();
+        }else if(indexerLoad[0] == ColorSensorState.GREEN){
+            launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
         }
     }
 }

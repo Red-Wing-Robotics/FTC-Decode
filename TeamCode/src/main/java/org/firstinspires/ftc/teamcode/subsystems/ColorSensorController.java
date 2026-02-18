@@ -86,4 +86,13 @@ public class ColorSensorController {
         return ColorSensorState.NONE;
     }
 
+    public boolean isInstaceOfSwitchableLight(){
+        return color1 instanceof SwitchableLight;
+    }
+
+    public void enableLight(boolean b){//not sure what b does
+        ((SwitchableLight)color1).enableLight(b);
+        ((SwitchableLight)color2).enableLight(b);
+    }
+
 }

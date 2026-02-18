@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.teleop;
 
-
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -23,6 +22,8 @@ import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.aut
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.state.OdometryTurret;
 import org.firstinspires.ftc.teamcode.state.SingleLauncher;
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensorController;
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensorState;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.BallColor;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
@@ -36,7 +37,7 @@ import android.graphics.Color;
 @SuppressWarnings("unused")
 @Configurable
 @TeleOp(name = "Blue Teleop Far Start", group = "Examples")
-public class  BlueTeleopFarStart extends OpMode {
+public class BlueTeleopFarStart extends OpMode {
 
     public static boolean robotCentric = true;
     private Follower follower;
@@ -93,9 +94,9 @@ public class  BlueTeleopFarStart extends OpMode {
 
     private OdometryTurret turretStateMachine;
 
-    private BallColor[] indexerLoad = {BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE};// extra,intake,shoot
+    private ColorSensorState[] indexerLoad = {ColorSensorState.GREEN, ColorSensorState.PURPLE, ColorSensorState.PURPLE};// extra,intake,shoot
 
-    NormalizedColorSensor colorSensorIntake;
+    ColorSensorController colorSensorIntake = null;
     private Servo shooterLight;
     private int purpleHueMin = 165;
     private int purpleHueMax = 240;
@@ -130,7 +131,7 @@ public class  BlueTeleopFarStart extends OpMode {
         turretStateMachine = new OdometryTurret(hardwareMap, telemetry, follower, alliance);
 
         intake = hardwareMap.get(DcMotor.class, "intake");
-        colorSensorIntake = hardwareMap.get(NormalizedColorSensor.class, "color1");
+        colorSensorIntake = new ColorSensorController(hardwareMap,telemetry);
 
         launcher = new SingleLauncher( hardwareMap, telemetry, null );
 
@@ -149,8 +150,8 @@ public class  BlueTeleopFarStart extends OpMode {
         isShooterOn = true;
         launcher.startShooter();
 
-        if (colorSensorIntake instanceof SwitchableLight) {
-            ((SwitchableLight)colorSensorIntake).enableLight(true);
+        if (colorSensorIntake.isInstaceOfSwitchableLight()) {
+            colorSensorIntake.enableLight(true);
         }
     }
     //72.1x, 75.155y,134h
@@ -187,14 +188,15 @@ public class  BlueTeleopFarStart extends OpMode {
             distanceToGoal = 0;
         }
 
-        intakeHue = getColorSensorHue();
-        if( purpleHueMin <= intakeHue && intakeHue <= purpleHueMax){
+        //intakeHue = getColorSensorHue();
+        /*if( purpleHueMin <= intakeHue && intakeHue <= purpleHueMax){
             indexerLoad[1] = BallColor.PURPLE;
         } else if (greenHueMin <= intakeHue && intakeHue <= greenHueMax) {
             indexerLoad[1] = BallColor.GREEN;
         }else {
             indexerLoad[1] = null;
-        }
+        }*/
+        indexerLoad[1] = colorSensorIntake.getColor();
 
 
         if(automatedDrive && !follower.isBusy()){
@@ -373,27 +375,27 @@ public class  BlueTeleopFarStart extends OpMode {
         //leftShooter.setPower(  p );
         launcher.setShooterVelocity( p );
     }
-
+/*
     private float getColorSensorHue(){
-        NormalizedRGBA colors = colorSensorIntake.getNormalizedColors();
-        float hue = JavaUtil.colorToHue(colors.toColor());
-        logColors(colors);
-        return hue;
+       NormalizedRGBA colors = colorSensorIntake.getNormalizedColors();
+       float hue = JavaUtil.colorToHue(colors.toColor());
+       logColors(colors);
+       return hue;
         // Convert the RGB colors to HSV values
         //Color.RGBToHSV((int)(colors.red * SCALE_FACTOR), (int)(colors.green * SCALE_FACTOR), (int)(colors.blue * SCALE_FACTOR), hsvValues);
 
         //return hsvValues[0];
-    }
+    }*/
 
     private void adjustColorSensingClockwise(){
-        BallColor extra = indexerLoad[0];
+        ColorSensorState extra = indexerLoad[0];
         indexerLoad[0] = indexerLoad[2];
         indexerLoad[2] = indexerLoad[1];
         indexerLoad[1] = extra;
     }
 
     private void adjustColorSensingCounterClockwise(){
-        BallColor extra = indexerLoad[0];
+        ColorSensorState extra = indexerLoad[0];
         indexerLoad[0] = indexerLoad[1];
         indexerLoad[1] = indexerLoad[2];
         indexerLoad[2] = extra;
@@ -419,38 +421,55 @@ public class  BlueTeleopFarStart extends OpMode {
     }
 
     private void shootGreen (){
-        if(indexerLoad[2] == BallColor.GREEN){
+        if(indexerLoad[2] == ColorSensorState.GREEN){
             launcher.shootShoot();
             removeShootColor();
-        }else if(indexerLoad[1] == BallColor.GREEN){
+        }else if(indexerLoad[1] == ColorSensorState.GREEN){
             launcher.shootIntake();
             adjustColorSensingClockwise();
             removeShootColor();
-        }else if(indexerLoad[0] == BallColor.GREEN){
+        }else if(indexerLoad[0] == ColorSensorState.GREEN){
             launcher.shootExtra();
             adjustColorSensingCounterClockwise();
             removeShootColor();
-        }else{
-            //otPurple();
+        }else if(indexerLoad[2] == ColorSensorState.PURPLE){
+            launcher.shootShoot();
+            removeShootColor();
+        }else if(indexerLoad[1] == ColorSensorState.PURPLE){
+            launcher.shootIntake();
+            adjustColorSensingClockwise();
+            removeShootColor();
+        }else if(indexerLoad[0] == ColorSensorState.PURPLE) {
+            launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
         }
     }
 
     private void shootPurple(){
-        if(indexerLoad[2] == BallColor.PURPLE){
+        if(indexerLoad[2] == ColorSensorState.PURPLE){
             launcher.shootShoot();
             removeShootColor();
-        }else if(indexerLoad[1] == BallColor.PURPLE){
+        }else if(indexerLoad[1] == ColorSensorState.PURPLE){
             launcher.shootIntake();
             adjustColorSensingClockwise();
             removeShootColor();
-        }else if(indexerLoad[0] == BallColor.PURPLE){
+        }else if(indexerLoad[0] == ColorSensorState.PURPLE){
             launcher.shootExtra();
             adjustColorSensingCounterClockwise();
             removeShootColor();
-        }else{
-            //shootGreen();
+        }else if(indexerLoad[2] == ColorSensorState.GREEN){
+            launcher.shootShoot();
+            removeShootColor();
+        }else if(indexerLoad[1] == ColorSensorState.GREEN){
+            launcher.shootIntake();
+            adjustColorSensingClockwise();
+            removeShootColor();
+        }else if(indexerLoad[0] == ColorSensorState.GREEN){
+            launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
         }
     }
 }
-
 
