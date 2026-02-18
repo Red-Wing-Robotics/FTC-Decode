@@ -7,9 +7,12 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.state.OdometryTurret;
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensorController;
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensorState;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 
 @SuppressWarnings("unused")
@@ -31,6 +34,13 @@ public class TestTeleop extends OpMode {
     private boolean aPressed = false;
     private boolean xPressed = false;
 
+    private Servo turretLight;
+    private Servo shooterLight;
+
+    private Servo spindexer;
+
+    ColorSensorController colorController;
+
     @Override
     public void init() {
         Pose start = new Pose(13.653, 9.403, Math.toRadians(90));
@@ -39,16 +49,26 @@ public class TestTeleop extends OpMode {
         follower.setStartingPose(start);
         follower.update();
 
-        turret = new OdometryTurret(hardwareMap, telemetry, follower, alliance);
+        //turret = new OdometryTurret(hardwareMap, telemetry, follower, alliance);
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
         limelight.start();
         limelight.pipelineSwitch(limelightPipeline);
 
+        turretLight = hardwareMap.get(Servo.class, "turretlight");
+        shooterLight = hardwareMap.get(Servo.class, "shooterlight");
+        spindexer = hardwareMap.get(Servo.class, "spindexer");
+
+        colorController = new ColorSensorController(hardwareMap, telemetry);
+
+
+        turretLight.setPosition(0.5);
+        shooterLight.setPosition(0.5);
+
         visionEnabled = startWithVisionEnabled;
-        turret.setVisionEnabled(visionEnabled);
-        turret.setEnabled(turretEnabled);
+        //turret.setVisionEnabled(visionEnabled);
+        //turret.setEnabled(turretEnabled);
     }
 
     @Override
@@ -66,13 +86,26 @@ public class TestTeleop extends OpMode {
         );
         follower.update();
 
+        ColorSensorState color = colorController.getColor();
+        switch(color) {
+            case GREEN:
+                turretLight.setPosition(0.5);
+                break;
+            case PURPLE:
+                turretLight.setPosition(0.7);
+                break;
+            case NONE:
+                turretLight.setPosition(0);
+                break;
+        }
+
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
 
         // Toggle vision correction with gamepad1 A
         if (gamepad1.a && !aPressed) {
             visionEnabled = !visionEnabled;
-            turret.setVisionEnabled(visionEnabled);
+            //turret.setVisionEnabled(visionEnabled);
             aPressed = true;
         } else if (!gamepad1.a) {
             aPressed = false;
@@ -81,13 +114,13 @@ public class TestTeleop extends OpMode {
         // Toggle turret enabled/disabled with gamepad1 X
         if (gamepad1.x && !xPressed) {
             turretEnabled = !turretEnabled;
-            turret.setEnabled(turretEnabled);
+            //turret.setEnabled(turretEnabled);
             xPressed = true;
         } else if (!gamepad1.x) {
             xPressed = false;
         }
 
-        turret.update(result);
+        //turret.update(result);
 
         telemetry.addData("Turret Enabled (X toggle)", turretEnabled);
         telemetry.addData("Vision Enabled (A toggle)", visionEnabled);

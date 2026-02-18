@@ -90,6 +90,7 @@ public class OdometryTurret {
     private boolean visionEnabled = false;
 
     public final Servo turret;
+    private final Servo turretLight;
     private final Logger logger;
     private final Follower follower;
     private final double goalX;
@@ -110,6 +111,7 @@ public class OdometryTurret {
         this.logger = new Logger(telemetry);
         this.follower = follower;
         this.turret = hardwareMap.get(Servo.class, "turret");
+        this.turretLight = hardwareMap.get(Servo.class, "turretlight");
 
         // Select goal coordinates based on alliance
         if (alliance == Alliance.RED) {
@@ -124,6 +126,9 @@ public class OdometryTurret {
         this.filteredTargetPos = TURRET_MIDPOINT;
         setToDefault();
         this.state = OdometryTurretState.TRACKING;
+        
+        // Initialize turret light to tracking state
+        this.turretLight.setPosition(0.666);
     }
 
     // --- State management ---
@@ -183,6 +188,7 @@ public class OdometryTurret {
      */
     public void update(LLResult result) {
         if (state == OdometryTurretState.DISABLED) {
+            turretLight.setPosition(0.388);
             logTurret(0, 0);
             return;
         }
@@ -229,12 +235,28 @@ public class OdometryTurret {
         // 6. Exponential moving average (EMA) smoothing on the target position
         filteredTargetPos = alpha * correctedTargetPos + (1.0 - alpha) * filteredTargetPos;
 
+        // Check if target position is beyond turret limits
+        boolean targetBeyondLimits = correctedTargetPos < minPos || correctedTargetPos > maxPos;
+
         // 7. Compute error and derivative
         double error = filteredTargetPos - turretPos;
 
         // Deadband: if we're close enough, don't move (prevents servo buzzing)
         double errorInRad = error / RAD_TO_SERVO; // convert back to radians for deadband check
-        if (Math.abs(errorInRad) < deadbandRad) {
+        boolean inPosition = Math.abs(errorInRad) < deadbandRad;
+        
+        // Update turret light:
+        // - 0.278 if target is beyond turret's min/max limits (unreachable)
+        // - 0.5 if turret is in position (tracking correctly)
+        // Note: When tracking but not yet in position, we still show 0.5 since the turret
+        // is actively tracking and will reach position soon
+        if (targetBeyondLimits) {
+            turretLight.setPosition(0.289);
+        } else {
+            turretLight.setPosition(0.5);
+        }
+        
+        if (inPosition) {
             previousError = error;
             logTurret(turretRelativeAngle, error);
             return;
@@ -282,6 +304,7 @@ public class OdometryTurret {
         logger.logData("OdoTurret Vision Correction", visionCorrection);
         logger.logData("OdoTurret Vision TX", filteredTxDeg);
         logger.logData("OdoTurret Vision Enabled", visionEnabled);
+        logger.logData("OdoTurret Light Pos", turretLight.getPosition());
     }
 
 }

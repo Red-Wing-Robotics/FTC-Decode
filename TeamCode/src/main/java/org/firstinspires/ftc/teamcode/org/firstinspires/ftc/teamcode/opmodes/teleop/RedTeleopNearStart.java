@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
@@ -67,6 +68,8 @@ public class RedTeleopNearStart extends OpMode {
     private boolean isRightBumperPressed = false;
     private boolean isLeftBumperPressed = false;
     private boolean isAPressed = false;
+    private boolean isGamepad1XPressed = false;
+    private boolean isTurretEnabled = true;
 
 
     private double trigDistanceToGoal = 0;
@@ -87,6 +90,7 @@ public class RedTeleopNearStart extends OpMode {
     private BallColor[] indexerLoad = {BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE};// extra,intake,shoot
 
     NormalizedColorSensor colorSensorIntake;
+    private Servo shooterLight;
     private int purpleHueMin = 165;
     private int purpleHueMax = 240;
     private int greenHueMin = 150;
@@ -129,6 +133,7 @@ public class RedTeleopNearStart extends OpMode {
         limelight.start(); // This tells Limelight to start looking!
         limelight.pipelineSwitch(2); // Switch to pipeline
 
+        shooterLight = hardwareMap.get(Servo.class, "shooterlight");
     }
 
     public void start() {
@@ -209,6 +214,15 @@ public class RedTeleopNearStart extends OpMode {
 
         }
 
+        // Toggle turret enabled/disabled with gamepad1 X
+        if (gamepad1.x && !isGamepad1XPressed) {
+            isTurretEnabled = !isTurretEnabled;
+            turretStateMachine.setEnabled(isTurretEnabled);
+            isGamepad1XPressed = true;
+        } else if (!gamepad1.x) {
+            isGamepad1XPressed = false;
+        }
+
         if ( gamepad2.x && !isXPressed) {
             launcher.shootExtra();
             isXPressed = true;
@@ -284,9 +298,11 @@ public class RedTeleopNearStart extends OpMode {
                 shooterVelocity = VelocityCalculation.getTargetVelocity(distanceToGoal);
             }
             setShooterVelocity( shooterVelocity );
+            shooterLight.setPosition(1);
         }else{
             setShooterVelocity( 0 );
             launcher.stopShooter();
+            shooterLight.setPosition(0);
         }
 /*
         if( Math.abs(shooterVelocity - shooter.getVelocity() ) < SHOOTER_VELOCITY_FUDGE_FACTOR && elapsedTime == 0 && flyWheelStart != 0){
@@ -322,6 +338,7 @@ public class RedTeleopNearStart extends OpMode {
         telemetry.addData( "Motor Velocity", launcher.getShooterVelocity());
         telemetry.addData( "Distance To Goal", distanceToGoal);
         telemetry.addData("Driving Mode", robotCentric ? "Robot-Centric" : "Field-Centric");
+        telemetry.addData("Turret Enabled (GP1 X)", isTurretEnabled);
         telemetry.addData("PP x", follower.getPose().getX());
         telemetry.addData("PP y", follower.getPose().getY());
         telemetry.addData("PP heading", Math.toDegrees(follower.getPose().getHeading()));
