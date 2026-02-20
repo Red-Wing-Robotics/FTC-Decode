@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.state.DualColorSensorStateMachine;
 import org.firstinspires.ftc.teamcode.state.OdometryTurret;
 import org.firstinspires.ftc.teamcode.subsystems.ColorSensorController;
 import org.firstinspires.ftc.teamcode.subsystems.ColorSensorState;
@@ -39,7 +40,7 @@ public class TestTeleop extends OpMode {
 
     private Servo spindexer;
 
-    ColorSensorController colorController;
+    DualColorSensorStateMachine colorStateMachine;
 
     @Override
     public void init() {
@@ -60,8 +61,7 @@ public class TestTeleop extends OpMode {
         shooterLight = hardwareMap.get(Servo.class, "shooterlight");
         spindexer = hardwareMap.get(Servo.class, "spindexer");
 
-        colorController = new ColorSensorController(hardwareMap, telemetry);
-
+        colorStateMachine = new DualColorSensorStateMachine(hardwareMap, telemetry);
 
         turretLight.setPosition(0.5);
         shooterLight.setPosition(0.5);
@@ -85,19 +85,19 @@ public class TestTeleop extends OpMode {
                 robotCentric
         );
         follower.update();
+        colorStateMachine.update();
 
-        ColorSensorState color = colorController.getColor();
-        switch(color) {
-            case GREEN:
-                turretLight.setPosition(0.5);
-                break;
-            case PURPLE:
-                turretLight.setPosition(0.7);
-                break;
-            case NONE:
-                turretLight.setPosition(0);
-                break;
-        }
+//        switch(color) {
+//            case GREEN:
+//                turretLight.setPosition(0.5);
+//                break;
+//            case PURPLE:
+//                turretLight.setPosition(0.7);
+//                break;
+//            case NONE:
+//                turretLight.setPosition(0);
+//                break;
+//        }
 
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
@@ -122,18 +122,19 @@ public class TestTeleop extends OpMode {
 
         //turret.update(result);
 
-        telemetry.addData("Turret Enabled (X toggle)", turretEnabled);
-        telemetry.addData("Vision Enabled (A toggle)", visionEnabled);
-        telemetry.addData("LL Has Target", result != null && result.isValid());
-        if (result != null) {
-            telemetry.addData("LL tx", result.getTx());
-            telemetry.addData("LL ty", result.getTy());
-            telemetry.addData("LL ta", result.getTa());
-        }
-        telemetry.addData("PP x", follower.getPose().getX());
-        telemetry.addData("PP y", follower.getPose().getY());
-        telemetry.addData("PP heading", Math.toDegrees(follower.getPose().getHeading()));
-        telemetry.addData("Drive Mode", robotCentric ? "Robot-Centric" : "Field-Centric");
+//        telemetry.addData("Turret Enabled (X toggle)", turretEnabled);
+//        telemetry.addData("Vision Enabled (A toggle)", visionEnabled);
+//        telemetry.addData("LL Has Target", result != null && result.isValid());
+//        if (result != null) {
+//            telemetry.addData("LL tx", result.getTx());
+//            telemetry.addData("LL ty", result.getTy());
+//            telemetry.addData("LL ta", result.getTa());
+//        }
+//        telemetry.addData("PP x", follower.getPose().getX());
+//        telemetry.addData("PP y", follower.getPose().getY());
+//        telemetry.addData("PP heading", Math.toDegrees(follower.getPose().getHeading()));
+//        telemetry.addData("Drive Mode", robotCentric ? "Robot-Centric" : "Field-Centric");
+//        telemetry.update();
         telemetry.update();
     }
 
