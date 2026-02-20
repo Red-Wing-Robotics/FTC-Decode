@@ -16,7 +16,7 @@ public class SingleLauncher {
 
     public static double FEED_TIME_MS = 700; // in milliseconds
     public static double LAUNCHER_VELOCITY_PERCENT_FUDGE_FACTOR = 0.20; // Decimal percentage
-    public static double LAUNCHER_RAMPING_TIME = 300;
+    public static double LAUNCHER_RAMPING_TIME = 4000;
     public static double TIME_BETWEEN_SHOTS_MS = 750; // in milliseconds
     public static double SPINDEXER_TURN_TIME_MS = 700; // in milliseconds
     public static double SPINDERXER_TURN_MAGNITUDE = 0.38;

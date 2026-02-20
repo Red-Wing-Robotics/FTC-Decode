@@ -40,19 +40,19 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public Servo turret = null;
 
 
-    public static double shootVelocity = 1900;
+    public static double shootVelocity = 2500;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     public static long TIMEOUT_DEFAULT = 5000;
 
     // POSES -------------------------------------------------------------
 
-    public static double startX = 57.2;
+    public static double startX = 67;
     public static double startY = 16.09375/2d;
     public static double startHeading = 90;
-    public static double shootX = 57.2;
-    public static double shootY = 10;
-    public static double shootHeading = 90;
+    public static double shootX = 67;
+    public static double shootY = 26;
+    public static double shootHeading = 89;
     public static double secondLoadingZoneY = 15;
     public static double secondLoadingZoneX = 14;
     public static double secondLoadingZoneHeading = 180;
@@ -62,14 +62,14 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public static double ppgX = 50;
     public static double ppgY = 37;
     public static double ppgHeading = 180;
-    public static double ppgGreenX = 32;
+    public static double ppgGreenX = 34;
     public static double ppgGreenY = 37;
     public static double ppgGreenHeading = 180;
     public static double ppgPurpleX = 25;
     public static double ppgPurpleY = 37;
     public static double ppgPurpleHeading = 180;
     public static double ppgLastX = 7;
-    public static double ppgLastY = 37;
+    public static double ppgLastY = 34;
     public static double ppgLastHeading = 180;
     public static double secondPurpleCollectX = 15;
     public static double leaveY = 24;
@@ -87,7 +87,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     private final Pose leavePose = new Pose(leaveX, leaveY, Math.toRadians(leaveHeading));
 
 
-    private PathChain gotoShootPose, gotoFirstLoadingZonePose, gotoSecondLoadingZonePose, gotoSecondShootPose, gotoPPGPose, gotoPPGGreenPose, gotoPPGPurplePose, gotoPPGLastPose, gotoThirdShootPose, gotoLeavePose;
+    private PathChain gotoShootPose, gotoFirstShootPose, gotoFirstLoadingZonePose, gotoSecondLoadingZonePose, gotoSecondShootPose, gotoPPGPose, gotoPPGGreenPose, gotoPPGPurplePose, gotoPPGLastPose, gotoThirdShootPose, gotoLeavePose;
 
     //private Supplier<PathChain> extra;
 
@@ -140,6 +140,11 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
         gotoLeavePose = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, leavePose))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), leavePose.getHeading())
+                .build();
+
+        gotoFirstShootPose = follower.pathBuilder()
+                .addPath(new BezierLine( startPose, shootPose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
                 .build();
 /*
         gotoGPPCollect = follower.pathBuilder()
@@ -246,7 +251,8 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
             case 0:
                 launcher.startShooter();
                 launcher.setShooterVelocity(shootVelocity);
-                turret.setPosition(0.75);
+                turret.setPosition(0.9);
+                follower.followPath( gotoFirstShootPose );
                 setPathState(1);
                 break;
             case 1:
