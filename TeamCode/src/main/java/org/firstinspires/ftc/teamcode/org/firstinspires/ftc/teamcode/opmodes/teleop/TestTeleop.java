@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.teleop;
 
+import android.graphics.Color;
+
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -86,18 +88,18 @@ public class TestTeleop extends OpMode {
         );
         follower.update();
         colorStateMachine.update();
-
-//        switch(color) {
-//            case GREEN:
-//                turretLight.setPosition(0.5);
-//                break;
-//            case PURPLE:
-//                turretLight.setPosition(0.7);
-//                break;
-//            case NONE:
-//                turretLight.setPosition(0);
-//                break;
-//        }
+        ColorSensorState color = colorStateMachine.getIntakeColor();
+        switch(color) {
+            case GREEN:
+                turretLight.setPosition(0.5);
+                break;
+            case PURPLE:
+                turretLight.setPosition(0.7);
+                break;
+            case NONE:
+                turretLight.setPosition(0);
+                break;
+        }
 
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
