@@ -233,10 +233,10 @@ public class BlueTeleopNearStart extends OpMode {
         }
 
         if ( gamepad2.x && !isXPressed) {
-            //launcher.shootExtra();
-            //adjustColorSensingCounterClockwise();
-            //removeShootColor();
-            shootPurple();
+            launcher.shootExtra();
+            adjustColorSensingCounterClockwise();
+            removeShootColor();
+            //shootPurple();
             isXPressed = true;
         } else if(!gamepad2.x){
             isXPressed = false;
@@ -249,10 +249,10 @@ public class BlueTeleopNearStart extends OpMode {
         */
 
         if ( gamepad2.y && !isYPressed) {
-            /*launcher.shootIntake();
+            launcher.shootIntake();
             adjustColorSensingClockwise();
-            removeShootColor();*/
-            shootGreen();
+            removeShootColor();
+            //shootGreen();
             isYPressed = true;
         } else if(!gamepad2.y){
             isYPressed = false;

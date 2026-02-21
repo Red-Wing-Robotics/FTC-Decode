@@ -202,29 +202,29 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         // load will be Shoot: Purple; Intake: Purple; Extra: Green
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
-                /*
+
                 launcher.shootShoot();
                 launcher.shootExtra();
-                launcher.shootExtra();*/
-                shootPurple();
-                shootGreen();
-                shootPurple();
+                launcher.shootExtra();
+                //shootPurple();
+                //shootGreen();
+                //shootPurple();
                 break;
             case GREEN_PURPLE_PURPLE:
-                /*launcher.shootExtra();
                 launcher.shootExtra();
-                launcher.shootExtra();*/
-                shootGreen();
+                launcher.shootExtra();
+                launcher.shootExtra();
+                /*shootGreen();
                 shootPurple();
-                shootPurple();
+                shootPurple();*/
                 break;
             case PURPLE_PURPLE_GREEN:
-                /*launcher.shootShoot();
+                launcher.shootShoot();
                 launcher.shootIntake();
-                launcher.shootIntake();*/
+                launcher.shootIntake();
+                /*shootPurple();
                 shootPurple();
-                shootPurple();
-                shootGreen();
+                shootGreen();*/
             /*default:
                 launcher.shootShoot();
                 launcher.shootIntake();
