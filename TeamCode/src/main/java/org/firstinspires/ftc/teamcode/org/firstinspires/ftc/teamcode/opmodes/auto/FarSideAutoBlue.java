@@ -40,7 +40,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public Servo turret = null;
 
 
-    public static double shootVelocity = 2500;
+    public static double shootVelocity = 2700;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
 
     public static long TIMEOUT_DEFAULT = 5000;
@@ -50,7 +50,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     public static double startX = 67;
     public static double startY = 16.09375/2d;
     public static double startHeading = 90;
-    public static double shootX = 67;
+    public static double shootX = 66;
     public static double shootY = 26;
     public static double shootHeading = 89;
     public static double secondLoadingZoneY = 15;

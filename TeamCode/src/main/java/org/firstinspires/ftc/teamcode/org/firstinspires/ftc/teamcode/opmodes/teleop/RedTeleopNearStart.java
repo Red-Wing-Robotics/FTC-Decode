@@ -298,7 +298,7 @@ public class RedTeleopNearStart extends OpMode {
                 shooterVelocity = VelocityCalculation.getTargetVelocity(distanceToGoal);
             }
             setShooterVelocity( shooterVelocity );
-            shooterLight.setPosition(1);
+            shooterLight.setPosition(0.5);
         }else{
             setShooterVelocity( 0 );
             launcher.stopShooter();
