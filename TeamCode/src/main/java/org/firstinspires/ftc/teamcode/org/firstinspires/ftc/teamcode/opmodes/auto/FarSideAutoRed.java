@@ -83,7 +83,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
     private final Pose ppgPose = new Pose( ppgX, ppgY, Math.toRadians(ppgHeading));
     private final Pose ppgGreenPose = new Pose( ppgGreenX, ppgGreenY, Math.toRadians(ppgGreenHeading));
     private final Pose ppgPurplePose = new Pose(ppgPurpleX, ppgPurpleY, Math.toRadians(ppgPurpleHeading));
-    private final Pose ppgLastPose = new Pose( secondPurpleCollectX, ppgLastY, Math.toRadians(ppgLastHeading));
+    private final Pose ppgLastPose = new Pose( ppgLastX, ppgLastY, Math.toRadians(ppgLastHeading));
     private final Pose leavePose = new Pose(leaveX, leaveY, Math.toRadians(leaveHeading));
 
 
