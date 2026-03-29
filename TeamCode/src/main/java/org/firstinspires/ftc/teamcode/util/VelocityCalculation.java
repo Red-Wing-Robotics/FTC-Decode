@@ -13,11 +13,13 @@ public class VelocityCalculation {
         if(distanceToGoal == 0){
             return 0;
         } else if(distanceToGoal < 90 ){
-            return 6.27 * distanceToGoal + NEAR_VELOCITY_COEFFICIENT;
+            return 1172 - ( 2.91 * distanceToGoal ) + (0.0682 * Math.pow( distanceToGoal, 2 ));
         } else if (distanceToGoal > 110 ) {
             return 1850;
         } else {
             return 1480;
         }
     }
+
+
 }

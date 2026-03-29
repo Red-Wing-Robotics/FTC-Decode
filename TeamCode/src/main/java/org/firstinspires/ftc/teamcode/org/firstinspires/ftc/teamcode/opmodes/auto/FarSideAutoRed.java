@@ -68,7 +68,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
     public static double ppgPurpleX = 144 - FarSideAutoBlue.ppgPurpleX;
     public static double ppgPurpleY = 37;
     public static double ppgPurpleHeading = 180 - FarSideAutoBlue.ppgPurpleHeading;
-    public static double ppgLastX = 144 - FarSideAutoBlue.ppgLastX;
+    public static double ppgLastX = 132;
     public static double ppgLastY = 34;
     public static double ppgLastHeading = 180 - FarSideAutoBlue.ppgLastHeading;
     public static double secondPurpleCollectX = 15;
