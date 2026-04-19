@@ -57,11 +57,11 @@ public class OdometryTurret {
     // --- Turret geometry constants ---
 
     // Servo position when the turret faces the robot's forward direction.
-    public static double TURRET_MIDPOINT = 0.5;
+    public static double TURRET_MIDPOINT = 0.525;
 
     // Servo travel limits.
-    public static double minPos = 0.0;
-    public static double maxPos = 1.0;
+    public static double minPos = 0.3;
+    public static double maxPos = 0.75;
 
     // Turret offset from robot center in inches (robot-frame coordinates).
     // +X = forward, +Y = left.  Tune these to match your physical turret mounting.
@@ -76,7 +76,7 @@ public class OdometryTurret {
     // For a 180-degree servo whose full range (0..1) maps to pi radians:
     //   RAD_TO_SERVO = 1.0 / Math.PI  ≈ 0.318
     // Adjust if your servo or gear ratio differs.
-    public static double RAD_TO_SERVO = 1.0 / Math.toRadians(109.6);
+    public static double RAD_TO_SERVO = 1.0 / Math.toRadians(180);
 
     // --- Instance fields ---
 
