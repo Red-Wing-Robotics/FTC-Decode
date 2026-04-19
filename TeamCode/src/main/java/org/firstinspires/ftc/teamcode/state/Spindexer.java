@@ -26,6 +26,7 @@ public class Spindexer {
     public static double KP = 0.012;
     public static double KI = 0.0;
     public static double KD = 0.0003;
+    private int fullRotationTurns = 0;
 
     public enum SpindexerPosition {
         SLOT_1,
@@ -35,7 +36,8 @@ public class Spindexer {
 
     public enum SpindexerState {
         MOVING,
-        NOT_MOVING
+        NOT_MOVING,
+        FULL_ROTATION
     }
 
     public enum SpindexerMode {
@@ -66,6 +68,16 @@ public class Spindexer {
 
         if (state == SpindexerState.MOVING && spindexer.isAtTarget()) {
             state = SpindexerState.NOT_MOVING;
+        } else if (state == SpindexerState.FULL_ROTATION && spindexer.isAtTarget()) {
+            if(fullRotationTurns == 3){
+                state = SpindexerState.NOT_MOVING;
+                fullRotationTurns = 0;
+            } else{
+                slotIndex--;
+                updatePositionEnum();
+                goToCurrentSlot();
+                fullRotationTurns++;
+            }
         }
     }
 
@@ -90,6 +102,12 @@ public class Spindexer {
             slotIndex--;
             updatePositionEnum();
             goToCurrentSlot();
+        }
+    }
+
+    public void moveFulRotation(){
+        if(state == SpindexerState.NOT_MOVING){
+            state = SpindexerState.FULL_ROTATION;
         }
     }
 
@@ -121,7 +139,9 @@ public class Spindexer {
         double offset = (mode == SpindexerMode.SHOOTING) ? SHOOT_OFFSET_DEGREES : INTAKE_OFFSET_DEGREES;
         double targetDegrees = slotIndex * SLOT_SPACING_DEGREES + offset;
         spindexer.setTargetRotation(targetDegrees);
-        state = SpindexerState.MOVING;
+        if(state != SpindexerState.FULL_ROTATION) {
+            state = SpindexerState.MOVING;
+        }
     }
 
     private void updatePositionEnum() {

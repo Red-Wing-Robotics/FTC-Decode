@@ -19,6 +19,7 @@ public class SingleLauncher {
     public static double LAUNCHER_RAMPING_TIME = 4000;
     public static double TIME_BETWEEN_SHOTS_MS = 0; // in milliseconds
     public static double SPINDEXER_TURN_TIME_MS = 700; // in milliseconds
+    public static double SHOOT_ALL_TIME = 3000;
     public static double SPINDERXER_TURN_MAGNITUDE = 0.38;
 
 
@@ -45,13 +46,14 @@ public class SingleLauncher {
         SHOOTING,
         WAITING,
         TURN_SPINDEXER,
-        DONE
+        SHOOT_ALL, DONE
     }
 
     private enum SpindexerSlot {
         SHOOT,
         INTAKE,
-        EXTRA
+        EXTRA,
+        ALL
     }
 
     public final DcMotorEx shooter;
@@ -98,7 +100,14 @@ public class SingleLauncher {
             case READY:
                 if (!shotQueue.isEmpty()) {
                     ShotRequest currentShot = shotQueue.peek();
-                    if (currentShot != null && currentShot.slot != SpindexerSlot.SHOOT) {
+                    if( currentShot != null && currentShot.slot == SpindexerSlot.ALL){
+                        this.state = LauncherState.SHOOT_ALL;
+                        stateStartTime = currentTime;
+                        turnSpindexer( currentShot.slot );
+                        activateFeeder();
+                        logger.logLine("Starting intake for three shots.");
+                    }
+                    else if (currentShot != null && currentShot.slot != SpindexerSlot.SHOOT) {
                         this.state = LauncherState.TURN_SPINDEXER;
                         stateStartTime = currentTime;
                         turnSpindexer( currentShot.slot );
@@ -109,6 +118,21 @@ public class SingleLauncher {
                         stateStartTime = currentTime;
                         activateFeeder();
                         logger.logLine("Shooting");
+                    }
+                }
+                break;
+            case SHOOT_ALL:
+                if(currentTime - stateStartTime >= SHOOT_ALL_TIME){
+                    deactivateFeeders();
+                    shotQueue.poll();
+                    logger.logLine("Finished Shooting");
+                    if (shotQueue.isEmpty()) {
+                        this.state = LauncherState.DONE;
+                        logger.logLine("Shot queue empty, returning to ready.");
+                    } else {
+                        this.state = LauncherState.WAITING;
+                        stateStartTime = currentTime;
+                        logger.logLine("Waiting between shots.");
                     }
                 }
                 break;
@@ -223,6 +247,17 @@ public class SingleLauncher {
             logger.logLine("Cannot queue shot, launcher is idle.");
         }
     }
+
+    public void shootAll() {
+        this.shotQueue.clear();
+        if (state != LauncherState.IDLE) {
+            shootTurret();
+            this.shotQueue.add(new ShotRequest(SpindexerSlot.ALL));
+            logger.logLine("Queued RIGHT shot. Intake: " + false);
+        } else {
+            logger.logLine("Cannot queue shot, launcher is idle.");
+        }
+    }
 /*
     public void shootLeft(boolean shouldActivateIntake) {
         if (state != LauncherState.IDLE) {
@@ -276,6 +311,8 @@ public class SingleLauncher {
             case INTAKE:
                 spindexer.moveClockwise();
                 break;
+            case ALL:
+                spindexer.moveFulRotation();
         }
     }
 

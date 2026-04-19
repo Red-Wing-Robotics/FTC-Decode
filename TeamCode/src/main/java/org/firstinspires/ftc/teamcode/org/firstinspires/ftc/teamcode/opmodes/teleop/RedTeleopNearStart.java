@@ -250,6 +250,14 @@ public class RedTeleopNearStart extends OpMode {
             isBPressed = false;
         }
 
+        if ( gamepad2.a && !isAPressed) {
+            launcher.shootAll();
+            removeShootColor();//TODO: adjust color sensing methods to remove all at once
+            isAPressed = true;
+        } else if(!gamepad2.a){
+            isAPressed = false;
+        }
+
         if (gamepad2.right_bumper && !isRightBumperPressed) {
             isShooterOn = !isShooterOn;
             if( isShooterOn){
@@ -327,12 +335,12 @@ public class RedTeleopNearStart extends OpMode {
             launcher.turnSpindexerCounterClockwise();
         }
 
-        if(gamepad2.a && !isAPressed){
+        /*if(gamepad2.a && !isAPressed){
             launcher.switchSpindexerMode();
             isAPressed = true;
         }else if(!gamepad2.a){
             isAPressed = false;
-        }
+        }*/
 
         telemetry.addData( "Shooter Velocity", shooterVelocity);
         telemetry.addData( "Motor Velocity", launcher.getShooterVelocity());

@@ -20,6 +20,4 @@ public class VelocityCalculation {
             return 1480;
         }
     }
-
-
 }
