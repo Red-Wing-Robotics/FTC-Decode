@@ -367,7 +367,6 @@ public class BlueTeleopFarStart extends OpMode {
         if (elapsedTime > 0) {
             telemetry.addData( "Flywheel spin-up time (ms)", elapsedTime );
         }
-
     }
 
     private void setShooterVelocity(double p ){

@@ -1,182 +1,135 @@
 package org.firstinspires.ftc.teamcode.state;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.subsystems.RTPAxon;
 import org.firstinspires.ftc.teamcode.util.log.Logger;
 
 @Configurable
 public class Spindexer {
 
-    public static double SPINDERXER_POSITION_SHOOT_1 = 0.04;
-    public static double SPINDERXER_POSITION_SHOOT_2 = 0.42;
-    public static double SPINDERXER_POSITION_SHOOT_3 = 0.8;
-    public static double SPINDERXER_POSITION_INTAKE_1 = 0.93;
-    public static double SPINDERXER_POSITION_INTAKE_2 = 0.17;
-    public static double SPINDERXER_POSITION_INTAKE_3 = 0.55;
-    public static long SPINDEXER_MOVE_TIME_MS = 500;
+    // Degrees between each of the 3 slots (120 degrees apart on a full rotation)
+    public static double SLOT_SPACING_DEGREES = 120.0;
 
-    public enum SpindexerPosition{
-        SHOOT_1,
-        SHOOT_2,
-        SHOOT_3
+    // Offset in degrees from slot center for shooting vs intaking positions.
+    // These let you fine-tune the exact stopping angle within each slot.
+    public static double SHOOT_OFFSET_DEGREES = 0.0;
+    public static double INTAKE_OFFSET_DEGREES = 10.0;
+
+    // Tuned in TestSpindexer. Update here to propagate to all opmodes.
+    public static double MAX_POWER = 1.0;
+    public static double KP = 0.012;
+    public static double KI = 0.0;
+    public static double KD = 0.0003;
+
+    public enum SpindexerPosition {
+        SLOT_1,
+        SLOT_2,
+        SLOT_3
     }
 
-    public enum SpindexerState{
+    public enum SpindexerState {
         MOVING,
         NOT_MOVING
     }
 
-    public enum SpindexerMode{
+    public enum SpindexerMode {
         SHOOTING,
         INTAKING
     }
 
-
-    public final Servo spindexer;
+    public final RTPAxon spindexer;
 
     public SpindexerState state = SpindexerState.NOT_MOVING;
-    public SpindexerPosition position = SpindexerPosition.SHOOT_1;
+    public SpindexerPosition position = SpindexerPosition.SLOT_1;
     public SpindexerMode mode = SpindexerMode.INTAKING;
-    private long moveStartTime = 0;
+    private int slotIndex = 0;
     private final Logger logger;
-    public Spindexer(HardwareMap hardwareMap, Telemetry telemetry){
+
+    public Spindexer(HardwareMap hardwareMap, Telemetry telemetry) {
         this.logger = new Logger(telemetry);
-        spindexer = hardwareMap.get(Servo.class, "spindexer");
+        CRServo servo = hardwareMap.get(CRServo.class, "spindexer");
+        servo.setDirection(DcMotorSimple.Direction.REVERSE);
+        AnalogInput encoder = hardwareMap.get(AnalogInput.class, "axonEncoder");
+        spindexer = new RTPAxon(servo, encoder);
+        spindexer.setMaxPower(MAX_POWER);
+        spindexer.setPidCoeffs(KP, KI, KD);
     }
 
-    public void update(){
-        if (state == SpindexerState.MOVING){
-            if (System.currentTimeMillis() - moveStartTime >= SPINDEXER_MOVE_TIME_MS) {
-                state = SpindexerState.NOT_MOVING;
-                //logger.logLine("Diverter reached position: " + currentPosition.toString());
-            }
+    public void update() {
+        spindexer.update();
+
+        if (state == SpindexerState.MOVING && spindexer.isAtTarget()) {
+            state = SpindexerState.NOT_MOVING;
         }
     }
 
-    public void moveClockwise(){
-        if( state == SpindexerState.NOT_MOVING) {
-            state = SpindexerState.MOVING;
-            moveStartTime = System.currentTimeMillis();
-            if(mode == SpindexerMode.SHOOTING) {
-                switch (position) {
-                    case SHOOT_1:
-                        spindexer.setPosition(SPINDERXER_POSITION_SHOOT_3);
-                        position = SpindexerPosition.SHOOT_3;
-                        break;
-                    case SHOOT_2:
-                        spindexer.setPosition(SPINDERXER_POSITION_SHOOT_1);
-                        position = SpindexerPosition.SHOOT_1;
-                        break;
-                    case SHOOT_3:
-                        spindexer.setPosition(SPINDERXER_POSITION_SHOOT_2);
-                        position = SpindexerPosition.SHOOT_2;
-                        break;
-                }
-            }else {
-                switch (position) {
-                    case SHOOT_1:
-                        spindexer.setPosition(SPINDERXER_POSITION_INTAKE_3);
-                        position = SpindexerPosition.SHOOT_3;
-                        break;
-                    case SHOOT_2:
-                        spindexer.setPosition(SPINDERXER_POSITION_INTAKE_1);
-                        position = SpindexerPosition.SHOOT_1;
-                        break;
-                    case SHOOT_3:
-                        spindexer.setPosition(SPINDERXER_POSITION_INTAKE_2);
-                        position = SpindexerPosition.SHOOT_2;
-                        break;
-                }
-            }
+    /**
+     * Advance one slot in the clockwise direction (positive rotation).
+     * Always rotates forward — never backtracks.
+     */
+    public void moveClockwise() {
+        if (state == SpindexerState.NOT_MOVING) {
+            slotIndex++;
+            updatePositionEnum();
+            goToCurrentSlot();
         }
     }
 
-    public void moveCounterClockwise(){
-        if( state == SpindexerState.NOT_MOVING) {
-            state = SpindexerState.MOVING;
-            moveStartTime = System.currentTimeMillis();
-            if (mode == SpindexerMode.SHOOTING) {
-                switch (position) {
-                    case SHOOT_1:
-                        spindexer.setPosition(SPINDERXER_POSITION_SHOOT_2);
-                        position = SpindexerPosition.SHOOT_2;
-                        break;
-                    case SHOOT_2:
-                        spindexer.setPosition(SPINDERXER_POSITION_SHOOT_3);
-                        position = SpindexerPosition.SHOOT_3;
-                        break;
-                    case SHOOT_3:
-                        spindexer.setPosition(SPINDERXER_POSITION_SHOOT_1);
-                        position = SpindexerPosition.SHOOT_1;
-                        break;
-                }
-            }else {
-                switch (position) {
-                    case SHOOT_1:
-                        spindexer.setPosition(SPINDERXER_POSITION_INTAKE_2);
-                        position = SpindexerPosition.SHOOT_2;
-                        break;
-                    case SHOOT_2:
-                        spindexer.setPosition(SPINDERXER_POSITION_INTAKE_3);
-                        position = SpindexerPosition.SHOOT_3;
-                        break;
-                    case SHOOT_3:
-                        spindexer.setPosition(SPINDERXER_POSITION_INTAKE_1);
-                        position = SpindexerPosition.SHOOT_1;
-                        break;
-                }
-            }
+    /**
+     * Advance one slot in the counter-clockwise direction (negative rotation).
+     * Always rotates backward — never backtracks.
+     */
+    public void moveCounterClockwise() {
+        if (state == SpindexerState.NOT_MOVING) {
+            slotIndex--;
+            updatePositionEnum();
+            goToCurrentSlot();
         }
     }
 
-    public void initialize(){
-        state = SpindexerState.MOVING;
-        moveStartTime = System.currentTimeMillis();
-        spindexer.setPosition( SPINDERXER_POSITION_INTAKE_1);
-        position = SpindexerPosition.SHOOT_1;
+    public void initialize() {
+        slotIndex = 0;
+        position = SpindexerPosition.SLOT_1;
+        spindexer.forceResetTotalRotation();
+        goToCurrentSlot();
     }
 
-    public double getPosition(){
-        return spindexer.getPosition();
+    public double getPosition() {
+        return spindexer.getTotalRotation();
     }
 
-    public void switchMode(){
-        if( mode == SpindexerMode.INTAKING){
+    public void switchMode() {
+        if (mode == SpindexerMode.INTAKING) {
             mode = SpindexerMode.SHOOTING;
-            switch (position) {
-                case SHOOT_2:
-                    spindexer.setPosition(SPINDERXER_POSITION_SHOOT_2);
-                    position = SpindexerPosition.SHOOT_2;
-                    break;
-                case SHOOT_3:
-                    spindexer.setPosition(SPINDERXER_POSITION_SHOOT_3);
-                    position = SpindexerPosition.SHOOT_3;
-                    break;
-                case SHOOT_1:
-                    spindexer.setPosition(SPINDERXER_POSITION_SHOOT_1);
-                    position = SpindexerPosition.SHOOT_1;
-                    break;
-            }
-        }else{
+        } else {
             mode = SpindexerMode.INTAKING;
-            switch (position) {
-                case SHOOT_2:
-                    spindexer.setPosition(SPINDERXER_POSITION_INTAKE_2);
-                    position = SpindexerPosition.SHOOT_2;
-                    break;
-                case SHOOT_3:
-                    spindexer.setPosition(SPINDERXER_POSITION_INTAKE_3);
-                    position = SpindexerPosition.SHOOT_3;
-                    break;
-                case SHOOT_1:
-                    spindexer.setPosition(SPINDERXER_POSITION_INTAKE_1);
-                    position = SpindexerPosition.SHOOT_1;
-                    break;
-            }
         }
+        goToCurrentSlot();
     }
 
+    public String log() {
+        return spindexer.log();
+    }
+
+    private void goToCurrentSlot() {
+        double offset = (mode == SpindexerMode.SHOOTING) ? SHOOT_OFFSET_DEGREES : INTAKE_OFFSET_DEGREES;
+        double targetDegrees = slotIndex * SLOT_SPACING_DEGREES + offset;
+        spindexer.setTargetRotation(targetDegrees);
+        state = SpindexerState.MOVING;
+    }
+
+    private void updatePositionEnum() {
+        int mod = ((slotIndex % 3) + 3) % 3;
+        switch (mod) {
+            case 0: position = SpindexerPosition.SLOT_1; break;
+            case 1: position = SpindexerPosition.SLOT_2; break;
+            case 2: position = SpindexerPosition.SLOT_3; break;
+        }
+    }
 }

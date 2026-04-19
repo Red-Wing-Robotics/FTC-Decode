@@ -239,10 +239,15 @@ public class RTPAxon {
         return Math.abs(targetRotation - totalRotation) < tolerance;
     }
 
-    // Force reset total rotation and PID state
+    // Force reset total rotation and PID state. Re-captures the current encoder
+    // angle as the new "home" so totalRotation will start at 0 and grow from here.
     public void forceResetTotalRotation() {
+        double currentAngle = getCurrentAngle();
+        homeAngle = currentAngle;
+        previousAngle = currentAngle;
+        cliffs = 0;
         totalRotation = 0;
-        previousAngle = getCurrentAngle();
+        targetRotation = 0;
         resetPID();
     }
 

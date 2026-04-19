@@ -80,6 +80,7 @@ public class SingleLauncher {
         long currentTime = System.currentTimeMillis();
         logger.logData("Launcher State", this.state.toString());
         spindexer.update();
+        logSpindexer();
         if( spindexer.state == Spindexer.SpindexerState.NOT_MOVING && feeder.getPower() == 1.0){
             deactivateFeeders();
         }
@@ -302,6 +303,19 @@ public class SingleLauncher {
         if(turret != null) {
             turret.shoot();
         }
+    }
+
+    /**
+     * Emit Spindexer state/position/PID telemetry. Called automatically every
+     * update() so any OpMode using SingleLauncher gets Spindexer debug info
+     * without any extra wiring.
+     */
+    private void logSpindexer() {
+        logger.logData("Spindexer State", spindexer.state);
+        logger.logData("Spindexer Position", spindexer.position);
+        logger.logData("Spindexer Mode", spindexer.mode);
+        logger.logData("Spindexer Total Rotation (deg)", spindexer.getPosition());
+        logger.logLine(spindexer.log());
     }
 
 }
