@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.util.log.Logger;
 enum OdometryTurretState {
     DISABLED,
     TRACKING,
+    SET_POSITION
 }
 
 @Configurable
@@ -162,6 +163,11 @@ public class OdometryTurret {
         setState(enabled ? OdometryTurretState.TRACKING : OdometryTurretState.DISABLED);
     }
 
+    public void setTurretPosition( double position ){
+        setState(OdometryTurretState.SET_POSITION);
+        turret.setPosition( position );
+    }
+
     /**
      * Enable or disable LimeLight vision correction.
      * When disabled, the turret uses odometry only.
@@ -187,7 +193,7 @@ public class OdometryTurret {
      * @param result LimeLight result for vision fine-tuning, or null if unavailable
      */
     public void update(LLResult result) {
-        if (state == OdometryTurretState.DISABLED) {
+        if (state == OdometryTurretState.DISABLED || state == OdometryTurretState.SET_POSITION) {
             turretLight.setPosition(0.388);
             logTurret(0, 0);
             return;

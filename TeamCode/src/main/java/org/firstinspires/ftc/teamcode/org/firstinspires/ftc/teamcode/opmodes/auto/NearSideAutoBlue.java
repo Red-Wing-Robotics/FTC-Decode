@@ -29,6 +29,7 @@ import org.firstinspires.ftc.teamcode.util.timer.NonBlockingTimer;
 @Autonomous(name = "Near Side Auto Blue", group = "Examples")
 public class NearSideAutoBlue extends RWRBaseOpMode {
 
+    public static  double OBLELISK_READ_TURRET_POSITION = 0.75;
     Limelight3A limelight;
 
     private int pipeline;
@@ -198,7 +199,6 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     }*/
 
     public void shoot(ObeliskState oState) {
-        // TODO - Refactor with Single Launcher
         // load will be Shoot: Purple; Intake: Purple; Extra: Green
         switch (oState) {
             case PURPLE_GREEN_PURPLE:
@@ -258,7 +258,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
             case 0:
                 launcher.startShooter();
                 launcher.setShooterVelocity(shootVelocity);
-                turret.setPosition(0);
+                //turret.setPosition(OBLELISK_READ_TURRET_POSITION);
                 follower.followPath(gotoFirstShootPose, true);
                 waitTimer.start();
                 setPathState(1);
@@ -272,7 +272,8 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                         oState = ObeliskState.fromInt(id);
                         //pipeline = 1;
                     }
-                    turret.setPosition(1);
+                    //turret.setPosition(1);
+                    odometryTurret.setEnabled(true);
                     waitTimer.start();
                     setPathState(2);
                 }
@@ -406,7 +407,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         follower.setStartingPose(startPose);
         odometryTurret = new OdometryTurret(hardwareMap, telemetry, follower, Alliance.BLUE);
         odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
-        disableOdometryTurret();
+        odometryTurret.setTurretPosition(OBLELISK_READ_TURRET_POSITION);
         buildPaths();
 
         launcher = new SingleLauncher(hardwareMap, telemetry, null);
@@ -430,7 +431,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
 
-        if (odometryTurretEnabled) {
+        if (odometryTurretEnabled && pipeline != 0) {
             odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
             odometryTurret.update(result);
         }
