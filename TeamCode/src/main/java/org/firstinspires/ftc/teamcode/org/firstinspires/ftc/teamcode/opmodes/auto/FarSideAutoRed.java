@@ -10,12 +10,13 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.RWRBaseOpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.state.OdometryTurret;
 import org.firstinspires.ftc.teamcode.state.SingleLauncher;
+import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.ObeliskState;
 
@@ -30,6 +31,9 @@ public class FarSideAutoRed extends RWRBaseOpMode {
 
     private Follower follower;
     private SingleLauncher launcher;
+    private OdometryTurret odometryTurret;
+    private boolean odometryTurretEnabled = false;
+    public static boolean odometryTurretVisionEnabled = true;
 
 
     private int pathState;
@@ -37,7 +41,6 @@ public class FarSideAutoRed extends RWRBaseOpMode {
     private ObeliskState oState = ObeliskState.UNKNOWN;
 
     public DcMotor intake = null;
-    public Servo turret = null;
 
 
     public static double shootVelocity = 2500;
@@ -246,12 +249,26 @@ public class FarSideAutoRed extends RWRBaseOpMode {
         pathState = pState;
     }
 
+    public void enableOdometryTurret() {
+        odometryTurretEnabled = true;
+        if (odometryTurret != null) {
+            odometryTurret.setEnabled(true);
+            odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
+        }
+    }
+
+    public void disableOdometryTurret() {
+        odometryTurretEnabled = false;
+        if (odometryTurret != null) {
+            odometryTurret.setEnabled(false);
+        }
+    }
+
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
                 launcher.startShooter();
                 launcher.setShooterVelocity(shootVelocity);
-                turret.setPosition(0.1);
                 follower.followPath( gotoFirstShootPose );
                 setPathState(1);
                 break;
@@ -354,7 +371,6 @@ public class FarSideAutoRed extends RWRBaseOpMode {
     @Override
     public void init() {
         intake = hardwareMap.get(DcMotor.class, "intake");
-        turret = hardwareMap.get(Servo.class, "turret");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
@@ -363,6 +379,9 @@ public class FarSideAutoRed extends RWRBaseOpMode {
         limelight.pipelineSwitch(pipeline); // Switch to pipeline number 1
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
+        odometryTurret = new OdometryTurret(hardwareMap, telemetry, follower, Alliance.RED);
+        odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
+        enableOdometryTurret();
         buildPaths();
 
         launcher = new SingleLauncher(hardwareMap, telemetry, null);
@@ -373,7 +392,6 @@ public class FarSideAutoRed extends RWRBaseOpMode {
         //diverter.setPosition(0.02);
         intake.setPower(0);
         launcher.initializeSpindexer();
-        turret.setPosition(0.5);
     }
 
     @Override
@@ -381,6 +399,11 @@ public class FarSideAutoRed extends RWRBaseOpMode {
 
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
+
+        if (odometryTurretEnabled) {
+            odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
+            odometryTurret.update(result);
+        }
 
         if (pipeline == 0 && result != null && result.isValid() && oState == ObeliskState.UNKNOWN) {
             int id = result.getFiducialResults().get(0).getFiducialId();

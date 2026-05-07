@@ -53,7 +53,7 @@ public class OdometryTurret {
 
     // Maximum vision correction in servo units. Caps the offset so a noisy/bad
     // reading can't throw off the odometry-based position.
-    public static double maxVisionCorrection = 0.05;
+    public static double maxVisionCorrection = 0.1;
 
     // --- Turret geometry constants ---
 
@@ -74,10 +74,15 @@ public class OdometryTurret {
     public static double TURRET_FORWARD_OFFSET_RAD = 0.0;
 
     // Conversion factor: servo units per radian of turret rotation.
-    // For a 180-degree servo whose full range (0..1) maps to pi radians:
-    //   RAD_TO_SERVO = 1.0 / Math.PI  ≈ 0.318
-    // Adjust if your servo or gear ratio differs.
-    public static double RAD_TO_SERVO = 1.0 / Math.toRadians(180);
+    // The servo has 180 degrees (pi radians) of physical travel, but only the
+    // portion of the servo's 0..1 range between minPos and maxPos is used.
+    // Therefore (maxPos - minPos) servo units corresponds to pi radians.
+    // The sign is negative because, on this robot, increasing servo position
+    // rotates the turret clockwise (toward the robot's right / negative angle
+    // in standard math convention), so we invert to map +angle -> -servo delta.
+    //   RAD_TO_SERVO = -(maxPos - minPos) / Math.PI
+    // With minPos=0.3 and maxPos=0.75 -> -0.45 / pi  ≈ -0.1432
+    public static double RAD_TO_SERVO = -(maxPos - minPos) / Math.PI;
 
     // --- Instance fields ---
 
@@ -88,7 +93,7 @@ public class OdometryTurret {
     // Vision correction state
     private double visionCorrection = 0.0;
     private double filteredTxDeg = 0.0;
-    private boolean visionEnabled = false;
+    private boolean visionEnabled = true;
 
     public final Servo turret;
     private final Servo turretLight;
@@ -228,8 +233,11 @@ public class OdometryTurret {
             double txDeg = result.getTx();
             // EMA smooth the tx reading
             filteredTxDeg = visionAlpha * txDeg + (1.0 - visionAlpha) * filteredTxDeg;
-            // Convert to a small servo correction and clamp it
-            visionCorrection = clip(-visionKP * filteredTxDeg, -maxVisionCorrection, maxVisionCorrection);
+            // Convert to a small servo correction and clamp it.
+            // LimeLight tx is positive when the target is to the right of the
+            // crosshair, and increasing servo position rotates the turret right,
+            // so the correction shares the sign of tx.
+            visionCorrection = clip(visionKP * filteredTxDeg, -maxVisionCorrection, maxVisionCorrection);
         } else {
             // When vision is unavailable or disabled, let visionCorrection decay toward 0
             // so stale corrections don't persist forever.

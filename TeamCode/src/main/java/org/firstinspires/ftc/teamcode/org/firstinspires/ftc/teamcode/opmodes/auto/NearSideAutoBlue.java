@@ -317,7 +317,6 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                     launcher.startShooter();
                     launcher.setShooterVelocity(shootVelocity);
                     turnSpindexerCounterClockwise();
-                    turret.setPosition(1);
                     follower.followPath(gotoSecondShootPose,true);
                     setPathState(8);
                 }
@@ -396,7 +395,6 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
     @Override
     public void init() {
         intake = hardwareMap.get(DcMotor.class, "intake");
-        turret = hardwareMap.get(Servo.class, "turret");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
@@ -422,7 +420,6 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         //diverter.setPosition(0.02);
         intake.setPower(0);
         launcher.initializeSpindexer();
-        turret.setPosition(0);
     }
 
     @Override
@@ -431,7 +428,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
 
-        if (odometryTurretEnabled && pipeline != 0) {
+        if (odometryTurretEnabled) {
             odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
             odometryTurret.update(result);
         }

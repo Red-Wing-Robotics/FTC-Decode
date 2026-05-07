@@ -21,6 +21,7 @@ public class SingleLauncher {
     public static double SPINDEXER_TURN_TIME_MS = 700; // in milliseconds
     public static double SHOOT_ALL_TIME = 3000;
     public static double SPINDERXER_TURN_MAGNITUDE = 0.38;
+    public static double SHOOT_ALL_VELOCITY_MULTIPLIER = 1.15; // applied while in SHOOT_ALL
 
 
 
@@ -30,6 +31,7 @@ public class SingleLauncher {
     public static double SPINDEXER_START = 0.04;
 
     private double targetVelocity;
+    private double velocityMultiplier = 1.0;
 
     private static class ShotRequest {
         final SpindexerSlot slot;
@@ -103,6 +105,7 @@ public class SingleLauncher {
                     if( currentShot != null && currentShot.slot == SpindexerSlot.ALL){
                         this.state = LauncherState.SHOOT_ALL;
                         stateStartTime = currentTime;
+                        applyShootAllBoost();
                         turnSpindexer( currentShot.slot );
                         activateFeeder();
                         logger.logLine("Starting intake for three shots.");
@@ -124,6 +127,7 @@ public class SingleLauncher {
             case SHOOT_ALL:
                 if(currentTime - stateStartTime >= SHOOT_ALL_TIME){
                     deactivateFeeders();
+                    revertShootAllBoost();
                     shotQueue.poll();
                     logger.logLine("Finished Shooting");
                     if (shotQueue.isEmpty()) {
@@ -286,7 +290,19 @@ public class SingleLauncher {
 
     private void setVelocity(double p){
         this.targetVelocity = p;
-        shooter.setVelocity(-1 * p);
+        shooter.setVelocity(-1 * p * this.velocityMultiplier);
+    }
+
+    private void applyShootAllBoost() {
+        this.velocityMultiplier = SHOOT_ALL_VELOCITY_MULTIPLIER;
+        shooter.setVelocity(-1 * this.targetVelocity * this.velocityMultiplier);
+        logger.logLine("Applied SHOOT_ALL velocity multiplier: " + this.velocityMultiplier);
+    }
+
+    private void revertShootAllBoost() {
+        this.velocityMultiplier = 1.0;
+        shooter.setVelocity(-1 * this.targetVelocity * this.velocityMultiplier);
+        logger.logLine("Reverted velocity multiplier to 1.0");
     }
 
     public void turnSpindexerCounterClockwise(){

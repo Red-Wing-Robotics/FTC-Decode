@@ -10,7 +10,6 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.RWRBaseOpMode;
@@ -45,7 +44,6 @@ public class NearSideAutoRed extends RWRBaseOpMode {
     public static long WAIT_TIME = 2000;
 
     public DcMotor intake = null;
-    public Servo turret = null;
 
     public static double shootVelocity = 1370;
     public static double SHOOTER_VELOCITY_FUDGE_FACTOR = 100;
@@ -242,7 +240,6 @@ public class NearSideAutoRed extends RWRBaseOpMode {
             case 0:
                 launcher.startShooter();
                 launcher.setShooterVelocity(shootVelocity);
-                turret.setPosition(1);
                 follower.followPath(gotoFirstShootPose, true);
                 waitTimer.start();
                 setPathState(1);
@@ -256,7 +253,6 @@ public class NearSideAutoRed extends RWRBaseOpMode {
                         oState = ObeliskState.fromInt(id);
                         //pipeline = 1;
                     }
-                    turret.setPosition(0);
                     waitTimer.start();
                     setPathState(2);
                 }
@@ -300,7 +296,6 @@ public class NearSideAutoRed extends RWRBaseOpMode {
                     launcher.startShooter();
                     launcher.setShooterVelocity(shootVelocity);
                     launcher.turnSpindexerCounterClockwise();
-                    turret.setPosition(0);
                     follower.followPath(gotoSecondShootPose,true);
                     setPathState(8);
                 }
@@ -379,7 +374,6 @@ public class NearSideAutoRed extends RWRBaseOpMode {
     @Override
     public void init() {
         intake = hardwareMap.get(DcMotor.class, "intake");
-        turret = hardwareMap.get(Servo.class, "turret");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
@@ -388,9 +382,9 @@ public class NearSideAutoRed extends RWRBaseOpMode {
         limelight.pipelineSwitch(pipeline); // Switch to pipeline number 1
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
-        odometryTurret = new OdometryTurret(hardwareMap, telemetry, follower, Alliance.BLUE);
+        odometryTurret = new OdometryTurret(hardwareMap, telemetry, follower, Alliance.RED);
         odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
-        disableOdometryTurret();
+        enableOdometryTurret();
         buildPaths();
 
         launcher = new SingleLauncher(hardwareMap, telemetry, null);
@@ -403,7 +397,6 @@ public class NearSideAutoRed extends RWRBaseOpMode {
         //diverter.setPosition(0.02);
         intake.setPower(0);
         launcher.initializeSpindexer();
-        turret.setPosition(1);
     }
 
     @Override

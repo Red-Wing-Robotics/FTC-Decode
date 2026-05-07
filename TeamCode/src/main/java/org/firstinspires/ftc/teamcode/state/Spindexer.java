@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.RTPAxon;
@@ -26,6 +27,11 @@ public class Spindexer {
     public static double KP = 0.012;
     public static double KI = 0.0;
     public static double KD = 0.0003;
+
+    // If a move takes longer than this (in seconds), the spindexer is considered
+    // jammed and will revert to the previous slot it was at.
+    public static double MOVE_TIMEOUT_SECONDS = 0.9;
+
     private int fullRotationTurns = 0;
 
     public enum SpindexerPosition {
@@ -51,6 +57,13 @@ public class Spindexer {
     public SpindexerPosition position = SpindexerPosition.SLOT_1;
     public SpindexerMode mode = SpindexerMode.INTAKING;
     private int slotIndex = 0;
+    // Slot index we were at before the current move started. Used to revert
+    // on jam timeout.
+    private int previousSlotIndex = 0;
+    // Tracks whether the current move is itself a recovery from a jam, so we
+    // don't ping-pong forever if the revert also fails.
+    private boolean isRecovering = false;
+    private final ElapsedTime moveTimer = new ElapsedTime();
     private final Logger logger;
 
     public Spindexer(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -66,19 +79,56 @@ public class Spindexer {
     public void update() {
         spindexer.update();
 
-        if (state == SpindexerState.MOVING && spindexer.isAtTarget()) {
-            state = SpindexerState.NOT_MOVING;
-        } else if (state == SpindexerState.FULL_ROTATION && spindexer.isAtTarget()) {
-            if(fullRotationTurns == 3){
+        if (state == SpindexerState.MOVING) {
+            if (spindexer.isAtTarget()) {
                 state = SpindexerState.NOT_MOVING;
+                isRecovering = false;
+            } else if (moveTimer.seconds() > MOVE_TIMEOUT_SECONDS) {
+                handleJamTimeout();
+            }
+        } else if (state == SpindexerState.FULL_ROTATION) {
+            if (spindexer.isAtTarget()) {
+                if (fullRotationTurns == 3) {
+                    state = SpindexerState.NOT_MOVING;
+                    fullRotationTurns = 0;
+                    isRecovering = false;
+                } else {
+                    previousSlotIndex = slotIndex;
+                    slotIndex++;
+                    updatePositionEnum();
+                    goToCurrentSlot();
+                    fullRotationTurns++;
+                }
+            } else if (moveTimer.seconds() > MOVE_TIMEOUT_SECONDS) {
+                // Jammed mid full-rotation; abort and revert to the slot we
+                // were at before the current sub-move started.
                 fullRotationTurns = 0;
-            } else{
-                slotIndex--;
-                updatePositionEnum();
-                goToCurrentSlot();
-                fullRotationTurns++;
+                handleJamTimeout();
             }
         }
+    }
+
+    /**
+     * Called when the spindexer fails to reach its target within
+     * {@link #MOVE_TIMEOUT_SECONDS}. Reverts to the slot we were at before
+     * the current move. If we're already trying to recover (i.e. the revert
+     * also jammed), give up and stop so we don't oscillate forever.
+     */
+    private void handleJamTimeout() {
+        if (isRecovering) {
+            // The revert move itself timed out — stop trying.
+            state = SpindexerState.NOT_MOVING;
+            isRecovering = false;
+            spindexer.setTargetRotation(spindexer.getTotalRotation());
+            return;
+        }
+
+        slotIndex = previousSlotIndex;
+        updatePositionEnum();
+        isRecovering = true;
+        // Force a MOVING state for the revert even if we were in FULL_ROTATION.
+        state = SpindexerState.NOT_MOVING;
+        goToCurrentSlot();
     }
 
     /**
@@ -87,6 +137,8 @@ public class Spindexer {
      */
     public void moveClockwise() {
         if (state == SpindexerState.NOT_MOVING) {
+            previousSlotIndex = slotIndex;
+            isRecovering = false;
             slotIndex++;
             updatePositionEnum();
             goToCurrentSlot();
@@ -99,6 +151,8 @@ public class Spindexer {
      */
     public void moveCounterClockwise() {
         if (state == SpindexerState.NOT_MOVING) {
+            previousSlotIndex = slotIndex;
+            isRecovering = false;
             slotIndex--;
             updatePositionEnum();
             goToCurrentSlot();
@@ -107,12 +161,17 @@ public class Spindexer {
 
     public void moveFulRotation(){
         if(state == SpindexerState.NOT_MOVING){
+            previousSlotIndex = slotIndex;
+            isRecovering = false;
             state = SpindexerState.FULL_ROTATION;
+            moveTimer.reset();
         }
     }
 
     public void initialize() {
         slotIndex = 0;
+        previousSlotIndex = 0;
+        isRecovering = false;
         position = SpindexerPosition.SLOT_1;
         spindexer.forceResetTotalRotation();
         goToCurrentSlot();
@@ -128,6 +187,11 @@ public class Spindexer {
         } else {
             mode = SpindexerMode.INTAKING;
         }
+        // switchMode only changes the offset within the same slot, so a
+        // jam-revert here should snap back to the same slot index, not the
+        // pre-switch one. Refresh previousSlotIndex accordingly.
+        previousSlotIndex = slotIndex;
+        isRecovering = false;
         goToCurrentSlot();
     }
 
@@ -142,6 +206,7 @@ public class Spindexer {
         if(state != SpindexerState.FULL_ROTATION) {
             state = SpindexerState.MOVING;
         }
+        moveTimer.reset();
     }
 
     private void updatePositionEnum() {
