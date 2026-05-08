@@ -30,7 +30,11 @@ public class Spindexer {
 
     // If a move takes longer than this (in seconds), the spindexer is considered
     // jammed and will revert to the previous slot it was at.
-    public static double MOVE_TIMEOUT_SECONDS = 0.9;
+    public static double moveTimeoutSeconds = 0.9;
+
+    public static double AUTO_MOVE_TIMEOUT = 10.0;
+    public static double TELEOP_MOVE_TIMEOUT = 0.9;
+
 
     private int fullRotationTurns = 0;
 
@@ -66,7 +70,7 @@ public class Spindexer {
     private final ElapsedTime moveTimer = new ElapsedTime();
     private final Logger logger;
 
-    public Spindexer(HardwareMap hardwareMap, Telemetry telemetry) {
+    public Spindexer(HardwareMap hardwareMap, Telemetry telemetry, double moveTimeout) {
         this.logger = new Logger(telemetry);
         CRServo servo = hardwareMap.get(CRServo.class, "spindexer");
         servo.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -74,6 +78,7 @@ public class Spindexer {
         spindexer = new RTPAxon(servo, encoder);
         spindexer.setMaxPower(MAX_POWER);
         spindexer.setPidCoeffs(KP, KI, KD);
+        moveTimeoutSeconds = moveTimeout;
     }
 
     public void update() {
@@ -83,7 +88,7 @@ public class Spindexer {
             if (spindexer.isAtTarget()) {
                 state = SpindexerState.NOT_MOVING;
                 isRecovering = false;
-            } else if (moveTimer.seconds() > MOVE_TIMEOUT_SECONDS) {
+            } else if (moveTimer.seconds() > moveTimeoutSeconds) {
                 handleJamTimeout();
             }
         } else if (state == SpindexerState.FULL_ROTATION) {
@@ -99,7 +104,7 @@ public class Spindexer {
                     goToCurrentSlot();
                     fullRotationTurns++;
                 }
-            } else if (moveTimer.seconds() > MOVE_TIMEOUT_SECONDS) {
+            } else if (moveTimer.seconds() > moveTimeoutSeconds) {
                 // Jammed mid full-rotation; abort and revert to the slot we
                 // were at before the current sub-move started.
                 fullRotationTurns = 0;
@@ -110,7 +115,7 @@ public class Spindexer {
 
     /**
      * Called when the spindexer fails to reach its target within
-     * {@link #MOVE_TIMEOUT_SECONDS}. Reverts to the slot we were at before
+     * {@link #moveTimeoutSeconds}. Reverts to the slot we were at before
      * the current move. If we're already trying to recover (i.e. the revert
      * also jammed), give up and stop so we don't oscillate forever.
      */

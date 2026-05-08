@@ -70,12 +70,12 @@ public class SingleLauncher {
 
     private final Turret turret;
 
-    public SingleLauncher(HardwareMap hardwareMap, Telemetry telemetry, Turret turret) {
+    public SingleLauncher(HardwareMap hardwareMap, Telemetry telemetry, Turret turret, double spindexerMoveTime) {
         this.logger = new Logger(telemetry);
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         feeder = hardwareMap.get(DcMotor.class, "feederMotor");
-        spindexer = new Spindexer(hardwareMap,telemetry);
+        spindexer = new Spindexer(hardwareMap,telemetry, spindexerMoveTime );
         this.turret = turret;
         this.shotQueue = new ArrayDeque<>();
     }
@@ -193,7 +193,7 @@ public class SingleLauncher {
     }
 
     public boolean isBusy() {
-        return this.state == LauncherState.SHOOTING || this.state == LauncherState.WAITING || this.state == LauncherState.TURN_SPINDEXER || this.state == LauncherState.RAMPING || this.state == LauncherState.READY;
+        return this.state == LauncherState.SHOOTING || this.state == LauncherState.WAITING || this.state == LauncherState.TURN_SPINDEXER || this.state == LauncherState.RAMPING || this.state == LauncherState.READY || this.state == LauncherState.SHOOT_ALL;
     }
 
     public void setShooterVelocity(double velocity) {

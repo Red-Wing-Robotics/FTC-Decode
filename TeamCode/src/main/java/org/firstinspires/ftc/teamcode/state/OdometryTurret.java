@@ -289,6 +289,7 @@ public class OdometryTurret {
         turret.setPosition(turretPos);
 
         logTurret(turretRelativeAngle, error);
+        logger.logData( "Turret State", state );
     }
 
     // --- Helpers ---

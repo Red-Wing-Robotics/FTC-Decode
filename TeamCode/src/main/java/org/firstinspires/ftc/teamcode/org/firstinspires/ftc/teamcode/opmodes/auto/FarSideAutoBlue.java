@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.RWR
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.state.OdometryTurret;
 import org.firstinspires.ftc.teamcode.state.SingleLauncher;
+import org.firstinspires.ftc.teamcode.state.Spindexer;
 import org.firstinspires.ftc.teamcode.util.Alliance;
 import org.firstinspires.ftc.teamcode.util.DistanceCalculation;
 import org.firstinspires.ftc.teamcode.util.ObeliskState;
@@ -384,7 +385,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
         enableOdometryTurret();
         buildPaths();
 
-        launcher = new SingleLauncher(hardwareMap, telemetry, null);
+        launcher = new SingleLauncher(hardwareMap, telemetry, null, Spindexer.AUTO_MOVE_TIMEOUT);
     }
 
     public void start() {

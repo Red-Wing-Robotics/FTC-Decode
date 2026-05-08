@@ -29,7 +29,7 @@ public class TestSpindexer extends OpMode {
 
     @Override
     public void init() {
-        spindexer = new Spindexer(hardwareMap, telemetry);
+        spindexer = new Spindexer(hardwareMap, telemetry, 0.9);
         applyTuning();
     }
 

@@ -133,7 +133,7 @@ public class BlueTeleopFarStart extends OpMode {
         intake = hardwareMap.get(DcMotor.class, "intake");
         colorSensorIntake = new ColorSensorController(hardwareMap,telemetry);
 
-        launcher = new SingleLauncher( hardwareMap, telemetry, null );
+        launcher = new SingleLauncher( hardwareMap, telemetry, null , 0.9);
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)

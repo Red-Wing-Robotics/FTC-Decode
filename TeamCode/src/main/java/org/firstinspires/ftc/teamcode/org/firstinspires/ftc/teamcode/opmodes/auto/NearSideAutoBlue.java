@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.org.firstinspires.ftc.teamcode.opmodes.RWR
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.state.OdometryTurret;
 import org.firstinspires.ftc.teamcode.state.SingleLauncher;
+import org.firstinspires.ftc.teamcode.state.Spindexer;
 import org.firstinspires.ftc.teamcode.subsystems.ColorSensorController;
 import org.firstinspires.ftc.teamcode.subsystems.ColorSensorState;
 import org.firstinspires.ftc.teamcode.util.Alliance;
@@ -29,7 +30,7 @@ import org.firstinspires.ftc.teamcode.util.timer.NonBlockingTimer;
 @Autonomous(name = "Near Side Auto Blue", group = "Examples")
 public class NearSideAutoBlue extends RWRBaseOpMode {
 
-    public static  double OBLELISK_READ_TURRET_POSITION = 0.75;
+    public static  double OBLELISK_READ_TURRET_POSITION = 0.6;
     Limelight3A limelight;
 
     private int pipeline;
@@ -200,7 +201,8 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
 
     public void shoot(ObeliskState oState) {
         // load will be Shoot: Purple; Intake: Purple; Extra: Green
-        switch (oState) {
+        launcher.shootAll();
+        /*switch (oState) {
             case PURPLE_GREEN_PURPLE:
 
                 launcher.shootShoot();
@@ -214,14 +216,11 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 launcher.shootExtra();
                 launcher.shootExtra();
                 launcher.shootExtra();
-                /*shootGreen();
-                shootPurple();
-                shootPurple();*/
                 break;
             case PURPLE_PURPLE_GREEN:
                 launcher.shootShoot();
                 launcher.shootIntake();
-                launcher.shootIntake();
+                launcher.shootIntake();*/
                 /*shootPurple();
                 shootPurple();
                 shootGreen();*/
@@ -230,7 +229,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                 launcher.shootIntake();
                 launcher.shootIntake();
                 break;*/
-        }
+
     }
 
 
@@ -270,7 +269,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
                     if (pipeline == 0 && result != null && result.isValid() && oState == ObeliskState.UNKNOWN) {
                         int id = result.getFiducialResults().get(0).getFiducialId();
                         oState = ObeliskState.fromInt(id);
-                        //pipeline = 1;
+                        pipeline = 1;
                     }
                     //turret.setPosition(1);
                     odometryTurret.setEnabled(true);
@@ -408,7 +407,7 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         odometryTurret.setTurretPosition(OBLELISK_READ_TURRET_POSITION);
         buildPaths();
 
-        launcher = new SingleLauncher(hardwareMap, telemetry, null);
+        launcher = new SingleLauncher(hardwareMap, telemetry, null, Spindexer.AUTO_MOVE_TIMEOUT);
         waitTimer = new NonBlockingTimer(WAIT_TIME);
         //follower.setMaxPower(0.5);
 
@@ -428,10 +427,8 @@ public class NearSideAutoBlue extends RWRBaseOpMode {
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
 
-        if (odometryTurretEnabled) {
-            odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
-            odometryTurret.update(result);
-        }
+        odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
+        odometryTurret.update(result);
 
 
 
