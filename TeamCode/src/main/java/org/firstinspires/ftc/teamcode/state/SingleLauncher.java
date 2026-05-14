@@ -4,6 +4,7 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.log.Logger;
@@ -78,6 +79,9 @@ public class SingleLauncher {
         spindexer = new Spindexer(hardwareMap,telemetry, spindexerMoveTime );
         this.turret = turret;
         this.shotQueue = new ArrayDeque<>();
+
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(239.0, 1, 0, 21.0);
+        shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }
 
     public void update() {
