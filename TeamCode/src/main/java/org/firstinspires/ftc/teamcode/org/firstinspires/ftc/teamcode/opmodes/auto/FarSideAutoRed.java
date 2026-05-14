@@ -271,6 +271,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
                 launcher.startShooter();
                 launcher.setShooterVelocity(shootVelocity);
                 follower.followPath( gotoFirstShootPose );
+                odometryTurret.setEnabled(true);
                 setPathState(1);
                 break;
             case 1:
@@ -376,7 +377,7 @@ public class FarSideAutoRed extends RWRBaseOpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
         limelight.start(); // This tells Limelight to start looking!
-        pipeline = 0;
+        pipeline = 2;
         limelight.pipelineSwitch(pipeline); // Switch to pipeline number 1
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -401,10 +402,10 @@ public class FarSideAutoRed extends RWRBaseOpMode {
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
 
-        if (odometryTurretEnabled) {
-            odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
-            odometryTurret.update(result);
-        }
+
+        odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
+        odometryTurret.update(result);
+
 
         if (pipeline == 0 && result != null && result.isValid() && oState == ObeliskState.UNKNOWN) {
             int id = result.getFiducialResults().get(0).getFiducialId();

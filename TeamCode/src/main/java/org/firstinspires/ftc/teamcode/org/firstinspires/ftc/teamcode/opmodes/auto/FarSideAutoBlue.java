@@ -212,26 +212,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
     }*/
 
     public void shoot(ObeliskState oState) {
-        // TODO - Refactor with Single Launcher
-        // load will be Shoot: Purple; Intake: Purple; Extra: Green
-        switch (oState) {
-            case PURPLE_GREEN_PURPLE:
-                launcher.shootShoot();
-                launcher.shootExtra();
-                launcher.shootExtra();
-                break;
-            case GREEN_PURPLE_PURPLE:
-                launcher.shootExtra();
-                launcher.shootExtra();
-                launcher.shootExtra();
-                break;
-            case PURPLE_PURPLE_GREEN:
-                launcher.shootShoot();
-                launcher.shootIntake();
-                launcher.shootIntake();
-            default:
-                break;
-        }
+        launcher.shootAll();
     }
 /*
     public PathChain getCollectionPath(ObeliskState oState) {
@@ -271,6 +252,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
                 launcher.startShooter();
                 launcher.setShooterVelocity(shootVelocity);
                 follower.followPath( gotoFirstShootPose );
+                odometryTurret.setEnabled(true);
                 setPathState(1);
                 break;
             case 1:
@@ -376,7 +358,7 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
         limelight.start(); // This tells Limelight to start looking!
-        pipeline = 0;
+        pipeline = 1;
         limelight.pipelineSwitch(pipeline); // Switch to pipeline number 1
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -401,10 +383,9 @@ public class FarSideAutoBlue extends RWRBaseOpMode {
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
 
-        if (odometryTurretEnabled) {
-            odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
-            odometryTurret.update(result);
-        }
+        odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
+        odometryTurret.update(result);
+
 
         if (pipeline == 0 && result != null && result.isValid() && oState == ObeliskState.UNKNOWN) {
             int id = result.getFiducialResults().get(0).getFiducialId();

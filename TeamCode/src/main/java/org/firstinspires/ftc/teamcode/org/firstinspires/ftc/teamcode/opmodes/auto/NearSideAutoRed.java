@@ -191,29 +191,7 @@ public class NearSideAutoRed extends RWRBaseOpMode {
     }*/
 
     public void shoot(ObeliskState oState) {
-        // TODO - Refactor with Single Launcher
-        // load will be Shoot: Purple; Intake: Purple; Extra: Green
-        switch (oState) {
-            case PURPLE_GREEN_PURPLE:
-                launcher.shootShoot();
-                launcher.shootExtra();
-                launcher.shootExtra();
-                break;
-            case GREEN_PURPLE_PURPLE:
-                launcher.shootExtra();
-                launcher.shootExtra();
-                launcher.shootExtra();
-                break;
-            case PURPLE_PURPLE_GREEN:
-                launcher.shootShoot();
-                launcher.shootIntake();
-                launcher.shootIntake();
-            /*default:
-                launcher.shootShoot();
-                launcher.shootIntake();
-                launcher.shootIntake();
-                break;*/
-        }
+        launcher.shootAll();
     }
 
 
@@ -252,8 +230,9 @@ public class NearSideAutoRed extends RWRBaseOpMode {
                     if (pipeline == 0 && result != null && result.isValid() && oState == ObeliskState.UNKNOWN) {
                         int id = result.getFiducialResults().get(0).getFiducialId();
                         oState = ObeliskState.fromInt(id);
-                        //pipeline = 1;
+                        pipeline = 2;
                     }
+                    odometryTurret.setEnabled(true);
                     waitTimer.start();
                     setPathState(2);
                 }
@@ -296,14 +275,14 @@ public class NearSideAutoRed extends RWRBaseOpMode {
                 if(!follower.isBusy()) {
                     launcher.startShooter();
                     launcher.setShooterVelocity(shootVelocity);
-                    launcher.turnSpindexerCounterClockwise();
+                    turnSpindexerCounterClockwise();
                     follower.followPath(gotoSecondShootPose,true);
                     setPathState(8);
                 }
                 break;
             case 8:
                 if (!follower.isBusy()) {
-                    launcher.turnSpindexerClockwise();
+                    turnSpindexerClockwise();
                     shoot(oState);
                     setPathState(9);
                 }
@@ -406,10 +385,9 @@ public class NearSideAutoRed extends RWRBaseOpMode {
         limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = limelight.getLatestResult();
 
-        if (odometryTurretEnabled) {
-            odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
-            odometryTurret.update(result);
-        }
+        odometryTurret.setVisionEnabled(odometryTurretVisionEnabled);
+        odometryTurret.update(result);
+
 
 
 
@@ -447,6 +425,14 @@ public class NearSideAutoRed extends RWRBaseOpMode {
         logger.logData("heading", Math.toDegrees(follower.getPose().getHeading()));
         logger.logData("right shooter velocity", launcher.getShooterVelocity());
         logger.update();
+    }
+
+    private void turnSpindexerClockwise(){
+        launcher.turnSpindexerClockwise();
+    }
+
+    private void turnSpindexerCounterClockwise(){
+        launcher.turnSpindexerClockwise();
     }
 }
 
