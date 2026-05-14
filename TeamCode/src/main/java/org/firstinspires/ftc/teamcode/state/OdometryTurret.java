@@ -39,21 +39,21 @@ public class OdometryTurret {
     public static double deadbandRad = Math.toRadians(1.0 );
 
     // Maximum change in servo position per update cycle (limits speed / prevents jumps).
-    public static double maxStepPerUpdate = 0.18;
+    public static double maxStepPerUpdate = 0.2;
 
     // --- Vision fine-tuning constants ---
 
     // How much of the LimeLight tx error to apply as a correction (servo units per degree).
     // Keep this small -- it's a fine-tuning nudge, not the primary control.
-    public static double visionKP = 0.0008;
+    public static double visionKP = 0.001;
 
     // EMA smoothing for the vision correction to avoid jitter.
     // Lower = smoother but laggier. 0.2-0.4 is a good starting range.
-    public static double visionAlpha = 0.6;
+    public static double visionAlpha = 0.8;
 
     // Maximum vision correction in servo units. Caps the offset so a noisy/bad
     // reading can't throw off the odometry-based position.
-    public static double maxVisionCorrection = 0.6;
+    public static double maxVisionCorrection = 0.8;
 
     // --- Turret geometry constants ---
 
