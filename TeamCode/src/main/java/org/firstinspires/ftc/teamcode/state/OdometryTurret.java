@@ -25,11 +25,11 @@ public class OdometryTurret {
 
     // Proportional gain: how aggressively the servo corrects toward the target.
     // Start small (e.g. 0.3) and increase until it tracks well but doesn't oscillate.
-    public static double kP = 0.9;
+    public static double kP = 1.8;
 
     // Derivative gain: dampens oscillation by resisting rapid changes in error.
     // Start at 0 and increase if the turret oscillates around the target.
-    public static double kD = 0.05;
+    public static double kD = 0.07;
 
     // Exponential smoothing factor for the target position:
     // 1.0 = no smoothing (instant response), 0.1 = very smooth (more lag).
@@ -39,21 +39,21 @@ public class OdometryTurret {
     public static double deadbandRad = Math.toRadians(1.0 );
 
     // Maximum change in servo position per update cycle (limits speed / prevents jumps).
-    public static double maxStepPerUpdate = 0.12;
+    public static double maxStepPerUpdate = 0.18;
 
     // --- Vision fine-tuning constants ---
 
     // How much of the LimeLight tx error to apply as a correction (servo units per degree).
     // Keep this small -- it's a fine-tuning nudge, not the primary control.
-    public static double visionKP = 0.0005;
+    public static double visionKP = 0.0008;
 
     // EMA smoothing for the vision correction to avoid jitter.
     // Lower = smoother but laggier. 0.2-0.4 is a good starting range.
-    public static double visionAlpha = 0.3;
+    public static double visionAlpha = 0.6;
 
     // Maximum vision correction in servo units. Caps the offset so a noisy/bad
     // reading can't throw off the odometry-based position.
-    public static double maxVisionCorrection = 0.1;
+    public static double maxVisionCorrection = 0.6;
 
     // --- Turret geometry constants ---
 
