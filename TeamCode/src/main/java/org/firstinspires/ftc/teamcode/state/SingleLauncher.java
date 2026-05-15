@@ -80,8 +80,8 @@ public class SingleLauncher {
         this.turret = turret;
         this.shotQueue = new ArrayDeque<>();
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(239.0, 1, 0, 21.0);
-        shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        //PIDFCoefficients pidfCoefficients = new PIDFCoefficients(385.0, 1, 0, 41.0);
+        //shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }
 
     public void update() {
